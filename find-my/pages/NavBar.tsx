@@ -1,7 +1,7 @@
-import Link from "next/link";
-import {useRouter} from "next/router";
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-export default function NavBar(){
+export default function NavBar() {
   <nav>
     <Link href="/">
       <a>Home</a>
@@ -12,5 +12,5 @@ export default function NavBar(){
     <Link href="/logout">
       <a>Logout</a>
     </Link>
-  </nav>
+  </nav>;
 }
