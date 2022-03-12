@@ -7,40 +7,37 @@ export default function Login() {
   return (
     <main className="mt-16">
       <h3 className="text-5xl font-nanum-pen-script text-blue-400 text-center">어딨지?</h3>
-      <div className="mt-12">
-        <div className="flex flex-col items-center">
-          <h5 className="text-sm text-gray-500 font-medium">로그인</h5>
-          <form className="flex flex-col ">
+      <div className="mt-12 ">
+        <div className="flex flex-col items-center ">
+          <h5 className="text-lg font-bold mb-3">로그인</h5>
+          <form className="flex flex-col bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <div>
               <div className="mb-3 relative">
-                <div id="email" className="mr-1.5 text-2xl absolute left-2 top-1">
+                <div className="mr-1.5 text-2xl absolute left-2 top-1 text-gray-400">
                   <FontAwesomeIcon icon={faUser} />
                 </div>
                 <input
-                  className="w-72 h-10 px-10 py-3 border-blue-400"
+                  className="bg-white shadow appearance-none border  rounded w-full px-10 py-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-400"
                   name="email"
                   type="email"
                   placeholder="이메일"
-                  required
                 />
               </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" id="password">
-                  Username
-                  </label>
+              <div className="mb-3 relative">
+                <div className="mr-1.5 text-2xl absolute left-2 top-1 text-gray-400">
+                  <FontAwesomeIcon icon={faLock} />
+                </div>
                 <input
-                  className="bg-white shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="username"
-                  type="text"
-                  placeholder="Username"
+                  className="bg-white shadow appearance-none border  rounded w-full px-10 py-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-400"
+                  name="password"
+                  type="password"
+                  placeholder="비밀번호"
                 />
-                
               </div>
             </div>
 
             <input
-              className=" bg-blue-400 text-center text-white font-semibold py-1.5 rounded mt-2"
+              className=" bg-blue-400 text-center text-white font-semibold py-2 rounded "
               type="submit"
               value="로그인"
             />
