@@ -5,12 +5,12 @@ import { faUser, faComment, faLock, faN } from '@fortawesome/free-solid-svg-icon
 
 export default function Login() {
   return (
-    <main className="mt-16">
+    <main className="mt-16 w-full">
       <h3 className="text-5xl font-nanum-pen-script text-blue-400 text-center">어딨지?</h3>
-      <div className="mt-12 ">
+      <div className="mt-12">
         <div className="flex flex-col items-center ">
           <h5 className="text-lg font-bold mb-3">로그인</h5>
-          <form className="flex flex-col bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <form className="flex flex-col w-full  px-20 pt-6 pb-8 mb-4">
             <div>
               <div className="mb-3 relative">
                 <div className="mr-1.5 text-2xl absolute left-2 top-1 text-gray-400">
@@ -37,11 +37,11 @@ export default function Login() {
             </div>
 
             <input
-              className=" bg-blue-400 text-center text-white font-semibold py-2 rounded "
+              className=" bg-blue-400 text-center text-white font-semibold py-3 rounded "
               type="submit"
               value="로그인"
             />
-            <div className="flex justify-center text-xs mt-2 mb-3">
+            <div className="flex justify-center text-xs mt-2 mb-8">
               <Link href="/">
                 <a id="link-signup">아이디 찾기</a>
               </Link>
