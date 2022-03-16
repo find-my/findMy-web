@@ -4,15 +4,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Head from 'next/Head';
 import type { NextPage } from 'next';
-import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps } from 'react-kakao-maps-sdk';
+import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useWatchLocation from '../hooks/useWatchLocation';
 import Marker from '../components/Marker';
 import { markerPositions } from '../db';
-interface CurPosition {
-  latitude: number;
-  longitude: number;
-}
 
+interface Position {
+  lat: number;
+  lng: number;
+}
 // 컴포넌트 안쪽에서 선언하면 에러 발생
 const geolocationOptions = {
   enableHighAccuracy: true,
@@ -27,6 +27,7 @@ const Home: NextPage = () => {
   const { location, cancelLocationWatch, error } = useWatchLocation(geolocationOptions);
   const [map, setMap] = useState<kakao.maps.Map>();
   const [filter, setFilter] = useState<'lost' | 'found' | 'all'>('found');
+
   console.log('Home');
 
   const setMapType = (maptype: 'roadmap' | 'skyview') => {
@@ -83,21 +84,26 @@ const Home: NextPage = () => {
           level={3} // 지도의 확대 레벨
           onCreate={setMap}
         >
-          {filter !== 'all' ? (
-            <>
-              {markerPositions
-                .filter((position) => position.type === filter)
-                .map((position, index) => (
-                  <Marker key={index} position={position} />
+          <MarkerClusterer
+            averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+            minLevel={10} // 클러스터 할 최소 지도 레벨
+          >
+            {filter !== 'all' ? (
+              <>
+                {markerPositions
+                  .filter((position) => position.type === filter)
+                  .map((position) => (
+                    <Marker key={`${position.title}-${position.latlng}`} position={position} />
+                  ))}
+              </>
+            ) : (
+              <>
+                {markerPositions.map((position) => (
+                  <Marker key={`${position.title}-${position.latlng}`} position={position} />
                 ))}
-            </>
-          ) : (
-            <>
-              {markerPositions.map((position, index) => (
-                <Marker key={index} position={position} />
-              ))}
-            </>
-          )}
+              </>
+            )}
+          </MarkerClusterer>
         </Map>
         {/* 지도타입 컨트롤 div 입니다 */}
         <div>
