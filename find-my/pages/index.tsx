@@ -7,7 +7,7 @@ import type { NextPage } from 'next';
 import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps } from 'react-kakao-maps-sdk';
 import useWatchLocation from '../hooks/useWatchLocation';
 import Marker from '../components/Marker';
-
+import { markerPositions } from '../db';
 interface CurPosition {
   latitude: number;
   longitude: number;
@@ -26,6 +26,7 @@ const Home: NextPage = () => {
   const [mapStyle, setMapStyle] = useState<'roadmap' | 'skyview'>('roadmap');
   const { location, cancelLocationWatch, error } = useWatchLocation(geolocationOptions);
   const [map, setMap] = useState<kakao.maps.Map>();
+  const [filter, setFilter] = useState<'lost' | 'found' | 'all'>('found');
   console.log('Home');
 
   const setMapType = (maptype: 'roadmap' | 'skyview') => {
@@ -82,10 +83,50 @@ const Home: NextPage = () => {
           level={3} // 지도의 확대 레벨
           onCreate={setMap}
         >
-          <Marker />
+          {filter !== 'all' ? (
+            <>
+              {markerPositions
+                .filter((position) => position.type === filter)
+                .map((position, index) => (
+                  <Marker key={index} position={position} />
+                ))}
+            </>
+          ) : (
+            <>
+              {markerPositions.map((position, index) => (
+                <Marker key={index} position={position} />
+              ))}
+            </>
+          )}
         </Map>
         {/* 지도타입 컨트롤 div 입니다 */}
         <div>
+          <div className="flex absolute top-10  left-4 z-10  ">
+            <button
+              onClick={() => setFilter('lost')}
+              className={cls(
+                'cursor-pointer p-2 rounded text-center',
+                filter === 'lost' ? 'bg-yellow-400' : 'bg-white',
+              )}
+            >
+              분실물
+            </button>
+            <button
+              onClick={() => setFilter('found')}
+              className={cls(
+                'cursor-pointer p-2 rounded text-center mx-1',
+                filter === 'found' ? 'bg-yellow-400' : 'bg-white',
+              )}
+            >
+              습득물
+            </button>
+            <button
+              onClick={() => setFilter('all')}
+              className={cls('cursor-pointer p-2 rounded text-center', filter === 'all' ? 'bg-yellow-400' : 'bg-white')}
+            >
+              모두 보기
+            </button>
+          </div>
           <div className="custom_typecontrol radius_border absolute top-10  right-4 z-10 bg-white rounded ">
             <button
               id="btnRoadmap"
