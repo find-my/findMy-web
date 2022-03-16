@@ -1,11 +1,13 @@
 // index.html
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Head from 'next/Head';
 import type { NextPage } from 'next';
-import { Map, MapMarker } from 'react-kakao-maps-sdk';
+import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps } from 'react-kakao-maps-sdk';
 import useWatchLocation from '../hooks/useWatchLocation';
+import Marker from '../components/Marker';
+
 interface CurPosition {
   latitude: number;
   longitude: number;
@@ -17,29 +19,143 @@ const geolocationOptions = {
   timeout: 1000 * 60 * 1, // 1 min (1000 ms * 60 sec * 1 minute = 60 000ms)
   maximumAge: 1000 * 3600 * 24, // 24 hour
 };
-
+function cls(...classnames: string[]) {
+  return classnames.join(' ');
+}
 const Home: NextPage = () => {
+  const [mapStyle, setMapStyle] = useState<'roadmap' | 'skyview'>('roadmap');
   const { location, cancelLocationWatch, error } = useWatchLocation(geolocationOptions);
+  const [map, setMap] = useState<kakao.maps.Map>();
+  console.log('Home');
+
+  const setMapType = (maptype: 'roadmap' | 'skyview') => {
+    if (!map) return;
+
+    const roadmapControl = document.getElementById('btnRoadmap');
+    const skyviewControl = document.getElementById('btnSkyview');
+    if (!roadmapControl || !skyviewControl) return;
+    if (maptype === 'roadmap') {
+      map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+      roadmapControl.className = 'selected_btn';
+      skyviewControl.className = 'btn';
+    } else {
+      map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+      skyviewControl.className = 'selected_btn';
+      roadmapControl.className = 'btn';
+    }
+    console.log(map?.getMapTypeId());
+
+    setMapStyle(maptype);
+  };
+  const zoomIn = () => {
+    if (!map) return;
+    map.setLevel(map.getLevel() - 1);
+  };
+  const zoomOut = () => {
+    if (!map) return;
+    map.setLevel(map.getLevel() + 1);
+  };
 
   useEffect(() => {
     if (!location) return;
+
     console.log(location);
-  }, []);
+    console.log(error);
+  }, [location]);
 
   return (
-    <Map
-      center={{ lat: location?.latitude || 37.566535, lng: location?.longitude || 126.9779692 }}
-      style={{ width: '100%', height: '90vh' }}
-      level={3}
-    >
-      <MapMarker position={{ lat: 33.55635, lng: 126.795841 }}>
-        <div style={{ color: '#000' }}>Hello World!</div>
-      </MapMarker>
-    </Map>
+    <div>
+      <div className="mt-10 relative">
+        <Map // 지도를 표시할 Container
+          id="map"
+          center={{
+            // 지도의 중심좌표
+            lat: location?.latitude || 37.566535,
+            lng: location?.longitude || 126.795841,
+          }}
+          style={{
+            width: '100%',
+            height: '90vh',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+          level={3} // 지도의 확대 레벨
+          onCreate={setMap}
+        >
+          <Marker />
+        </Map>
+        {/* 지도타입 컨트롤 div 입니다 */}
+        <div>
+          <div className="custom_typecontrol radius_border absolute top-10  right-4 z-10 bg-white rounded ">
+            <button
+              id="btnRoadmap"
+              className={cls(
+                'selected_btn cursor-pointer  rounded-l mr-px p-2',
+                mapStyle === 'roadmap' ? 'bg-blue-400' : 'bg-white',
+              )}
+              onClick={() => setMapType('roadmap')}
+            >
+              지도
+            </button>
+            <button
+              id="btnSkyview"
+              className={cls(
+                'btn cursor-pointer bg-white rounded-r p-2',
+                mapStyle === 'skyview' ? 'bg-blue-400' : 'bg-white',
+              )}
+              onClick={() => {
+                setMapType('skyview');
+              }}
+            >
+              스카이뷰
+            </button>
+          </div>
+          {/* 지도 확대, 축소 컨트롤 div 입니다 */}
+          <div className="custom_zoomcontrol radius_border absolute top-20  right-4 z-10  bg-white w-10 p-2 rounded">
+            <span onClick={zoomIn} className="block mb-2 cursor-pointer">
+              <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_plus.png" alt="확대" />
+            </span>
+            <span onClick={zoomOut} className="cursor-pointer">
+              <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_minus.png" alt="축소" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default Home;
+/*
+
+
+<div className="custom_typecontrol radius_border">
+<span id="btnRoadmap" className="selected_btn" onClick={() => setMapType('roadmap')}>
+  지도
+</span>
+<span
+  id="btnSkyview"
+  className="btn"
+  onClick={() => {
+    setMapType('skyview');
+  }}
+>
+  스카이뷰
+</span>
+</div>
+
+<div className="custom_zoomcontrol radius_border">
+<span onClick={zoomIn}>
+  <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_plus.png" alt="확대" />
+</span>
+<span onClick={zoomOut}>
+  <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_minus.png" alt="축소" />
+</span>
+</div>
+
+
+
+*/
 
 /*
 
