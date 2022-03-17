@@ -1,4 +1,4 @@
-function Lost() {
+function LostList() {
   return (
     <div className="flex flex-col space-y-5  py-10">
       {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
@@ -71,4 +71,4 @@ function Lost() {
   );
 }
 
-export default Lost;
+export default LostList;
