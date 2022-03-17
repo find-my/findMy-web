@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faComment, faLock, faN } from '@fortawesome/free-solid-svg-icons';
-
-export default function Login() {
+import type { NextPage } from 'next';
+const Login: NextPage = () => {
   return (
     <main className="mt-16 w-full">
       <h3 className="text-5xl font-nanum-pen-script text-blue-400 text-center">어딨지?</h3>
@@ -78,8 +78,8 @@ export default function Login() {
       </div>
     </main>
   );
-}
-
+};
+export default Login;
 /*
   <aside>
         <span className="text-9xl">😵</span>
