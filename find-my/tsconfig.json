@@ -16,6 +16,6 @@
     "incremental": true,
     "types": ["kakao.maps.d.ts"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/posts.js", "lib/posts.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "libs/posts.js", "libs/posts.jsx"],
   "exclude": ["node_modules"]
 }
