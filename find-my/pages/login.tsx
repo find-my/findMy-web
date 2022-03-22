@@ -4,12 +4,15 @@ import { faUser, faComment, faLock, faN } from '@fortawesome/free-solid-svg-icon
 import { FieldErrors, useForm } from 'react-hook-form';
 import type { NextPage } from 'next';
 import Input from '../components/auth/Input';
+import { useState } from 'react';
+import usePost from '../libs/front/hooks/usePost';
 interface LoginForm {
   email: string;
   password: string;
   errors?: string;
 }
 const Login: NextPage = () => {
+  const [login, { loading, data, error }] = usePost('/api/users/login');
   const {
     register,
     handleSubmit,
@@ -18,11 +21,8 @@ const Login: NextPage = () => {
     reset,
   } = useForm<LoginForm>();
   const onValid = (data: LoginForm) => {
-    fetch("api/users/enter",{
-      method:"POST",
-      body:JSON.stringify(data);
-    });
-    console.log(data);
+    if (loading) return;
+    login(data);
   };
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
@@ -50,7 +50,7 @@ const Login: NextPage = () => {
                 placeholder="비밀번호"
               />
             </div>
-
+            {loading ? '로그인중' : null}
             <input
               className=" bg-blue-400 text-center text-white font-semibold py-3 rounded "
               type="submit"
