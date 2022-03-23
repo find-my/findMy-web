@@ -13,7 +13,7 @@ interface SignUpForm {
   errors?: string;
 }
 const SignUp: NextPage = () => {
-  const [signUp, { loading, data, error }] = usePost('/api/users/signUp');
+  const [signUp, { loading, data, error }] = usePost('/api/users/signup');
   const {
     register,
     handleSubmit,
@@ -28,6 +28,7 @@ const SignUp: NextPage = () => {
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
   };
+  console.log(loading, data, error);
   return (
     <main className="mt-16 w-full">
       <h3 className="text-5xl font-nanum-pen-script text-blue-400 text-center">어딨지?</h3>
@@ -74,7 +75,7 @@ const SignUp: NextPage = () => {
             <div className="flex justify-center text-xs mt-2 mb-8">
               <span>계정이 있으신가요?</span>
               <Link href="/">
-                <a id="link-signup"> 로그인</a>
+                <a id="link-signup">로그인</a>
               </Link>
             </div>
           </form>

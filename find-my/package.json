@@ -17,6 +17,7 @@
     "@types/tailwindcss": "^3.0.9",
     "bcrypt": "^5.0.1",
     "gray-matter": "^4.0.3",
+    "iron-session": "^6.1.1",
     "jsonwebtoken": "^8.5.1",
     "next": "^12.1.0",
     "normalize.css": "^8.0.1",

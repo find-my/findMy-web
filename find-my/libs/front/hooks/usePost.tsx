@@ -1,14 +1,13 @@
-import { prepareServerlessUrl } from 'next/dist/server/base-server';
 import { useState } from 'react';
 
-interface PostState {
+interface PostState<T> {
   loading: boolean;
-  data?: object;
+  data?: T;
   error?: object;
 }
-type UsePostResult = [(data: any) => void, PostState];
-export default function usePost(url: string): UsePostResult {
-  const [state, setState] = useState<PostState>({
+type UsePostResult<T> = [(data: any) => void, PostState<T>];
+export default function usePost<T = any>(url: string): UsePostResult<T> {
+  const [state, setState] = useState<PostState<T>>({
     loading: false,
     data: undefined,
     error: undefined,
@@ -23,9 +22,8 @@ export default function usePost(url: string): UsePostResult {
       body: JSON.stringify(data),
     })
       .then((response) => response.json().catch(() => {}))
-      .then((data) => setState((prev) => ({ ...prev, data })))
-      .catch((error) => setState((prev) => ({ ...prev, error })))
-      .finally(() => setState((prev) => ({ ...prev, loading: false })));
+      .then((data) => setState((prev) => ({ ...prev, data, loading: false })))
+      .catch((error) => setState((prev) => ({ ...prev, error, loading: false })));
   };
   return [postFunc, { ...state }];
 }

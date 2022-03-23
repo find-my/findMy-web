@@ -27,6 +27,7 @@ const Login: NextPage = () => {
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
   };
+  console.log(loading, data, error);
   return (
     <main className="mt-16 w-full">
       <h3 className="text-5xl font-nanum-pen-script text-blue-400 text-center">어딨지?</h3>
@@ -58,15 +59,15 @@ const Login: NextPage = () => {
             />
             <div className="flex justify-center text-xs mt-2 mb-8">
               <Link href="/">
-                <a id="link-signup">아이디 찾기</a>
+                <a>아이디 찾기</a>
               </Link>
               <div className="mx-1 text-blue-400">ㅣ</div>
               <Link href="/">
-                <a id="link-signup">비밀번호 찾기</a>
+                <a>비밀번호 찾기</a>
               </Link>
               <div className="mx-1 text-blue-400">ㅣ</div>
-              <Link href="/">
-                <a id="link-signup">회원가입</a>
+              <Link href="/signup">
+                <a>회원가입</a>
               </Link>
             </div>
 
