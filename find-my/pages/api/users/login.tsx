@@ -3,13 +3,7 @@ import { withIronSessionApiRoute } from 'iron-session/next';
 import client from '@libs/back/client';
 import bcrypt from 'bcrypt';
 import protectedHandler, { ResponseType } from '@libs/back/protectedHandler';
-declare module 'iron-session' {
-  interface IronSessionData {
-    user?: {
-      id: number;
-    };
-  }
-}
+import { withApiSession } from '@libs/back/session';
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const { email, password } = req.body;
   console.log('login');
@@ -31,22 +25,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       message: '비밀번호가 일치 하지 않습니다.',
     });
   }
-  const payload = Math.floor(100000 + Math.random() * 900000) + '';
 
-  const token = await client.token.create({
-    data: {
-      payload,
-      user: {
-        connect: { id: user.id },
-      },
-    },
-  });
-  if (!token) {
-    return res.json({
-      ok: false,
-      message: '알 수 없는 오류가 발생했습니다.',
-    });
-  }
   req.session.user = {
     id: user.id,
   };
@@ -57,7 +36,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   });
 }
 
-export default withIronSessionApiRoute(protectedHandler('POST', handler), {
-  cookieName: 'findMySession',
-  password: '9845904809485098594385093840598df;slkgjfdl;gkfsdjg;ldfksjgdsflgjdfklgjdflgjflkgjdgd',
-});
+export default withApiSession(protectedHandler({ method: 'POST', handler, isPrivate: false }));
