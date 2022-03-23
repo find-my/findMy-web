@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faComment, faLock, faN } from '@fortawesome/free-solid-svg-icons';
 import { FieldErrors, useForm } from 'react-hook-form';
 import type { NextPage } from 'next';
-import Input from '../components/auth/Input';
+import Input from '@components/auth/Input';
 import { useState } from 'react';
-import usePost from '../libs/front/hooks/usePost';
+import usePost from '@libs/front/hooks/usePost';
 interface LoginForm {
   email: string;
   password: string;

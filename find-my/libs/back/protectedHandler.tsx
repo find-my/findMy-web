@@ -1,5 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+export interface ResponseType {
+  ok: boolean;
+  [key: string]: any;
+}
 export default function protectedHandler(
   method: 'GET' | 'POST' | 'DELETE',
   func: (req: NextApiRequest, res: NextApiResponse) => void,
