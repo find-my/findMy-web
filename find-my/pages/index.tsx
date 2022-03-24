@@ -6,9 +6,9 @@ import Head from 'next/Head';
 import type { NextPage } from 'next';
 import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useWatchLocation from '../hooks/useWatchLocation';
-import Marker from '../components/Marker';
+import Marker from '@components/Marker';
 import { markerPositions } from '../db';
-
+import useFetchUser from '@libs/front/hooks/useFetchUser';
 interface Position {
   lat: number;
   lng: number;
@@ -27,7 +27,7 @@ const Home: NextPage = () => {
   const { location, cancelLocationWatch, error } = useWatchLocation(geolocationOptions);
   const [map, setMap] = useState<kakao.maps.Map>();
   const [filter, setFilter] = useState<'lost' | 'found' | 'all'>('found');
-
+  const user = useFetchUser();
   console.log('Home');
 
   const setMapType = (maptype: 'roadmap' | 'skyview') => {
