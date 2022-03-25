@@ -6,7 +6,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   const userData = await client.user.findUnique({
     where: { id: req.session.user?.id },
   });
-  res.json({
+  if (!userData)
+    return res.json({
+      ok: false,
+    });
+  return res.json({
     ok: true,
     userData,
   });
