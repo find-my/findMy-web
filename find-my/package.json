@@ -41,6 +41,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.3",
+    "kakao.maps.d.ts": "^0.1.26",
     "postcss": "^8.4.7",
     "prettier": "^2.5.1",
     "prisma": "^3.11.0",
