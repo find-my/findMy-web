@@ -12,7 +12,7 @@ import {
   faList,
   faMap,
 } from '@fortawesome/free-solid-svg-icons';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CategoryGroupCode } from 'components/Map/types';
 import SearchList from '@components/Map/SearchList';
 import { LOST_PLACE } from '@libs/front/swrKey';
@@ -148,6 +148,19 @@ export default function placeFinder() {
       // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
     }
   };
+  const onKeywordSubmit = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    if (!placeKeyword || !placeKeyword.trim()) return;
+    if (!location) return;
+    console.log(location);
+    const { latitude, longitude } = location;
+    const ps = new kakao.maps.services.Places();
+    ps.keywordSearch(placeKeyword, OnKeywordSearch, {
+      useMapBounds: true,
+      location: new kakao.maps.LatLng(latitude, longitude),
+      sort: kakao.maps.services.SortBy.DISTANCE,
+    });
+  };
   useEffect(() => {
     if (!placeCategoryCode) return;
     if (!location) return;
@@ -160,25 +173,14 @@ export default function placeFinder() {
       sort: kakao.maps.services.SortBy.DISTANCE,
     });
   }, [placeCategoryCode, location]);
-  useEffect(() => {
-    if (!placeKeyword || !placeKeyword.trim()) return;
-    if (!location) return;
-    console.log(location);
-    const { latitude, longitude } = location;
-    const ps = new kakao.maps.services.Places();
-    ps.keywordSearch(placeKeyword, OnKeywordSearch, {
-      useMapBounds: true,
-      location: new kakao.maps.LatLng(latitude, longitude),
-      sort: kakao.maps.services.SortBy.DISTANCE,
-    });
-  }, [placeKeyword, location]);
+
   //mt-10
 
   return (
     <div>
       <div className="fixed top-0 z-10 w-full bg-white">
         <header className=" flex items-center p-2">
-          {placeCategoryCode && placeSearchOn ? (
+          {(placeCategoryCode || placeKeyword) && placeSearchOn ? (
             <button
               onClick={() => setDisplayByMap((prev) => !prev)}
               className="h-8 w-16 flex justify-center space-x-1 items-center whitespace-nowrap text-sm bg-blue-400 text-white rounded"
@@ -201,7 +203,16 @@ export default function placeFinder() {
               X
             </button>
           ) : null}
-          <input onClick={placeSearchOnSwitch} type="text" placeholder="장소 검색" className="w-full h-10 rounded-lg" />
+          <form onSubmit={onKeywordSubmit} className="w-full">
+            <input
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPlaceKeyword(event.currentTarget.value)}
+              value={placeKeyword}
+              onClick={placeSearchOnSwitch}
+              type="text"
+              placeholder="장소 검색"
+              className="w-full h-10 rounded-lg"
+            />
+          </form>
         </header>
         {placeSearchOn ? (
           <div className="w-full flex justify-between py-2 px-10">
