@@ -36,4 +36,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   });
 }
 
-export default withApiSession(protectedHandler({ method: 'POST', handler, isPrivate: false }));
+export default withApiSession(protectedHandler({ methods: ['POST'], handler, isPrivate: false }));

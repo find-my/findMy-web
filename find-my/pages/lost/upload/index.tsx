@@ -38,7 +38,7 @@ const CATEGORY = [
 ];
 const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
-  const [uploadLost, { loading, data: uploadResult, error }] = usePost<UploadLostState>('/api/losts/post');
+  const [uploadLost, { loading, data: uploadResult, error }] = usePost<UploadLostState>('/api/losts');
   const router = useRouter();
   const { data: lostPlace } = useSWR(LOST_PLACE);
   const { mutate } = useSWRConfig();
