@@ -37,6 +37,7 @@ model Token {
   @@index([userId])
 }
 
+//views 기능 추가 필요
 //lostPlace string 고치기 
 model Lost{
   id Int @id @default(autoincrement())

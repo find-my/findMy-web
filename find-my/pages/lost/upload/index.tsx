@@ -7,11 +7,17 @@ import useSWR, { useSWRConfig } from 'swr';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import usePost from '@libs/front/hooks/usePost';
+import { Lost } from '@prisma/client';
 interface LostForm {
   images?: string[];
   title: string;
   category?: string;
   description: string;
+}
+interface UploadLostState {
+  ok: boolean;
+  message?: string;
+  lost?: Lost;
 }
 const CATEGORY = [
   '선택안함',
@@ -32,7 +38,7 @@ const CATEGORY = [
 ];
 const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
-  const [uploadLost, { loading, data: uploadResult, error }] = usePost('/api/losts/post');
+  const [uploadLost, { loading, data: uploadResult, error }] = usePost<UploadLostState>('/api/losts/post');
   const router = useRouter();
   const { data: lostPlace } = useSWR(LOST_PLACE);
   const { mutate } = useSWRConfig();
@@ -44,23 +50,28 @@ const Upload: NextPage = () => {
     watch,
     reset,
   } = useForm<LostForm>();
-  const onValid = useCallback((data: LostForm) => {
+  const onValid = (data: LostForm) => {
     console.log(data, loading);
     if (loading) return;
     if (!lostPlace || !lostPlace.trim()) return;
-    console.log(lostPlace);
+    console.log('갈거임');
     uploadLost({ ...data, lostPlace });
+    console.log('갔다옴');
     if (uploadResult && uploadResult?.ok) {
-      console.log('업로드 완료');
     }
-  }, []);
-  const onInvalid = useCallback((errors: FieldErrors) => {
+  };
+  const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
-  }, []);
+  };
   const placeFinderOpen = () => {
     setIsPlaceFinderOpen(true);
   };
-  console.log(error);
+  useEffect(() => {
+    if (uploadResult?.ok) {
+      console.log('업로드 완료');
+      router.push(`/lost/${uploadResult.lost?.id}`);
+    }
+  }, [uploadResult, router]);
   return (
     <>
       {!isPlaceFinderOpen ? (
