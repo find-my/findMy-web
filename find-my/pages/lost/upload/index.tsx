@@ -6,31 +6,33 @@ import { LOST_PLACE } from '@libs/front/swrKey';
 import useSWR, { useSWRConfig } from 'swr';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
+import usePost from '@libs/front/hooks/usePost';
 interface LostForm {
   images?: string[];
   title: string;
-  category: string;
+  category?: string;
   description: string;
 }
 const CATEGORY = [
-  { value: 'none', name: '선택안함' },
-  { value: 'bag', name: '가방' },
-  { value: 'wallet', name: '지갑' },
-  { value: 'money', name: '카드/현금' },
-  { value: 'clothes', name: '의류' },
-  { value: 'phone', name: '휴대폰' },
-  { value: 'electronics', name: '전자기기' },
-  { value: 'preciousMetal', name: '귀금속' },
-  { value: 'book', name: '도서용품' },
-  { value: 'paper', name: '서류/증명서' },
-  { value: 'sports', name: '스포츠용품' },
-  { value: 'instrument', name: '악기' },
-  { value: 'car', name: '자동차관련' },
-  { value: 'bag', name: '가방' },
-  { value: 'others', name: '기타' },
+  '선택안함',
+  '가방',
+  '지갑',
+  '카드/현금',
+  '의류',
+  '휴대폰',
+  '전자기기',
+  '귀금속',
+  '도서용품',
+  '서류/증명서',
+  '스포츠용품',
+  '악기',
+  '자동차관련',
+  '가방',
+  '기타',
 ];
 const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
+  const [uploadLost, { loading, data: uploadResult, error }] = usePost('/api/losts/post');
   const router = useRouter();
   const { data: lostPlace } = useSWR(LOST_PLACE);
   const { mutate } = useSWRConfig();
@@ -43,16 +45,22 @@ const Upload: NextPage = () => {
     reset,
   } = useForm<LostForm>();
   const onValid = useCallback((data: LostForm) => {
-    console.log(data);
+    console.log(data, loading);
+    if (loading) return;
+    if (!lostPlace || !lostPlace.trim()) return;
+    console.log(lostPlace);
+    uploadLost({ ...data, lostPlace });
+    if (uploadResult && uploadResult?.ok) {
+      console.log('업로드 완료');
+    }
   }, []);
   const onInvalid = useCallback((errors: FieldErrors) => {
     console.dir(errors);
   }, []);
   const placeFinderOpen = () => {
-    mutate(LOST_PLACE, LOSTPLACE_NULL);
     setIsPlaceFinderOpen(true);
   };
-
+  console.log(error);
   return (
     <>
       {!isPlaceFinderOpen ? (
@@ -127,14 +135,11 @@ const Upload: NextPage = () => {
             </div>
             <div className="mt-2 space-x-2">
               <label htmlFor="lostCategory">카테고리</label>
-              <select
-                {...register('category', { required: true })}
-                className="rounded"
-                id="lostCategory"
-                name="lostCategory"
-              >
-                {CATEGORY.map((option) => (
-                  <option value={option.value}>{option.name}</option>
+              <select {...register('category')} className="rounded" id="lostCategory">
+                {CATEGORY.map((item, index) => (
+                  <option key={index} value={item}>
+                    {item}
+                  </option>
                 ))}
               </select>
             </div>
@@ -202,6 +207,7 @@ const Upload: NextPage = () => {
                 />
               </div>
             </div>
+            {loading ? '업로드중' : null}
             <UploadButton isCompleted={errors !== null} />
           </form>
         </div>
@@ -214,3 +220,24 @@ const Upload: NextPage = () => {
 
 export default Upload;
 /* <span>영통역 수인분당선</span> */
+/*
+ {CATEGORY.map((option) => (
+                  <option value={option.value}>{option.name}</option>
+                ))}
+*/
+/*
+  <option value='선택안함'>선택안함</option>
+                <option value="가방">가방</option>
+                <option value="지갑">지갑</option>
+                <option value="카드/현금">카드/현금</option>
+                <option value="의류">의류</option>
+                <option value='휴대폰'>휴대폰</option>
+                <option value="전자기기">전자기기</option>
+                <option value="귀금속">귀금속</option>
+                <option value="도서용품">도서용품</option>
+                <option value="서류/증명서">서류/증명서</option>
+                <option value='스포츠용품'>스포츠용품</option>
+                <option value="악기">악기</option>
+                <option value="자동차관련">자동차관련</option>
+                <option value="기타">기타</option>
+*/

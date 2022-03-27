@@ -25,9 +25,7 @@ interface Imarker {
 function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>();
   const { mutate } = useSWRConfig();
-  const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>(
-    new kakao.maps.Marker({ position: new kakao.maps.LatLng(37.566535, 126.795841) }),
-  );
+  const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>();
 
   const zoomIn = () => {
     if (!map) return;
@@ -64,7 +62,11 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props)
       }
     });
   };
-
+  useEffect(() => {
+    window.kakao.maps.load(() => {
+      setPointMarker(new kakao.maps.Marker({ position: new kakao.maps.LatLng(37.566535, 126.795841) }));
+    });
+  }, []);
   useEffect(() => {
     if (!map || !categoryPlaceInfo) return;
 
