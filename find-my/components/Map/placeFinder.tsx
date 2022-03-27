@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import SearchMap from '@components/Map/SearchMap';
-import useWatchLocation from '../../../hooks/useWatchLocation';
+import useWatchLocation from '../../hooks/useWatchLocation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTrainSubway,
@@ -16,6 +16,7 @@ import React, { useState, useEffect } from 'react';
 import { CategoryGroupCode } from 'components/Map/types';
 import SearchList from '@components/Map/SearchList';
 import { LOST_PLACE } from '@libs/front/swrKey';
+import Router, { useRouter } from 'next/router';
 const geolocationOptions = {
   enableHighAccuracy: true,
   timeout: 1000 * 60 * 1, // 1 min (1000 ms * 60 sec * 1 minute = 60 000ms)
@@ -30,6 +31,9 @@ const placeCategory = [
   { name: '숙박', code: CategoryGroupCode.AD5, icon: faBed },
   { name: '카페', code: CategoryGroupCode.CE7, icon: faMugSaucer },
 ];
+interface Props {
+  setOpenFalse: () => void;
+}
 interface Imarker {
   position: {
     lat: number;
@@ -48,16 +52,15 @@ interface IcategoryPlaceInfoByList {
   category_group_name: string;
 }
 
-export default function placeFinder() {
+export default function placeFinder({ setOpenFalse }: Props) {
   const { location, error } = useWatchLocation(geolocationOptions);
   const [placeSearchOn, setPlaceSearchOn] = useState<boolean>(true);
-  const [placeCategoryCode, setPlaceCategoryCode] = useState<kakao.maps.services.CategoryGroupCode>();
   const [placeKeyword, setPlaceKeyword] = useState<string>();
   const [displayByMap, setDisplayByMap] = useState<boolean>(true);
   const [categoryPlaceInfoByMap, setCategoryPlaceInfoByMap] = useState<IcategoryPlaceInfoByMap>();
   const [categoryPlaceInfoByList, setCategoryPlaceInfoByList] = useState<IcategoryPlaceInfoByList[]>();
   const { data: lostPlace } = useSWR(LOST_PLACE);
-
+  const router = useRouter();
   const placeSearchOnSwitch = () => {
     if (placeSearchOn) return;
     setPlaceSearchOn(true);
@@ -148,6 +151,9 @@ export default function placeFinder() {
       // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
     }
   };
+  const onPlaceSeleted = () => {
+    setOpenFalse();
+  };
   const onKeywordSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
     if (!placeKeyword || !placeKeyword.trim()) return;
@@ -161,18 +167,19 @@ export default function placeFinder() {
       sort: kakao.maps.services.SortBy.DISTANCE,
     });
   };
-  useEffect(() => {
-    if (!placeCategoryCode) return;
+
+  const categorySearch = (code: kakao.maps.services.CategoryGroupCode) => {
+    if (!code) return;
     if (!location) return;
     console.log(location);
     const { latitude, longitude } = location;
     const ps = new kakao.maps.services.Places();
-    ps.categorySearch(placeCategoryCode, OnCategorySearch, {
+    ps.categorySearch(code, OnCategorySearch, {
       useMapBounds: true,
       location: new kakao.maps.LatLng(latitude, longitude),
       sort: kakao.maps.services.SortBy.DISTANCE,
     });
-  }, [placeCategoryCode, location]);
+  };
 
   //mt-10
 
@@ -180,7 +187,7 @@ export default function placeFinder() {
     <div>
       <div className="fixed top-0 z-10 w-full bg-white">
         <header className=" flex items-center p-2">
-          {(placeCategoryCode || placeKeyword) && placeSearchOn ? (
+          {placeSearchOn ? (
             <button
               onClick={() => setDisplayByMap((prev) => !prev)}
               className="h-8 w-16 flex justify-center space-x-1 items-center whitespace-nowrap text-sm bg-blue-400 text-white rounded"
@@ -218,7 +225,7 @@ export default function placeFinder() {
           <div className="w-full flex justify-between py-2 px-10">
             {placeCategory.map((place, index) => (
               <button
-                onClick={() => setPlaceCategoryCode(place.code)}
+                onClick={() => categorySearch(place.code)}
                 key={index}
                 className="flex flex-col items-center space-y-1"
               >
@@ -239,7 +246,9 @@ export default function placeFinder() {
       <div className="fixed bottom-0 flex flex-col w-full h-20 z-10 bg-white divide-y py-1 px-5">
         <div className="flex justify-between items-center py-1">
           <span>🗺️ 선택된 위치</span>
-          <button className="rounded bg-blue-400 p-1 text-white">선택 완료</button>
+          <button onClick={onPlaceSeleted} className="rounded bg-blue-400 p-1 text-white">
+            선택 완료
+          </button>
         </div>
         <span>{lostPlace || '선택안됨'}</span>
       </div>

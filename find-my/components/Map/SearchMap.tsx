@@ -10,7 +10,7 @@ import { LOST_PLACE } from '@libs/front/swrKey';
 interface Props {
   latitude?: number;
   longitude?: number;
-
+  placeKeyword?: string;
   categoryPlaceInfo?: { markers: Imarker[]; bounds: kakao.maps.LatLngBounds };
 }
 interface Imarker {
@@ -22,29 +22,13 @@ interface Imarker {
   road_address_name: string;
 }
 
-function Search({ latitude, longitude, categoryPlaceInfo }: Props) {
-  const [mapStyle, setMapStyle] = useState<'roadmap' | 'skyview'>('roadmap');
+function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>();
   const { mutate } = useSWRConfig();
-  const setMapType = (maptype: 'roadmap' | 'skyview') => {
-    if (!map) return;
+  const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>(
+    new kakao.maps.Marker({ position: new kakao.maps.LatLng(37.566535, 126.795841) }),
+  );
 
-    const roadmapControl = document.getElementById('btnRoadmap');
-    const skyviewControl = document.getElementById('btnSkyview');
-    if (!roadmapControl || !skyviewControl) return;
-    if (maptype === 'roadmap') {
-      map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
-      roadmapControl.className = 'selected_btn';
-      skyviewControl.className = 'btn';
-    } else {
-      map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
-      skyviewControl.className = 'selected_btn';
-      roadmapControl.className = 'btn';
-    }
-    console.log(map?.getMapTypeId());
-
-    setMapStyle(maptype);
-  };
   const zoomIn = () => {
     if (!map) return;
     map.setLevel(map.getLevel() - 1);
@@ -53,11 +37,40 @@ function Search({ latitude, longitude, categoryPlaceInfo }: Props) {
     if (!map) return;
     map.setLevel(map.getLevel() + 1);
   };
+  function searchDetailAddrFromCoords(coords: any, callback: any) {
+    // 주소-좌표 변환 객체를 생성합니다
+    const geocoder = new kakao.maps.services.Geocoder();
+    // 좌표로 법정동 상세 주소 정보를 요청합니다
+    geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+  }
+
+  const onMapClick = (target: kakao.maps.Map, mouseEvent: kakao.maps.event.MouseEvent) => {
+    if (!pointMarker) return;
+    searchDetailAddrFromCoords(mouseEvent.latLng, function (result: any, status: any) {
+      if (!mouseEvent.latLng) return;
+      if (!map) return;
+      if (status === kakao.maps.services.Status.OK) {
+        console.log(result[0].address.address_name);
+        console.log(mouseEvent?.latLng?.getLat());
+        // 클릭한 위치를 표시할 마커입니다
+        //const = new kakao.maps.InfoWindow({zindex:1}); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+        // 마커를 클릭한 위치에 표시합니다
+        pointMarker.setPosition(mouseEvent.latLng);
+        pointMarker.setMap(map);
+        mutate(LOST_PLACE, result[0].address.address_name);
+        // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+        //infowindow.setContent(content);
+        //infowindow.open(map, marker);
+      }
+    });
+  };
+
   useEffect(() => {
     if (!map || !categoryPlaceInfo) return;
+
     console.log('바운드세팅');
     map.setBounds(categoryPlaceInfo.bounds);
-  }, [map, categoryPlaceInfo]);
+  }, [categoryPlaceInfo]);
   return (
     <div className="mt-20">
       <div className="relative ">
@@ -76,6 +89,7 @@ function Search({ latitude, longitude, categoryPlaceInfo }: Props) {
           }}
           level={3} // 지도의 확대 레벨
           onCreate={setMap}
+          onClick={onMapClick}
         >
           {categoryPlaceInfo &&
             categoryPlaceInfo.markers?.map((marker) => (
@@ -90,30 +104,6 @@ function Search({ latitude, longitude, categoryPlaceInfo }: Props) {
         </Map>
         {/* 지도타입 컨트롤 div 입니다 */}
         <div>
-          <div className="custom_typecontrol radius_border absolute top-10  right-4 z-10 bg-white rounded ">
-            <button
-              id="btnRoadmap"
-              className={classNames(
-                'selected_btn cursor-pointer  rounded-l mr-px p-2',
-                mapStyle === 'roadmap' ? 'bg-blue-400' : 'bg-white',
-              )}
-              onClick={() => setMapType('roadmap')}
-            >
-              지도
-            </button>
-            <button
-              id="btnSkyview"
-              className={classNames(
-                'btn cursor-pointer bg-white rounded-r p-2',
-                mapStyle === 'skyview' ? 'bg-blue-400' : 'bg-white',
-              )}
-              onClick={() => {
-                setMapType('skyview');
-              }}
-            >
-              스카이뷰
-            </button>
-          </div>
           {/* 지도 확대, 축소 컨트롤 div 입니다 */}
           <div className="custom_zoomcontrol radius_border absolute top-20  right-4 z-10  bg-white w-10 p-2 rounded">
             <span onClick={zoomIn} className="block mb-2 cursor-pointer">

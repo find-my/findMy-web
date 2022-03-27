@@ -19,7 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7c979a8b28e8fbc552afe34a35bebecd&libraries=services,clusterer&autoload=false"
         strategy="beforeInteractive"
       />
-
+      <Script></Script>
       <Component {...pageProps} />
     </SWRConfig>
   );
