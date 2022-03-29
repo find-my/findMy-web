@@ -36,7 +36,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
 
   return res.json({
     ok: true,
-    result,
+    lostList: result,
   });
 }
 
