@@ -9,12 +9,15 @@ import { useState } from 'react';
 import GetLostResult from '@components/GetLostResult';
 import { withRouter, NextRouter } from 'next/router';
 import SearchInput from '@components/SearchInput';
-interface LostWithUser extends Lost {
+interface ExtendedLost extends Lost {
   user: User;
+  _count: {
+    scraps: number;
+  };
 }
-interface LostDetailResponse {
+interface LostListResponse {
   ok: boolean;
-  lostList: LostWithUser[];
+  lostList: ExtendedLost[];
 }
 interface WithRouterProps {
   router: NextRouter;
@@ -23,7 +26,7 @@ const LostSearch = ({ router }: WithRouterProps) => {
   const {
     query: { searchTerm },
   } = router;
-  const { data: searchResult, isLoading } = useSearch<LostDetailResponse>(searchTerm?.toString() || '');
+  const { data: searchResult, isLoading } = useSearch<LostListResponse>(searchTerm?.toString() || '');
   console.log(searchTerm);
   return (
     <>

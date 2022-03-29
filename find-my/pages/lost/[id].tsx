@@ -3,18 +3,29 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { Lost, User } from '@prisma/client';
-
-interface LostWithUser extends Lost {
+import { classNames } from '@libs/front/utils';
+import usePost from '@libs/front/hooks/usePost';
+interface ExtendedLost extends Lost {
   user: User;
+  _count: {
+    scraps: number;
+  };
 }
 interface LostDetailResponse {
   ok: boolean;
-  lost: LostWithUser;
+  lost: ExtendedLost;
+  isScraped: boolean;
 }
 const LostDetail: NextPage = () => {
   const router = useRouter();
-  const { data, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
-  console.log(data);
+  const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  console.log(data?.isScraped);
+  const [toggleScrap] = usePost(`/api/users/me/scrap/${router.query.id}`);
+  const onScrapClick = () => {
+    if (!data) return;
+    mutate({ ...data, isScraped: !data.isScraped }, false);
+    toggleScrap({});
+  };
   function displayedAt(createdAt: string) {
     if (!createdAt) return;
     const now = new Date();
@@ -129,10 +140,10 @@ const LostDetail: NextPage = () => {
                     d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                   ></path>
                 </svg>
-                <span>1</span>
+                <span>{data?.lost._count.scraps || 0}</span>
               </div>
             </div>
-            <button className=" mt-1  flex space-x-1 items-center p-1 rounded  bg-slate-300">
+            <button onClick={onScrapClick} className=" mt-1  flex space-x-1 items-center p-1 rounded  bg-slate-300">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -147,7 +158,7 @@ const LostDetail: NextPage = () => {
                   d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                 ></path>
               </svg>
-              <span>스크랩</span>
+              {data ? <>{data?.isScraped ? <span>스크랩 취소</span> : <span>스크랩</span>}</> : <span>스크랩</span>}
             </button>
           </div>
         </div>

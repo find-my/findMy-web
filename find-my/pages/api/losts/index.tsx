@@ -17,6 +17,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
             name: true,
           },
         },
+        _count: {
+          select: {
+            scraps: true,
+          },
+        },
       },
     });
 
