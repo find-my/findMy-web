@@ -19,7 +19,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         },
       },
     });
-    console.log(lostList);
+
     if (!lostList)
       return res.json({
         ok: false,
