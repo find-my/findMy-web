@@ -14,6 +14,7 @@ export default function protectedHandler({ methods, isPrivate = true, handler }:
     if (req.method && !methods.includes(req.method as any)) {
       return res.status(405).end();
     }
+    console.log(req.session.user?.isLoggedIn, 'wtith');
     if (isPrivate && !req.session.user) {
       return res.status(401).json({ ok: false, message: '로그인이 필요합니다.' });
     }

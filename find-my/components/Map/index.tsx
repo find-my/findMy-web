@@ -19,7 +19,6 @@ function MapContainer() {
   const [map, setMap] = useState<kakao.maps.Map>();
   const [filter, setFilter] = useState<'lost' | 'found' | 'all'>('found');
   //const user = useFetchUser();
-  console.log('Home');
 
   const setMapType = (maptype: 'roadmap' | 'skyview') => {
     if (!map) return;
@@ -51,9 +50,6 @@ function MapContainer() {
 
   useEffect(() => {
     if (!location) return;
-
-    console.log(location);
-    console.log(error);
   }, [location]);
   //mt-10
   return (

@@ -10,7 +10,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     session: { user },
   } = req;
   if (req.method === 'GET') {
-    const lostList = await client.lost.findMany({});
+    const lostList = await client.lost.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    console.log(lostList);
     if (!lostList)
       return res.json({
         ok: false,

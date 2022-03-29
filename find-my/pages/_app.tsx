@@ -7,21 +7,24 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 config.autoAddCss = false;
 import type { AppProps } from 'next/app';
 import { SWRConfig } from 'swr';
+import { CookiesProvider } from 'react-cookie';
 //
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <SWRConfig
-      value={{
-        fetcher: (url: string) => fetch(url).then((response) => response.json()),
-      }}
-    >
-      <Script
-        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7c979a8b28e8fbc552afe34a35bebecd&libraries=services,clusterer&autoload=false"
-        strategy="beforeInteractive"
-      />
-      <Script></Script>
-      <Component {...pageProps} />
-    </SWRConfig>
+    <CookiesProvider>
+      <SWRConfig
+        value={{
+          fetcher: (url: string) => fetch(url).then((response) => response.json()),
+        }}
+      >
+        <Script
+          src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7c979a8b28e8fbc552afe34a35bebecd&libraries=services,clusterer&autoload=false"
+          strategy="beforeInteractive"
+        />
+        <Script></Script>
+        <Component {...pageProps} />
+      </SWRConfig>
+    </CookiesProvider>
   );
 }
 

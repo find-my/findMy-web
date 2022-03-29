@@ -6,10 +6,10 @@ import type { NextPage } from 'next';
 import Input from '@components/auth/Input';
 import Submit from '@components/auth/Submit';
 import AuthLayout from '@components/auth/authLayout';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import usePost from '@libs/front/hooks/usePost';
 import { useRouter } from 'next/router';
-
+import useSWR from 'swr';
 interface LoginForm {
   email: string;
   password: string;
@@ -17,6 +17,7 @@ interface LoginForm {
 }
 const Login: NextPage = () => {
   const router = useRouter();
+  //const { data, mutate: loginMutate } = useSWR<boolean>('isLoggedIn');
   const [login, { loading, data: loginResult, error }] = usePost('/api/users/login');
   const {
     register,
@@ -28,14 +29,16 @@ const Login: NextPage = () => {
   const onValid = (data: LoginForm) => {
     if (loading) return;
     login(data);
-    if (loginResult && loginResult.ok) {
-      router.push('/');
-    }
   };
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
   };
-
+  useEffect(() => {
+    if (loginResult && loginResult.ok) {
+      //loginMutate(true);
+      router.push('/');
+    }
+  }, [router, loginResult]);
   console.log(loading, loginResult, error);
   return (
     <AuthLayout authType="로그인">

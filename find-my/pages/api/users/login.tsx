@@ -28,12 +28,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
 
   req.session.user = {
     id: user.id,
+    isLoggedIn: true,
   };
   await req.session.save();
-  return res.json({
-    ok: true,
-    user,
-  });
+
+  return res.send({ ok: true });
 }
 
 export default withApiSession(protectedHandler({ methods: ['POST'], handler, isPrivate: false }));

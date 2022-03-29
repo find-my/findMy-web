@@ -26,7 +26,7 @@ const useWatchLocation = (option: Option) => {
   // Geolocation의 `watchPosition` 메소드에 대한 성공 callback 핸들러
   const handleSuccess = (pos: any) => {
     const { latitude, longitude } = pos.coords;
-    console.log('lalalala');
+
     setLocation({
       latitude,
       longitude,

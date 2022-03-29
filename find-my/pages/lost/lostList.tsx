@@ -1,16 +1,17 @@
 import type { NextPage } from 'next';
 import useSWR from 'swr';
-import useFetchUser from '@libs/front/hooks/useFetchUser';
-import { Lost } from '@prisma/client';
+import useUser from '@libs/front/hooks/useUser';
 import { useEffect } from 'react';
-interface LostListResponse {
+import { Lost, User } from '@prisma/client';
+interface LostWithUser extends Lost {
+  user: User;
+}
+interface LostDetailResponse {
   ok: boolean;
-  lostList?: Lost[];
-  message?: string;
+  lostList: LostWithUser[];
 }
 const LostList: NextPage = () => {
-  const { user, isLoading } = useFetchUser();
-  const { data } = useSWR<LostListResponse>('/api/losts');
+  const { data } = useSWR('/api/losts');
   function displayedAt(createdAt: string) {
     if (!createdAt) return;
     const now = new Date();
@@ -49,9 +50,14 @@ const LostList: NextPage = () => {
   }, [data]);
   return (
     <div className="flex flex-col space-y-5  py-10">
-      {data?.lostList?.map((lost, i) => {
-        const { title, lostPlace, createdAt, userId } = lost;
-        const ago = displayedAt(lost.createdAt.toString());
+      {data?.lostList?.map((lost: any, i: number) => {
+        const {
+          title,
+          lostPlace,
+          createdAt,
+          user: { name },
+        } = lost;
+        const ago = displayedAt(createdAt.toString());
         return (
           <div key={i} className="flex border-b pb-4 cursor-pointer justify-between items-end px-4">
             <div className="flex space-x-4">
@@ -64,7 +70,7 @@ const LostList: NextPage = () => {
                 </div>
                 <div className="flex items-end text-xs font-medium text-slate-500">
                   <span className="text-xs font-medium">{ago}</span> <span> ㅣ </span>{' '}
-                  <span className="text-xs font-medium">{lost.userId}</span>
+                  <span className="text-xs font-medium">{name}</span>
                 </div>
               </div>
             </div>

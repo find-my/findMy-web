@@ -1,22 +1,70 @@
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import useSWR from 'swr';
+import Link from 'next/link';
+import { Lost, User } from '@prisma/client';
+
+interface LostWithUser extends Lost {
+  user: User;
+}
+interface LostDetailResponse {
+  ok: boolean;
+  lost: LostWithUser;
+}
 const LostDetail: NextPage = () => {
+  const router = useRouter();
+  const { data, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  console.log(data);
+  function displayedAt(createdAt: string) {
+    if (!createdAt) return;
+    const now = new Date();
+    const year = now.getFullYear();
+
+    const createdArr = createdAt.split('-');
+    const createdY = createdArr[0];
+    const createdM = createdArr[1];
+    const createdD = createdArr[2].split('T')[0];
+    const createdH = createdArr[2].split('T')[1].split(':')[0];
+    const createdMin = createdArr[2].split('T')[1].split(':')[1];
+    //createdAt.getTime();
+    console.log(now, createdArr, createdY, createdM, createdD, createdH, createdMin);
+
+    const Y_SAME = year === +createdY;
+
+    if (Y_SAME) {
+      return `${createdM}/${createdD} ${createdH}:${createdMin}`;
+    }
+    return `${createdY}/${createdM}/${createdD} ${createdH}:${createdMin}`;
+  }
   return (
     <>
       <div className="w-full h-96 bg-slate-500" />
       <div className="p-4 pb-14">
         <div className="border-b pb-3">
-          <div className="cursor-pointer flex items-center space-x-2 border-b pb-4 border-slate-300">
-            <div className="w-12 h-12 rounded-full bg-green-500" />
+          <div className="flex items-center space-x-2 border-b pb-4 border-slate-300">
+            <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
+              <a>
+                {' '}
+                <div className="w-12 h-12 rounded-full bg-green-500" />
+              </a>
+            </Link>
             <div>
-              <p className="font-bold text-lg">오니</p>
+              <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
+                <a>
+                  <p className="font-bold text-lg">{data?.lost?.user?.name || null}</p>
+                </a>
+              </Link>
+              <span className="text-sm text-slate-500">
+                {' '}
+                {displayedAt(data?.lost?.createdAt?.toString() || '') || null}
+              </span>
             </div>
           </div>
           <div>
-            <h1 className="font-bold text-xl ">카드지갑 찾아요😢</h1>
+            <h1 className="font-bold text-xl ">{data?.lost?.title || null}</h1>
             <div className="text-sm text-slate-500">
-              <span>여성잡화</span>
-              <span>ㆍ</span>
-              <span>15분 전</span>
+              <span>카테고리 : </span>
+              <span>{data?.lost?.category || null}</span>
             </div>
             <div className="text-sm text-slate-500">
               <span>잃어 버린 곳 : </span>
@@ -24,10 +72,7 @@ const LostDetail: NextPage = () => {
               <span>/</span>
               <span>영통역</span>
             </div>
-            <p className="mt-7">
-              남색에 꽃 자수 되어있는 지갑입니다. 어제 영통역 앞에나 안에서 저녁에 잃어버린 것 같아요😢 혹시 발견하신 분
-              쪽지나 댓글 부탁드려요ㅠㅠㅠ 파출소에도 연락해 봤는데 없으시다네요😢
-            </p>
+            <p className="mt-7">{data?.lost?.description || null}</p>
             <div className="mt-3 flex space-x-2 text-slate-500 items-center">
               <div className="text-black flex items-center">
                 <svg

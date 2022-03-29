@@ -1,9 +1,31 @@
 // index.html
 import React, { useEffect, useMemo, useState } from 'react';
-import type { NextPage } from 'next';
+import type { NextPage, NextPageContext } from 'next';
 import Map from '@components/Map';
+import useSWRR, { SWRConfig } from 'swr';
+import { useRouter } from 'next/router';
+import useUser from '@libs/front/hooks/useUser';
+import { withSsrSession } from '@libs/back/session';
+import client from '@libs/back/client';
 
-const Home: NextPage = () => {
+export const getServerSideProps = withSsrSession(async function ({ req, res }: NextPageContext) {
+  const user = req?.session?.user;
+
+  if (!user) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { user },
+  };
+});
+const Home: NextPage = ({ user }: any) => {
+  console.log(JSON.parse(JSON.stringify(user)));
   return <Map />;
 };
 

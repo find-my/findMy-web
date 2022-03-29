@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import client from '@libs/back/client';
 import bcrypt from 'bcrypt';
 import protectedHandler, { ResponseType } from '@libs/back/protectedHandler';
+import { withApiSession } from '@libs/back/session';
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const { email, password, name, phone } = req.body;
 
@@ -36,4 +37,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   });
 }
 
-export default protectedHandler({ methods: ['POST'], handler, isPrivate: false });
+export default withApiSession(protectedHandler({ methods: ['POST'], handler, isPrivate: false }));

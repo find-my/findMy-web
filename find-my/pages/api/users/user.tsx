@@ -1,8 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import withHandler, { ResponseType } from '@libs/back/protectedHandler';
+import protectedHandler, { ResponseType } from '@libs/back/protectedHandler';
 import client from '@libs/back/client';
 import { withApiSession } from '@libs/back/session';
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
+  if (!req.session.user)
+    return res.json({
+      ok: false,
+      isLoggedIn: false,
+    });
   const userData = await client.user.findUnique({
     where: { id: req.session.user?.id },
   });
@@ -16,9 +21,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   });
 }
 
-export default withApiSession(
-  withHandler({
-    methods: ['GET'],
-    handler,
-  }),
-);
+export default withApiSession(protectedHandler({ methods: ['GET'], handler }));
