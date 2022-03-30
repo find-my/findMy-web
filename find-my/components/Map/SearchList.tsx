@@ -11,8 +11,7 @@ interface Props {
 }
 
 function SearchList({ categoryPlaceInfo }: Props) {
-  const { mutate } = useSWRConfig();
-  const { data: lostPlace } = useSWR(LOST_PLACE);
+  const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   console.log(lostPlace);
   return (
     <>
@@ -22,7 +21,7 @@ function SearchList({ categoryPlaceInfo }: Props) {
             const { place_name, road_address_name, category_group_name } = info;
             return (
               <div
-                onClick={() => mutate(LOST_PLACE, `${place_name}/${road_address_name}`)}
+                onClick={() => lostPlaceMutate(`${place_name}/${road_address_name}`)}
                 key={i}
                 className="flex border-b pb-4 cursor-pointer justify-between items-end px-4"
               >

@@ -3,12 +3,13 @@ import SearchInput from '@components/SearchInput';
 import useSWR from 'swr';
 import GetLostResult from '@components/GetLostResult';
 import { Lost, User } from '@prisma/client';
-interface LostWithUser extends Lost {
+interface ExtenedLost extends Lost {
   user: User;
+  _count: { scraps: number };
 }
 interface LostDetailResponse {
   ok: boolean;
-  lostList: LostWithUser[];
+  lostList: ExtenedLost[];
 }
 const LostList: NextPage = () => {
   const { data, error } = useSWR<LostDetailResponse>('/api/losts');

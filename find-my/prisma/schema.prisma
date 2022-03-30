@@ -23,7 +23,8 @@ model User {
   updatedAt DateTime @updatedAt
   tokens Token[]
   losts Lost[]
-  comments Comment[]
+  Comments Comment[]
+  reComments ReComment[]
   scrap Scrap[]
 }
 
@@ -50,20 +51,14 @@ model Lost{
   lostPlace String
   description String  @db.MediumText
   comments Comment[]
+  reComments ReComment[]
   category String
   views Int
   scraps Scrap[]
-  hashtags  Hashtag[]
+ 
 }
 
-//Found 추가 예정  
-model Hashtag {
-  id        Int      @id @default(autoincrement())
-  hashtag   String   @unique
-  Lost    Lost[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+
 model Scrap {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id],onDelete: Cascade)
@@ -89,8 +84,22 @@ model Comment {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
-  lost      Lost      @relation(fields: [lostId], references: [id])
+  lost      Lost      @relation(fields: [lostId], references: [id],onDelete: Cascade)
   lostId    Int
+  content String    @db.MediumText
+  reComment ReComment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReComment{
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  lost      Lost     @relation(fields: [lostId], references: [id],onDelete: Cascade)
+  lostId    Int
+  comment    Comment     @relation(fields: [commentId], references: [id])
+  commentId    Int
   content String    @db.MediumText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

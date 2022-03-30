@@ -11,7 +11,7 @@ import { Lost } from '@prisma/client';
 interface LostForm {
   images?: string[];
   title: string;
-  category?: string;
+  category: string;
   description: string;
 }
 interface UploadLostState {
@@ -40,8 +40,7 @@ const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
   const [uploadLost, { loading, data: uploadResult, error }] = usePost<UploadLostState>('/api/losts');
   const router = useRouter();
-  const { data: lostPlace } = useSWR(LOST_PLACE);
-  const { mutate } = useSWRConfig();
+  const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false);
   const {
     register,
@@ -54,11 +53,7 @@ const Upload: NextPage = () => {
     console.log(data, loading);
     if (loading) return;
     if (!lostPlace || !lostPlace.trim()) return;
-    console.log('갈거임');
     uploadLost({ ...data, lostPlace });
-    console.log('갔다옴');
-    if (uploadResult && uploadResult?.ok) {
-    }
   };
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
@@ -67,8 +62,12 @@ const Upload: NextPage = () => {
     setIsPlaceFinderOpen(true);
   };
   useEffect(() => {
+    lostPlaceMutate('');
+  }, []);
+  useEffect(() => {
     if (uploadResult?.ok) {
       console.log('업로드 완료');
+      lostPlaceMutate('');
       router.push(`/lost/${uploadResult.lost?.id}`);
     }
   }, [uploadResult, router]);
@@ -76,7 +75,7 @@ const Upload: NextPage = () => {
     <>
       {!isPlaceFinderOpen ? (
         <div>
-          <form onSubmit={handleSubmit(onValid, onInvalid)} className="px-4 py-16">
+          <form onSubmit={handleSubmit(onValid)} className="px-4 py-16">
             <div>
               <div className="flex space-x-4 border-b pb-4">
                 <div className="flex flex-col items-center justify-center border border-slate-400 rounded w-20 h-20">
@@ -159,9 +158,9 @@ const Upload: NextPage = () => {
                 <span>잃어 버린 곳</span>
                 <span className="text-blue-400">{lostPlace}</span>
               </div>
-              <button
+              <div
                 onClick={placeFinderOpen}
-                className="flex items-center bg-blue-400 text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-1 "
+                className="w-1/2 cursor-pointer flex items-center bg-blue-400 text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-1 "
               >
                 <svg
                   className="w-6 h-6"
@@ -184,11 +183,11 @@ const Upload: NextPage = () => {
                   ></path>
                 </svg>
                 <span onClick={placeFinderOpen}>지도에 위치 표시하기</span>
-              </button>
+              </div>
 
-              <button
-                onClick={() => mutate(LOST_PLACE, LOSTPLACE_NULL)}
-                className="flex items-center bg-blue-400 text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-1 "
+              <div
+                onClick={() => lostPlaceMutate(LOSTPLACE_NULL)}
+                className="w-1/2 cursor-pointer flex items-center bg-blue-400 text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-1 "
               >
                 <svg
                   className="w-6 h-6"
@@ -205,7 +204,7 @@ const Upload: NextPage = () => {
                   ></path>
                 </svg>
                 <span>모르겠음</span>
-              </button>
+              </div>
             </div>
             <div className="mt-3">
               <label htmlFor="description">설명</label>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Lost, User } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import usePost from '@libs/front/hooks/usePost';
+import MessageInput from '@components/MessageInput';
 interface ExtendedLost extends Lost {
   user: User;
   _count: {
@@ -23,7 +24,18 @@ const LostDetail: NextPage = () => {
   const [toggleScrap] = usePost(`/api/users/me/scrap/${router.query.id}`);
   const onScrapClick = () => {
     if (!data) return;
-    mutate({ ...data, isScraped: !data.isScraped }, false);
+    mutate(
+      {
+        ...data,
+        lost: {
+          ...data.lost,
+          _count: { scraps: data.isScraped ? data.lost?._count?.scraps - 1 : data?.lost?._count?.scraps + 1 },
+        },
+        isScraped: !data.isScraped,
+      },
+      false,
+    );
+
     toggleScrap({});
   };
   function displayedAt(createdAt: string) {
@@ -52,25 +64,31 @@ const LostDetail: NextPage = () => {
       <div className="w-full h-96 bg-slate-500" />
       <div className="p-4 pb-14">
         <div className="border-b pb-3">
-          <div className="flex items-center space-x-2 border-b pb-4 border-slate-300">
-            <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
-              <a>
-                {' '}
-                <div className="w-12 h-12 rounded-full bg-green-500" />
-              </a>
-            </Link>
-            <div>
+          <div className="flex justify-between items-center space-x-2 border-b pb-3 border-slate-300">
+            <div className="flex items-center space-x-2">
               <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
                 <a>
-                  <p className="font-bold text-lg">{data?.lost?.user?.name || null}</p>
+                  {' '}
+                  <div className="w-12 h-12 rounded-full bg-green-500" />
                 </a>
               </Link>
-              <span className="text-sm text-slate-500">
-                {' '}
-                {displayedAt(data?.lost?.createdAt?.toString() || '') || null}
-              </span>
+              <div>
+                <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
+                  <a>
+                    <p className="font-bold text-lg">{data?.lost?.user?.name || null}</p>
+                  </a>
+                </Link>
+                <span className="text-sm text-slate-500">
+                  {' '}
+                  {displayedAt(data?.lost?.createdAt?.toString() || '') || null}
+                </span>
+              </div>
             </div>
+            <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
+              작성자에게 채팅 보내기
+            </button>
           </div>
+
           <div>
             <h1 className="font-bold text-xl ">{data?.lost?.title || null}</h1>
             <div className="text-sm text-slate-500">
@@ -79,9 +97,7 @@ const LostDetail: NextPage = () => {
             </div>
             <div className="text-sm text-slate-500">
               <span>잃어 버린 곳 : </span>
-              <span>영통구 영통동</span>
-              <span>/</span>
-              <span>영통역</span>
+              <span>{data?.lost?.lostPlace || null}</span>
             </div>
             <p className="mt-7">{data?.lost?.description || null}</p>
             <div className="mt-3 flex space-x-2 text-slate-500 items-center">
@@ -140,9 +156,10 @@ const LostDetail: NextPage = () => {
                     d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                   ></path>
                 </svg>
-                <span>{data?.lost._count.scraps || 0}</span>
+                <span>{data?.lost?._count?.scraps || 0}</span>
               </div>
             </div>
+
             <button onClick={onScrapClick} className=" mt-1  flex space-x-1 items-center p-1 rounded  bg-slate-300">
               <svg
                 className="w-5 h-5"
@@ -162,6 +179,7 @@ const LostDetail: NextPage = () => {
             </button>
           </div>
         </div>
+
         <div>
           <div>
             {[1, 2].map((_, i) => (
@@ -200,11 +218,7 @@ const LostDetail: NextPage = () => {
             ))}
           </div>
         </div>
-        <div className="fixed left-0 bottom-0 z-10 bg-white w-full h-12 shadow grid place-items-center">
-          <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-3 rounded-xl text-white">
-            작성자에게 채팅 보내기
-          </button>
-        </div>
+        <MessageInput placeholder="댓글을 입력해 주세요." />
       </div>
     </>
   );

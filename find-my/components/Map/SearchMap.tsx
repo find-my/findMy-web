@@ -24,7 +24,7 @@ interface Imarker {
 
 function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>();
-  const { mutate } = useSWRConfig();
+  const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>();
 
   const zoomIn = () => {
@@ -55,7 +55,7 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props)
         // 마커를 클릭한 위치에 표시합니다
         pointMarker.setPosition(mouseEvent.latLng);
         pointMarker.setMap(map);
-        mutate(LOST_PLACE, result[0].address.address_name);
+        lostPlaceMutate(result[0].address.address_name);
         // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
         //infowindow.setContent(content);
         //infowindow.open(map, marker);
@@ -99,7 +99,7 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props)
                 key={`marker-${marker.place_name}-${marker.position.lat},${marker.position.lng}`}
                 position={marker.position}
                 onClick={() => {
-                  mutate(LOST_PLACE, `${marker.place_name}/${marker.road_address_name}`);
+                  lostPlaceMutate(`${marker.place_name}/${marker.road_address_name}`);
                 }}
               ></MapMarker>
             ))}

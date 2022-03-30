@@ -59,7 +59,7 @@ export default function placeFinder({ setOpenFalse }: Props) {
   const [displayByMap, setDisplayByMap] = useState<boolean>(true);
   const [categoryPlaceInfoByMap, setCategoryPlaceInfoByMap] = useState<IcategoryPlaceInfoByMap>();
   const [categoryPlaceInfoByList, setCategoryPlaceInfoByList] = useState<IcategoryPlaceInfoByList[]>();
-  const { data: lostPlace } = useSWR(LOST_PLACE);
+  const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const router = useRouter();
   const placeSearchOnSwitch = () => {
     if (placeSearchOn) return;
