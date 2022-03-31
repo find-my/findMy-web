@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import useUser from '@libs/front/hooks/useUser';
 import usePost from '@libs/front/hooks/usePost';
 import MessageInput from '@components/MessageInput';
+import CommentItem from './CommentItem';
 interface ExtendedComment extends Comment {
   user: User;
 }
@@ -99,36 +100,7 @@ function Comments() {
       <div>
         {data?.lost?.comments?.map((comment: any, i: number) => (
           <div key={comment.id} className="border-b p-2">
-            <div className="text-sm flex justify-between">
-              <div className="cursor-pointer flex items-center space-x-1">
-                <div className="w-5 h-5 bg-purple-500 rounded-full" />
-                <span>{comment?.user?.name || null}</span>
-              </div>
-              <div>
-                <button onClick={() => setIsMenuClicked(true)}>
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                    ></path>
-                  </svg>
-                  {isMenuClicked ? <div>modal</div> : null}
-                </button>
-              </div>
-            </div>
-            <p className="mt-1">{comment.content}</p>
-            <div className="flex space-x-1 text-xs text-slate-500">
-              <span>3/15</span>
-              <span>20:54</span>
-            </div>
+            <CommentItem comment={comment} />
           </div>
         ))}
       </div>
