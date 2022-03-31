@@ -1,27 +1,70 @@
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import useSWR from 'swr';
+import useSWR, { SWRConfig } from 'swr';
 import Link from 'next/link';
-import { Lost, User } from '@prisma/client';
+import { Lost, User, Comment } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import usePost from '@libs/front/hooks/usePost';
 import MessageInput from '@components/MessageInput';
+import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import Comments from '@components/Comments';
+import useUser from '@libs/front/hooks/useUser';
+import { userInfo } from 'os';
+interface ExtendedComment extends Comment {
+  user: User;
+}
 interface ExtendedLost extends Lost {
   user: User;
   _count: {
     scraps: number;
+    comments: number;
   };
+  comments: ExtendedComment[];
 }
 interface LostDetailResponse {
   ok: boolean;
   lost: ExtendedLost;
   isScraped: boolean;
 }
+interface CommentForm {
+  comment: string;
+}
+function displayedAt(createdAt: string) {
+  if (!createdAt) return;
+  const now = new Date();
+  const year = now.getFullYear();
+
+  const createdArr = createdAt.split('-');
+  const createdY = createdArr[0];
+  const createdM = createdArr[1];
+  const createdD = createdArr[2].split('T')[0];
+  const createdH = createdArr[2].split('T')[1].split(':')[0];
+  const createdMin = createdArr[2].split('T')[1].split(':')[1];
+  //createdAt.getTime();
+  console.log(now, createdArr, createdY, createdM, createdD, createdH, createdMin);
+
+  const Y_SAME = year === +createdY;
+
+  if (Y_SAME) {
+    return `${createdM}/${createdD} ${createdH}:${createdMin}`;
+  }
+  return `${createdY}/${createdM}/${createdD} ${createdH}:${createdMin}`;
+}
 const LostDetail: NextPage = () => {
   const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<CommentForm>();
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
-  console.log(data?.isScraped);
+  const [createComment, { loading, data: createCommentResult }] = usePost(`/api/losts/${router.query.id}/comments`);
+  const { mutate: commentMutate } = useSWR(`/api/losts/${router.query.id}/comments`);
   const [toggleScrap] = usePost(`/api/users/me/scrap/${router.query.id}`);
+  const { user, isLoading: userLoading } = useUser();
   const onScrapClick = () => {
     if (!data) return;
     mutate(
@@ -29,7 +72,10 @@ const LostDetail: NextPage = () => {
         ...data,
         lost: {
           ...data.lost,
-          _count: { scraps: data.isScraped ? data.lost?._count?.scraps - 1 : data?.lost?._count?.scraps + 1 },
+          _count: {
+            ...data.lost._count,
+            scraps: data.isScraped ? data.lost?._count?.scraps - 1 : data?.lost?._count?.scraps + 1,
+          },
         },
         isScraped: !data.isScraped,
       },
@@ -38,27 +84,41 @@ const LostDetail: NextPage = () => {
 
     toggleScrap({});
   };
-  function displayedAt(createdAt: string) {
-    if (!createdAt) return;
-    const now = new Date();
-    const year = now.getFullYear();
+  const onValid = (comment: CommentForm) => {
+    if (loading) return;
 
-    const createdArr = createdAt.split('-');
-    const createdY = createdArr[0];
-    const createdM = createdArr[1];
-    const createdD = createdArr[2].split('T')[0];
-    const createdH = createdArr[2].split('T')[1].split(':')[0];
-    const createdMin = createdArr[2].split('T')[1].split(':')[1];
-    //createdAt.getTime();
-    console.log(now, createdArr, createdY, createdM, createdD, createdH, createdMin);
+    createComment(comment);
+  };
+  useEffect(() => {
+    if (createCommentResult && createCommentResult.ok) {
+      if (!data) return;
+      console.log(createCommentResult?.comment);
 
-    const Y_SAME = year === +createdY;
-
-    if (Y_SAME) {
-      return `${createdM}/${createdD} ${createdH}:${createdMin}`;
+      mutate(
+        {
+          ...data,
+          lost: {
+            ...data.lost,
+            _count: {
+              ...data.lost._count,
+              comments: data.lost._count.comments + 1,
+            },
+            //임시적으로 로그인된 user의 name과 avatar url ,id을 넣어줌
+            comments: [
+              ...data.lost.comments,
+              {
+                ...createCommentResult.comment,
+                reComment: [],
+                user: { avatar: user.avatar, id: user.id, name: user.name },
+              },
+            ],
+          },
+        },
+        false,
+      );
+      console.log(data.lost.comments);
     }
-    return `${createdY}/${createdM}/${createdD} ${createdH}:${createdMin}`;
-  }
+  }, [createCommentResult]);
   return (
     <>
       <div className="w-full h-96 bg-slate-500" />
@@ -139,7 +199,7 @@ const LostDetail: NextPage = () => {
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   ></path>
                 </svg>
-                <span>2</span>
+                <span>{data?.lost?._count?.comments || 0}</span>
               </div>
               <div className="text-yellow-400 flex items-center">
                 <svg
@@ -180,45 +240,10 @@ const LostDetail: NextPage = () => {
           </div>
         </div>
 
-        <div>
-          <div>
-            {[1, 2].map((_, i) => (
-              <div key={i} className="border-b p-2">
-                <div className="text-sm flex justify-between">
-                  <div className="cursor-pointer flex items-center space-x-1">
-                    <div className="w-5 h-5 bg-purple-500 rounded-full" />
-                    <span>살찐감자</span>
-                  </div>
-                  <div>
-                    <button className="flex items-center space-x-1 text-slate-500 text-xs">
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-                        ></path>
-                      </svg>
-                      <span>대댓글 달기</span>
-                    </button>
-                  </div>
-                </div>
-                <p className="mt-1">예쁜 지갑이네요 얼른 찾으시길 ㅠㅠ</p>
-                <div className="flex space-x-1 text-xs text-slate-500">
-                  <span>3/15</span>
-                  <span>20:54</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <MessageInput placeholder="댓글을 입력해 주세요." />
+        <Comments comments={data?.lost?.comments} />
+        <form onSubmit={handleSubmit(onValid)}>
+          <MessageInput register={register('comment', { required: true })} placeholder="댓글을 입력해 주세요." />
+        </form>
       </div>
     </>
   );
