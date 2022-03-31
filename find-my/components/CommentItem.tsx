@@ -5,8 +5,8 @@ import { useRouter } from 'next/router';
 import useSWR, { SWRConfig } from 'swr';
 import usePost from '@libs/front/hooks/usePost';
 import useUser from '@libs/front/hooks/useUser';
-import MessageInput from '@components/MessageInput';
 import { useForm } from 'react-hook-form';
+import TextareaAutosize from 'react-textarea-autosize';
 interface ExtendedComment extends Comment {
   user: User;
 }
@@ -40,13 +40,16 @@ function CommentItem({ comment }: Props) {
     watch,
     reset,
   } = useForm<CommentForm>();
-  const [remove, { data: removeResult, loading }] = usePost(
+  const [remove, { data: removeResult, loading: removeLoading }] = usePost(
     `/api/losts/${router.query.id}/comments/delete/${comment.id}`,
+  );
+  const [update, { data: updateResult, loading: updateLoading }] = usePost(
+    `/api/losts/${router.query.id}/comments/update/${comment.id}`,
   );
   console.log(comment?.user.id, +user?.id);
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
   const onDelete = () => {
-    if (loading) return;
+    if (removeLoading) return;
     if (+comment?.user?.id === +user?.id) {
       remove({});
     }
@@ -55,7 +58,8 @@ function CommentItem({ comment }: Props) {
     setEditMode(true);
   };
   const onValid = (comment: CommentForm) => {
-    //reset();
+    if (updateLoading) return;
+    update(comment);
   };
   useEffect(() => {
     if (removeResult && removeResult.ok) {
@@ -77,6 +81,29 @@ function CommentItem({ comment }: Props) {
       );
     }
   }, [removeResult]);
+  useEffect(() => {
+    console.log(updateResult && updateResult.ok);
+    if (updateResult && updateResult.ok) {
+      if (!data) return;
+      mutate(
+        {
+          ...data,
+          lost: {
+            ...data.lost,
+            comments: data.lost.comments.map((c) => {
+              if (c.id !== comment.id) return { ...c };
+              else {
+                return { ...c, content: updateResult.comment };
+              }
+            }),
+          },
+        },
+        false,
+      );
+      reset();
+      setEditMode(false);
+    }
+  }, [updateResult]);
   return (
     <>
       <div className="text-sm flex justify-between">
@@ -117,10 +144,27 @@ function CommentItem({ comment }: Props) {
           </div>
         </div>
       </div>
+
       <p className="mt-1">
         {editMode ? (
-          <form onSubmit={handleSubmit(onValid)}>
-            <MessageInput register={register('comment', { required: true })} placeholder="댓글을 입력해 주세요." />
+          <form onSubmit={handleSubmit(onValid)} className="flex items-end">
+            <TextareaAutosize
+              {...register('comment', { required: true })}
+              placeholder="댓글 입력"
+              className="rounded  w-3/4 mx-4 "
+            />
+            <label>
+              <input type="submit" className="hidden" />
+
+              <svg
+                className="w-6 h-6 text-gray-400 hover:text-blue-400 cursor-pointer rotate-90"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+              </svg>
+            </label>
           </form>
         ) : (
           comment.content
