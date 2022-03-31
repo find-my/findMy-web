@@ -92,7 +92,6 @@ function Comments() {
         },
         false,
       );
-      console.log(data.lost.comments);
     }
   }, [createCommentResult]);
   return (
