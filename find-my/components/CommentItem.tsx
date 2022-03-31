@@ -23,12 +23,6 @@ interface Props {
   comment: ExtendedComment;
 }
 function CommentItem({ comment }: Props) {
-  const [isMenuOpened, setIsMenuOpened] = useState<boolean>(false);
-
-  const onToggleModal = useCallback(() => {
-    setIsMenuOpened((prev) => !prev);
-  }, []);
-
   return (
     <>
       <div className="text-sm flex justify-between">
@@ -37,7 +31,7 @@ function CommentItem({ comment }: Props) {
           <span>{comment?.user?.name || null}</span>
         </div>
         <div className="relative">
-          <button onClick={() => setIsMenuOpened(true)}>
+          <button>
             <svg
               className="w-6 h-6"
               fill="none"
@@ -53,13 +47,12 @@ function CommentItem({ comment }: Props) {
               ></path>
             </svg>
           </button>
-          {isMenuOpened ? (
-            <Modal onToggleModal={onToggleModal} show={isMenuOpened}>
-              <button className="p-1">대댓글 달기</button>
-              <button className="p-1">수정</button>
-              <button className="p-1">삭제</button>
-            </Modal>
-          ) : null}
+
+          <div className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap opacity-0 hover:opacity-100">
+            <button className="p-1">대댓글 달기</button>
+            <button className="p-1">수정</button>
+            <button className="p-1">삭제</button>
+          </div>
         </div>
       </div>
       <p className="mt-1">{comment.content}</p>
