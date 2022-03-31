@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useSWR, { SWRConfig } from 'swr';
 import { Lost, User, Comment } from '@prisma/client';
+import { useForm } from 'react-hook-form';
+import useUser from '@libs/front/hooks/useUser';
+import usePost from '@libs/front/hooks/usePost';
+import MessageInput from '@components/MessageInput';
 interface ExtendedComment extends Comment {
   user: User;
 }
@@ -18,14 +22,82 @@ interface LostDetailResponse {
   lost: ExtendedLost;
   isScraped: boolean;
 }
-interface Props {
-  comments: any;
+interface CommentForm {
+  comment: string;
 }
-function Comments({ comments }: Props) {
+function displayedAt(createdAt: string) {
+  if (!createdAt) return;
+  const now = new Date();
+  const year = now.getFullYear();
+
+  const createdArr = createdAt.split('-');
+  const createdY = createdArr[0];
+  const createdM = createdArr[1];
+  const createdD = createdArr[2].split('T')[0];
+  const createdH = createdArr[2].split('T')[1].split(':')[0];
+  const createdMin = createdArr[2].split('T')[1].split(':')[1];
+  //createdAt.getTime();
+  console.log(now, createdArr, createdY, createdM, createdD, createdH, createdMin);
+
+  const Y_SAME = year === +createdY;
+
+  if (Y_SAME) {
+    return `${createdM}/${createdD} ${createdH}:${createdMin}`;
+  }
+  return `${createdY}/${createdM}/${createdD} ${createdH}:${createdMin}`;
+}
+function Comments() {
+  const router = useRouter();
+  const [isMenuClicked, setIsMenuClicked] = useState<boolean>(false);
+  const [createComment, { loading, data: createCommentResult }] = usePost(`/api/losts/${router.query.id}/comments`);
+  const { mutate: commentMutate } = useSWR(`/api/losts/${router.query.id}/comments`);
+  const { user, isLoading: userLoading } = useUser();
+  const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<CommentForm>();
+  const onValid = (comment: CommentForm) => {
+    if (loading) return;
+    reset();
+    createComment(comment);
+  };
+
+  useEffect(() => {
+    if (createCommentResult && createCommentResult.ok) {
+      if (!data) return;
+      mutate(
+        {
+          ...data,
+          lost: {
+            ...data.lost,
+            _count: {
+              ...data.lost._count,
+              comments: data.lost._count.comments + 1,
+            },
+            //임시적으로 로그인된 user의 name과 avatar url ,id을 넣어줌
+            comments: [
+              ...data.lost.comments,
+              {
+                ...createCommentResult.comment,
+                reComment: [],
+                user: { avatar: user.avatar, id: user.id, name: user.name },
+              },
+            ],
+          },
+        },
+        false,
+      );
+      console.log(data.lost.comments);
+    }
+  }, [createCommentResult]);
   return (
     <div>
       <div>
-        {comments?.map((comment: any, i: number) => (
+        {data?.lost?.comments?.map((comment: any, i: number) => (
           <div key={comment.id} className="border-b p-2">
             <div className="text-sm flex justify-between">
               <div className="cursor-pointer flex items-center space-x-1">
@@ -33,7 +105,7 @@ function Comments({ comments }: Props) {
                 <span>{comment?.user?.name || null}</span>
               </div>
               <div>
-                <button className="flex items-center space-x-1 text-slate-500 text-xs">
+                <button onClick={() => setIsMenuClicked(true)}>
                   <svg
                     className="w-6 h-6"
                     fill="none"
@@ -45,10 +117,10 @@ function Comments({ comments }: Props) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                     ></path>
                   </svg>
-                  <span>대댓글 달기</span>
+                  {isMenuClicked ? <div>modal</div> : null}
                 </button>
               </div>
             </div>
@@ -60,6 +132,9 @@ function Comments({ comments }: Props) {
           </div>
         ))}
       </div>
+      <form onSubmit={handleSubmit(onValid)}>
+        <MessageInput register={register('comment', { required: true })} placeholder="댓글을 입력해 주세요." />
+      </form>
     </div>
   );
 }

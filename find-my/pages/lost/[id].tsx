@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Lost, User, Comment } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import usePost from '@libs/front/hooks/usePost';
-import MessageInput from '@components/MessageInput';
 import { useForm } from 'react-hook-form';
 import React, { useEffect } from 'react';
 import Comments from '@components/Comments';
@@ -53,18 +52,11 @@ function displayedAt(createdAt: string) {
 }
 const LostDetail: NextPage = () => {
   const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-  } = useForm<CommentForm>();
+
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
-  const [createComment, { loading, data: createCommentResult }] = usePost(`/api/losts/${router.query.id}/comments`);
-  const { mutate: commentMutate } = useSWR(`/api/losts/${router.query.id}/comments`);
+
   const [toggleScrap] = usePost(`/api/users/me/scrap/${router.query.id}`);
-  const { user, isLoading: userLoading } = useUser();
+
   const onScrapClick = () => {
     if (!data) return;
     mutate(
@@ -84,42 +76,7 @@ const LostDetail: NextPage = () => {
 
     toggleScrap({});
   };
-  const onValid = (comment: CommentForm) => {
-    if (loading) return;
-    reset();
-    createComment(comment);
-  };
 
-  useEffect(() => {
-    if (createCommentResult && createCommentResult.ok) {
-      if (!data) return;
-      console.log(createCommentResult?.comment);
-
-      mutate(
-        {
-          ...data,
-          lost: {
-            ...data.lost,
-            _count: {
-              ...data.lost._count,
-              comments: data.lost._count.comments + 1,
-            },
-            //임시적으로 로그인된 user의 name과 avatar url ,id을 넣어줌
-            comments: [
-              ...data.lost.comments,
-              {
-                ...createCommentResult.comment,
-                reComment: [],
-                user: { avatar: user.avatar, id: user.id, name: user.name },
-              },
-            ],
-          },
-        },
-        false,
-      );
-      console.log(data.lost.comments);
-    }
-  }, [createCommentResult]);
   return (
     <>
       <div className="w-full h-96 bg-slate-500" />
@@ -241,10 +198,7 @@ const LostDetail: NextPage = () => {
           </div>
         </div>
 
-        <Comments comments={data?.lost?.comments} />
-        <form onSubmit={handleSubmit(onValid)}>
-          <MessageInput register={register('comment', { required: true })} placeholder="댓글을 입력해 주세요." />
-        </form>
+        <Comments />
       </div>
     </>
   );
