@@ -1,5 +1,6 @@
 //any 고치기
-import { useState, useEffect, useRef } from 'react';
+import { watch } from 'fs/promises';
+import { useState, useEffect } from 'react';
 
 interface Option {
   enableHighAccuracy: boolean;
@@ -13,20 +14,18 @@ enableHighAccuracy: true,
   maximumAge: 1000 * 3600 * 24, // 24 hour
 */
 interface Location {
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
 }
 const useWatchLocation = (option: Option) => {
   // 내 위치 정보 저장
-  const [location, setLocation] = useState<Location>();
+  const [location, setLocation] = useState<Location>({ latitude: null, longitude: null });
   // 에러 메세지 저장
   const [error, setError] = useState<string>();
   // watch 인스턴스를 취소할 수 있도록 Geolocation의 `watchPosition`에서 반환된 ID를 저장합니다.
 
   // Geolocation의 `watchPosition` 메소드에 대한 성공 callback 핸들러
-  const handleSuccess = (pos: any) => {
-    const { latitude, longitude } = pos.coords;
-
+  const handleSuccess = ({ coords: { latitude, longitude } }: GeolocationPosition) => {
     setLocation({
       latitude,
       longitude,
@@ -34,9 +33,9 @@ const useWatchLocation = (option: Option) => {
   };
 
   // Geolocation의 `watchPosition` 메소드에 대한 실패 callback 핸들러
-  const handleError = (error: any) => {
-    console.log(error.message);
-    setError(error.message);
+  const handleError = (error: GeolocationPositionError) => {
+    console.log(error);
+    setError(error.toString());
   };
   //
   // 저장된 `watchPosition` ID를 기반으로 감시 인스턴스를 지웁니다.
