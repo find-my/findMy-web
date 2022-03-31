@@ -7,7 +7,7 @@ import { classNames } from '@libs/front/utils';
 import usePost from '@libs/front/hooks/usePost';
 import MessageInput from '@components/MessageInput';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Comments from '@components/Comments';
 import useUser from '@libs/front/hooks/useUser';
 import { userInfo } from 'os';
@@ -86,9 +86,10 @@ const LostDetail: NextPage = () => {
   };
   const onValid = (comment: CommentForm) => {
     if (loading) return;
-
+    reset();
     createComment(comment);
   };
+
   useEffect(() => {
     if (createCommentResult && createCommentResult.ok) {
       if (!data) return;
