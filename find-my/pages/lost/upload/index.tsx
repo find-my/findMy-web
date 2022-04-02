@@ -6,7 +6,7 @@ import { LOST_PLACE } from '@libs/front/swrKey';
 import useSWR, { useSWRConfig } from 'swr';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
-import usePost from '@libs/front/hooks/usePost';
+import useMutation from '@libs/front/hooks/useMutation';
 import { Lost } from '@prisma/client';
 interface LostForm {
   images?: string[];
@@ -38,7 +38,7 @@ const CATEGORY = [
 ];
 const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
-  const [uploadLost, { loading, data: uploadResult, error }] = usePost<UploadLostState>('/api/losts');
+  const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST');
   const router = useRouter();
   const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false);

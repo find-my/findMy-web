@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-type method = 'GET' | 'POST' | 'DELETE';
+type method = 'GET' | 'POST' | 'DELETE' | 'PUT';
 export interface ResponseType {
   ok: boolean;
   [key: string]: any;

@@ -2,33 +2,15 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import useSWR, { SWRConfig } from 'swr';
 import Link from 'next/link';
-import { Lost, User, Comment } from '@prisma/client';
+import { Lost, User, Comment, ReComment } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
-import usePost from '@libs/front/hooks/usePost';
+import useMutation from '@libs/front/hooks/useMutation';
 import { useForm } from 'react-hook-form';
 import React, { useEffect } from 'react';
 import Comments from '@components/Comments';
 import useUser from '@libs/front/hooks/useUser';
-import { userInfo } from 'os';
-interface ExtendedComment extends Comment {
-  user: User;
-}
-interface ExtendedLost extends Lost {
-  user: User;
-  _count: {
-    scraps: number;
-    comments: number;
-  };
-  comments: ExtendedComment[];
-}
-interface LostDetailResponse {
-  ok: boolean;
-  lost: ExtendedLost;
-  isScraped: boolean;
-}
-interface CommentForm {
-  comment: string;
-}
+import { LostDetailResponse, ExtendedComment } from '../../typeDefs/lost';
+
 function displayedAt(createdAt: string) {
   if (!createdAt) return;
   const now = new Date();
@@ -55,8 +37,13 @@ const LostDetail: NextPage = () => {
 
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
 
-  const [toggleScrap] = usePost(`/api/users/me/scrap/${router.query.id}`);
-
+  const [toggleScrap] = useMutation(`/api/users/me/scrap/${router.query.id}`, 'POST');
+  const sumReCommentsCount = (comments: ExtendedComment[] | undefined) => {
+    if (!comments) return 0;
+    let sum = 0;
+    data?.lost?.comments?.forEach((comment) => (sum += comment._count.reComments));
+    return sum;
+  };
   const onScrapClick = () => {
     if (!data) return;
     mutate(

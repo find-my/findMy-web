@@ -8,13 +8,13 @@ config.autoAddCss = false;
 import type { AppProps } from 'next/app';
 import { SWRConfig } from 'swr';
 import { CookiesProvider } from 'react-cookie';
-//
+import axios from 'axios';
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <CookiesProvider>
       <SWRConfig
         value={{
-          fetcher: (url: string) => fetch(url).then((response) => response.json()),
+          fetcher: (url: string) => axios.get(url).then((response) => response.data),
         }}
       >
         <Script

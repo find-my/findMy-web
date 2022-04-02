@@ -31,7 +31,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
           comments: {
             select: {
               id: true,
-              reComment: true,
+              createdAt: true,
+              updatedAt: true,
               user: {
                 select: {
                   id: true,
@@ -40,6 +41,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
                 },
               },
               content: true,
+              reComments: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      avatar: true,
+                    },
+                  },
+                },
+              },
+              _count: {
+                select: {
+                  reComments: true,
+                },
+              },
             },
           },
         },
@@ -55,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
           },
         }),
       );
-
+      console.log(lost?.comments[0]?.reComments);
       return res.json({ ok: true, lost, isScraped });
     } catch (error) {
       return res.json({ ok: false, message: '예상치 못한 오류가 발생했습니다.' });

@@ -51,7 +51,6 @@ model Lost{
   lostPlace String
   description String  @db.MediumText
   comments Comment[]
-  reComments ReComment[]
   category String
   views Int
   scraps Scrap[]
@@ -87,7 +86,7 @@ model Comment {
   lost      Lost      @relation(fields: [lostId], references: [id],onDelete: Cascade)
   lostId    Int
   content String    @db.MediumText
-  reComment ReComment[]
+  reComments ReComment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -96,8 +95,6 @@ model ReComment{
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
-  lost      Lost     @relation(fields: [lostId], references: [id],onDelete: Cascade)
-  lostId    Int
   comment    Comment     @relation(fields: [commentId], references: [id])
   commentId    Int
   content String    @db.MediumText

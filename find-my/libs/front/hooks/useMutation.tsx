@@ -6,7 +6,7 @@ interface PostState<T> {
   error?: object;
 }
 type UsePostResult<T> = [(data: any) => void, PostState<T>];
-export default function usePost<T = any>(url: string): UsePostResult<T> {
+export default function usePost<T = any>(url: string, method: 'POST' | 'PUT' | 'DELETE'): UsePostResult<T> {
   const [state, setState] = useState<PostState<T>>({
     loading: false,
     data: undefined,
@@ -15,7 +15,7 @@ export default function usePost<T = any>(url: string): UsePostResult<T> {
   const postFunc = (data: any) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
-      method: 'POST',
+      method,
       headers: {
         'Content-Type': 'application/json',
       },

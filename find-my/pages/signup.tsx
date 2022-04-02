@@ -4,7 +4,7 @@ import { faUser, faLock, faMobilePhone, faA } from '@fortawesome/free-solid-svg-
 import { FieldErrors, useForm } from 'react-hook-form';
 import type { NextPage } from 'next';
 import Input from '@components/auth/Input';
-import usePost from '@libs/front/hooks/usePost';
+import useMutation from '@libs/front/hooks/useMutation';
 import Submit from '@components/auth/Submit';
 import AuthLayout from '@components/auth/authLayout';
 interface SignUpForm {
@@ -15,7 +15,7 @@ interface SignUpForm {
   errors?: string;
 }
 const SignUp: NextPage = () => {
-  const [signUp, { loading, data, error }] = usePost('/api/users/signup');
+  const [signUp, { loading, data, error }] = useMutation('/api/users/me', 'POST');
   const {
     register,
     handleSubmit,

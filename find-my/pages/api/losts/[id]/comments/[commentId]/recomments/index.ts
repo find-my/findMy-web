@@ -5,24 +5,32 @@ import { withApiSession } from '@libs/back/session';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const {
-    query: { commentId },
-    body: { comment },
+    query: { id, commentId },
+    session: { user },
+    body: { reComment },
   } = req;
-  console.log('hello', comment);
-  try {
-    await client.comment.update({
-      where: {
-        id: +commentId,
+
+  const newReComment = await client.reComment.create({
+    data: {
+      user: {
+        connect: {
+          id: user?.id,
+        },
       },
-      data: {
-        content: `${comment}`,
+      comment: {
+        connect: {
+          id: +commentId.toString(),
+        },
       },
-    });
-    res.json({ ok: true, comment: comment.toString() });
-  } catch (error) {
-    console.log(error);
-    res.json({ ok: false });
-  }
+      content: reComment,
+    },
+  });
+
+  console.log(newReComment);
+  res.json({
+    ok: true,
+    reComment: newReComment,
+  });
 }
 
 export default withApiSession(

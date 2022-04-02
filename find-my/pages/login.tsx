@@ -7,7 +7,7 @@ import Input from '@components/auth/Input';
 import Submit from '@components/auth/Submit';
 import AuthLayout from '@components/auth/authLayout';
 import { useEffect, useState } from 'react';
-import usePost from '@libs/front/hooks/usePost';
+import useMutation from '@libs/front/hooks/useMutation';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 interface LoginForm {
@@ -18,7 +18,7 @@ interface LoginForm {
 const Login: NextPage = () => {
   const router = useRouter();
   //const { data, mutate: loginMutate } = useSWR<boolean>('isLoggedIn');
-  const [login, { loading, data: loginResult, error }] = usePost('/api/users/login');
+  const [login, { loading, data: loginResult, error }] = useMutation('/api/users/login', 'POST');
   const {
     register,
     handleSubmit,
