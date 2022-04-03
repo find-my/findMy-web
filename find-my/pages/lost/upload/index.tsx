@@ -3,7 +3,7 @@ import { FieldErrors, useForm } from 'react-hook-form';
 import UploadButton from '@components/UploadButton';
 import { useCallback, useState, useEffect } from 'react';
 import { LOST_PLACE } from '@libs/front/swrKey';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR, { SWRConfig, useSWRConfig } from 'swr';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
@@ -40,7 +40,10 @@ const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
   const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST');
   const router = useRouter();
-  const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
+  const [lostPlace, setLostPlace] = useState<string>('');
+  //const { data: lostPlaceData, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE, () => lostPlace);
+
+  //console.log(lostPlaceData);
   const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false);
   const {
     register,
@@ -53,7 +56,10 @@ const Upload: NextPage = () => {
     console.log(data, loading);
     if (loading) return;
     if (!lostPlace || !lostPlace.trim()) return;
-    uploadLost({ ...data, lostPlace });
+    if (lostPlace === LOSTPLACE_NULL) uploadLost({ ...data });
+    else {
+      uploadLost({ ...data, lostPlace });
+    }
   };
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
@@ -61,13 +67,14 @@ const Upload: NextPage = () => {
   const placeFinderOpen = () => {
     setIsPlaceFinderOpen(true);
   };
-  useEffect(() => {
-    lostPlaceMutate('');
-  }, []);
+  const onUnKnownClick = () => {
+    setLostPlace(LOSTPLACE_NULL);
+  };
+
   useEffect(() => {
     if (uploadResult?.ok) {
       console.log('업로드 완료');
-      lostPlaceMutate('');
+      setLostPlace('');
       router.push(`/lost/${uploadResult.lost?.id}`);
     }
   }, [uploadResult, router]);
@@ -186,7 +193,7 @@ const Upload: NextPage = () => {
               </div>
 
               <div
-                onClick={() => lostPlaceMutate(LOSTPLACE_NULL)}
+                onClick={onUnKnownClick}
                 className="w-1/2 cursor-pointer flex items-center bg-blue-400 text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-1 "
               >
                 <svg
@@ -222,7 +229,11 @@ const Upload: NextPage = () => {
           </form>
         </div>
       ) : (
-        <PlaceFinder setOpenFalse={() => setIsPlaceFinderOpen(false)} />
+        <PlaceFinder
+          setOpenFalse={() => setIsPlaceFinderOpen(false)}
+          setLostPlace={(place: string) => setLostPlace(place)}
+          lostPlace={lostPlace}
+        />
       )}
     </>
   );

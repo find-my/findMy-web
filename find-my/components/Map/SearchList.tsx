@@ -8,11 +8,12 @@ interface IcategoryPlaceInfoByList {
 }
 interface Props {
   categoryPlaceInfo?: IcategoryPlaceInfoByList[];
+  setLostPlace: (place: string) => void;
 }
 
-function SearchList({ categoryPlaceInfo }: Props) {
-  const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
-  console.log(lostPlace);
+function SearchList({ categoryPlaceInfo, setLostPlace }: Props) {
+  // const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
+
   return (
     <>
       {categoryPlaceInfo ? (
@@ -21,7 +22,7 @@ function SearchList({ categoryPlaceInfo }: Props) {
             const { place_name, road_address_name, category_group_name } = info;
             return (
               <div
-                onClick={() => lostPlaceMutate(`${place_name}/${road_address_name}`)}
+                onClick={() => setLostPlace(`${place_name}/${road_address_name}`)}
                 key={i}
                 className="flex border-b pb-4 cursor-pointer justify-between items-end px-4"
               >

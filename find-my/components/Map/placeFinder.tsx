@@ -33,6 +33,8 @@ const placeCategory = [
 ];
 interface Props {
   setOpenFalse: () => void;
+  setLostPlace: (place: string) => void;
+  lostPlace: string;
 }
 interface Imarker {
   position: {
@@ -52,14 +54,13 @@ interface IcategoryPlaceInfoByList {
   category_group_name: string;
 }
 
-export default function placeFinder({ setOpenFalse }: Props) {
+export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: Props) {
   const { location, error } = useWatchLocation(geolocationOptions);
   const [placeSearchOn, setPlaceSearchOn] = useState<boolean>(true);
   const [placeKeyword, setPlaceKeyword] = useState<string>();
   const [displayByMap, setDisplayByMap] = useState<boolean>(true);
   const [categoryPlaceInfoByMap, setCategoryPlaceInfoByMap] = useState<IcategoryPlaceInfoByMap>();
   const [categoryPlaceInfoByList, setCategoryPlaceInfoByList] = useState<IcategoryPlaceInfoByList[]>();
-  const { data: lostPlace, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const router = useRouter();
   const placeSearchOnSwitch = () => {
     if (placeSearchOn) return;
@@ -239,9 +240,9 @@ export default function placeFinder({ setOpenFalse }: Props) {
         ) : null}
       </div>
       {displayByMap ? (
-        <SearchMap {...location} categoryPlaceInfo={categoryPlaceInfoByMap} />
+        <SearchMap {...location} categoryPlaceInfo={categoryPlaceInfoByMap} setLostPlace={setLostPlace} />
       ) : (
-        <SearchList categoryPlaceInfo={categoryPlaceInfoByList} />
+        <SearchList categoryPlaceInfo={categoryPlaceInfoByList} setLostPlace={setLostPlace} />
       )}
       <div className="fixed bottom-0 flex flex-col w-full h-20 z-10 bg-white divide-y py-1 px-5">
         <div className="flex justify-between items-center py-1">

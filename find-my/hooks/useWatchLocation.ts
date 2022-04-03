@@ -1,5 +1,5 @@
 //any 고치기
-import { watch } from 'fs/promises';
+
 import { useState, useEffect } from 'react';
 
 interface Option {
@@ -14,12 +14,12 @@ enableHighAccuracy: true,
   maximumAge: 1000 * 3600 * 24, // 24 hour
 */
 interface Location {
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number;
+  longitude: number;
 }
 const useWatchLocation = (option: Option) => {
   // 내 위치 정보 저장
-  const [location, setLocation] = useState<Location>({ latitude: null, longitude: null });
+  const [location, setLocation] = useState<Location>();
   // 에러 메세지 저장
   const [error, setError] = useState<string>();
   // watch 인스턴스를 취소할 수 있도록 Geolocation의 `watchPosition`에서 반환된 ID를 저장합니다.

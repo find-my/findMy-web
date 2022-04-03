@@ -12,6 +12,7 @@ interface Props {
   longitude?: number;
   placeKeyword?: string;
   categoryPlaceInfo?: { markers: Imarker[]; bounds: kakao.maps.LatLngBounds };
+  setLostPlace: (place: string) => void;
 }
 interface Imarker {
   position: {
@@ -22,9 +23,9 @@ interface Imarker {
   road_address_name: string;
 }
 
-function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props) {
+function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword, setLostPlace }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>();
-  const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
+  // const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>();
 
   const zoomIn = () => {
@@ -55,7 +56,8 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props)
         // 마커를 클릭한 위치에 표시합니다
         pointMarker.setPosition(mouseEvent.latLng);
         pointMarker.setMap(map);
-        lostPlaceMutate(result[0].address.address_name);
+        console.log(mouseEvent.latLng);
+        setLostPlace(result[0].address.address_name);
         // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
         //infowindow.setContent(content);
         //infowindow.open(map, marker);
@@ -99,7 +101,7 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword }: Props)
                 key={`marker-${marker.place_name}-${marker.position.lat},${marker.position.lng}`}
                 position={marker.position}
                 onClick={() => {
-                  lostPlaceMutate(`${marker.place_name}/${marker.road_address_name}`);
+                  setLostPlace(`${marker.place_name}/${marker.road_address_name}`);
                 }}
               ></MapMarker>
             ))}
