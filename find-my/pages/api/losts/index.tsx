@@ -6,7 +6,7 @@ import { withApiSession } from '@libs/back/session';
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   //views 기능 추가 필요
   const {
-    body: { title, category, description, lostPlace },
+    body: { title, category, description, place, latitude, longitude },
     session: { user },
   } = req;
   if (req.method === 'GET') {
@@ -39,7 +39,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     const lost = await client.lost.create({
       data: {
         title,
-        lostPlace,
+        lostPlace: place,
+        latitude: +latitude || null,
+        longitude: +longitude || null,
         description,
         category,
         views: 0,
@@ -50,6 +52,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         },
       },
     });
+
     if (!lost) {
       return res.json({
         ok: false,

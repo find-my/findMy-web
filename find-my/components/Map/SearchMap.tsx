@@ -1,12 +1,10 @@
-// index.html
+// SearchMap.tsx
+// 지도 상에서 클릭한 위치로 lost/found place 설정
+// 키워드/카테고리 검색 결과 display
+// 검색 결과를 기반으로 lost/found place 설정
 import React, { useEffect, useState } from 'react';
-import { classNames } from '@libs/front/utils';
-import { Map, MarkerClusterer, MapMarker } from 'react-kakao-maps-sdk';
-import useWatchLocation from '../../hooks/useWatchLocation';
-import Marker from '@components/Map/Marker';
-import { markerPositions } from '../../db';
-import useSWR, { useSWRConfig } from 'swr';
-import { LOST_PLACE } from '@libs/front/swrKey';
+import { Map, MapMarker } from 'react-kakao-maps-sdk';
+
 interface Props {
   latitude?: number;
   longitude?: number;
@@ -28,18 +26,19 @@ interface ILostPlace {
   longitude?: number;
 }
 function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: Props) {
-  const [map, setMap] = useState<kakao.maps.Map>();
-  // const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
-  const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>();
-
+  const [map, setMap] = useState<kakao.maps.Map>(); //지도
+  const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>(); //지도 상에서 클릭한 위치에 생성될 마커
+  //지도 줌인
   const zoomIn = () => {
     if (!map) return;
     map.setLevel(map.getLevel() - 1);
   };
+  //지도 줌 아웃
   const zoomOut = () => {
     if (!map) return;
     map.setLevel(map.getLevel() + 1);
   };
+  //좌료를 주소로 변환
   function searchDetailAddrFromCoords(coords: any, callback: any) {
     // 주소-좌표 변환 객체를 생성합니다
     const geocoder = new kakao.maps.services.Geocoder();
@@ -47,16 +46,14 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: 
     geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
   }
 
+  //지도 상에서 클릭한 위치를 도로명 주소로 변환 함. 그리도 클릭한 위치위에 마커 생성
   const onMapClick = (target: kakao.maps.Map, mouseEvent: kakao.maps.event.MouseEvent) => {
     if (!pointMarker) return;
     searchDetailAddrFromCoords(mouseEvent.latLng, function (result: any, status: any) {
       if (!mouseEvent.latLng) return;
       if (!map) return;
       if (status === kakao.maps.services.Status.OK) {
-        console.log(result[0].address.address_name);
-        console.log(mouseEvent?.latLng?.getLat());
         // 클릭한 위치를 표시할 마커입니다
-        //const = new kakao.maps.InfoWindow({zindex:1}); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
         // 마커를 클릭한 위치에 표시합니다
         pointMarker.setPosition(mouseEvent.latLng);
         pointMarker.setMap(map);
@@ -66,12 +63,11 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: 
           latitude: mouseEvent.latLng.getLat(),
           longitude: mouseEvent.latLng.getLng(),
         });
-        // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
-        //infowindow.setContent(content);
-        //infowindow.open(map, marker);
       }
     });
   };
+
+  //임의의 좌표로 마커를 생성해둠
   useEffect(() => {
     window.kakao.maps.load(() => {
       setPointMarker(new kakao.maps.Marker({ position: new kakao.maps.LatLng(37.566535, 126.795841) }));
@@ -80,7 +76,7 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: 
   useEffect(() => {
     if (!map || !placeInfo) return;
 
-    console.log('바운드세팅');
+    //바운드 세팅
     map.setBounds(placeInfo.bounds);
   }, [placeInfo]);
   return (

@@ -1,4 +1,7 @@
-import useSWR from 'swr';
+//placeFinder.tsx
+//키워드 or 카테 고리 검색 실행
+// 검색 결과를 SearchMap 과 SearchList 컴포넌트에 넘겨줌
+// lost or found place 설정
 import SearchMap from '@components/Map/SearchMap';
 import useWatchLocation from '../../hooks/useWatchLocation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

@@ -61,11 +61,10 @@ const Upload: NextPage = () => {
     console.log(data, loading);
     if (loading) return;
     const { place, latitude, longitude } = lostPlace;
+    console.log(lostPlace);
     if (!place || !place.trim()) return;
-    if (place === LOSTPLACE_NULL) uploadLost({ ...data, place });
-    else {
-      uploadLost({ ...data, place, latitude, longitude });
-    }
+
+    uploadLost({ ...data, ...lostPlace });
   };
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);

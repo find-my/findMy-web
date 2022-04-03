@@ -1,6 +1,9 @@
+// SearchList.tsx
+// 키워드/카테고리 검색 결과 리스트(텍스트 목록)로display
+// 검색 결과를 기반으로 lost/found place 설정
+
 import React from 'react';
-import useSWR, { useSWRConfig } from 'swr';
-import { LOST_PLACE } from '@libs/front/swrKey';
+
 interface IPlaceSearchResultForList {
   place_name: string;
   road_address_name: string;
@@ -21,8 +24,6 @@ interface ILostPlace {
   longitude?: number;
 }
 function SearchList({ placeInfo, setLostPlace }: Props) {
-  // const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
-
   return (
     <>
       {placeInfo ? (
