@@ -12,7 +12,7 @@ import {
   faList,
   faMap,
 } from '@fortawesome/free-solid-svg-icons';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CategoryGroupCode } from 'components/Map/types';
 import SearchList from '@components/Map/SearchList';
 import { LOST_PLACE } from '@libs/front/swrKey';
@@ -33,9 +33,11 @@ const placeCategory = [
 ];
 interface Props {
   setOpenFalse: () => void;
-  setLostPlace: (place: string) => void;
-  lostPlace: string;
+  setLostPlace: (place: ILostPlace) => void;
+  lostPlace: ILostPlace;
 }
+
+//검색으로 도출된 marker의 interface
 interface Imarker {
   position: {
     lat: number;
@@ -44,138 +46,130 @@ interface Imarker {
   place_name: string;
   road_address_name: string;
 }
-interface IcategoryPlaceInfoByMap {
+
+//검색 결과를 display 하기 위한 interface for Map
+interface IPlaceSearchResultForMap {
   markers: Imarker[];
   bounds: kakao.maps.LatLngBounds;
 }
-interface IcategoryPlaceInfoByList {
+//검색 결과를 display 하기 위한 interface for List
+interface IPlaceSearchResultForList {
   place_name: string;
   road_address_name: string;
   category_group_name: string;
+  position: {
+    lat: number;
+    lng: number;
+  };
 }
 
+//공통으로 사용되는 interface 분리 예정.
+interface ILostPlace {
+  place: string;
+  latitude?: number;
+  longitude?: number;
+}
 export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: Props) {
-  const { location, error } = useWatchLocation(geolocationOptions);
-  const [placeSearchOn, setPlaceSearchOn] = useState<boolean>(true);
-  const [placeKeyword, setPlaceKeyword] = useState<string>();
-  const [displayByMap, setDisplayByMap] = useState<boolean>(true);
-  const [categoryPlaceInfoByMap, setCategoryPlaceInfoByMap] = useState<IcategoryPlaceInfoByMap>();
-  const [categoryPlaceInfoByList, setCategoryPlaceInfoByList] = useState<IcategoryPlaceInfoByList[]>();
+  const { location, error } = useWatchLocation(geolocationOptions); //현재 유저의 위치
+  const [placeSearchOn, setPlaceSearchOn] = useState<boolean>(true); //유저가 검색을 할 의도를 갖고 있는지 확인, search 영역이 활성화됨
+  const [placeKeyword, setPlaceKeyword] = useState<string>(); //검색 키워드(장소 이름)
+  const [displayByMap, setDisplayByMap] = useState<boolean>(true); //검색 결과를 지도상에서 확인 할 것인지 리스트목록으로 볼 것인지 확인
+  const [placeSearchResultForMap, setPlaceSearchResultForMap] = useState<IPlaceSearchResultForMap>(); //SearchMap 컴포넌트에 보내질 검색결과
+  const [placeSearchResultForList, setPlaceSearchResultForList] = useState<IPlaceSearchResultForList[]>(); //SearchList 컴포넌트에 보내질 검색 결과
   const router = useRouter();
-  const placeSearchOnSwitch = () => {
+
+  //검색 영역이 활성화됨
+  const placeSearchOnSwitch = useCallback(() => {
     if (placeSearchOn) return;
     setPlaceSearchOn(true);
-  };
-  const placeSearchOffSwitch = () => {
+  }, []);
+  //검색 영역이 비활성화됨
+  const placeSearchOffSwitch = useCallback(() => {
     if (!placeSearchOn) return;
     setPlaceSearchOn(false);
-  };
-  const OnCategorySearch = (
-    data: kakao.maps.services.PlacesSearchResult,
-    status: kakao.maps.services.Status,
-    pagination: kakao.maps.Pagination,
-  ) => {
-    if (status === kakao.maps.services.Status.OK) {
-      // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
-      // LatLngBounds 객체에 좌표를 추가합니다
-      const bounds = new kakao.maps.LatLngBounds();
-      const resultList = data.map((place: any) => {
-        const { place_name, road_address_name, category_group_name } = place;
-        return {
-          place_name,
-          road_address_name,
-          category_group_name,
-        };
-      });
-      const markers = data.map((place: any) => {
-        console.log({
-          position: {
-            lat: place.y,
-            lng: place.x,
-          },
-          content: place.place_name,
-        });
-        bounds.extend(new kakao.maps.LatLng(place.y, place.x));
-        return {
-          position: {
-            lat: place.y,
-            lng: place.x,
-          },
-          place_name: place.place_name,
-          road_address_name: place.road_address_name,
-        };
-      });
-      setCategoryPlaceInfoByMap({ markers, bounds });
-      setCategoryPlaceInfoByList(resultList);
-      console.log(data);
-      // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
-    }
-  };
-  const OnKeywordSearch = (
-    data: kakao.maps.services.PlacesSearchResult,
-    status: kakao.maps.services.Status,
-    pagination: kakao.maps.Pagination,
-  ) => {
-    if (status === kakao.maps.services.Status.OK) {
-      // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
-      // LatLngBounds 객체에 좌표를 추가합니다
-      const bounds = new kakao.maps.LatLngBounds();
-      const resultList = data.map((place: any) => {
-        const { place_name, road_address_name, category_group_name } = place;
-        return {
-          place_name,
-          road_address_name,
-          category_group_name,
-        };
-      });
-      const markers = data.map((place: any) => {
-        console.log({
-          position: {
-            lat: place.y,
-            lng: place.x,
-          },
-          content: place.place_name,
-        });
-        bounds.extend(new kakao.maps.LatLng(place.y, place.x));
-        return {
-          position: {
-            lat: place.y,
-            lng: place.x,
-          },
-          place_name: place.place_name,
-          road_address_name: place.road_address_name,
-        };
-      });
-      setCategoryPlaceInfoByMap({ markers, bounds });
-      setCategoryPlaceInfoByList(resultList);
-      console.log(data);
-      // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
-    }
-  };
+  }, []);
+  //place가 결정되면 upload로 돌아감.
   const onPlaceSeleted = () => {
     setOpenFalse();
   };
+  //keyword,category검색 함수 콜백함수
+  const OnSearch = (
+    data: kakao.maps.services.PlacesSearchResult,
+    status: kakao.maps.services.Status,
+    pagination: kakao.maps.Pagination,
+  ) => {
+    if (status === kakao.maps.services.Status.OK) {
+      // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+      // LatLngBounds 객체에 좌표를 추가합니다
+      // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+      // LatLngBounds 객체에 좌표를 추가합니다
+      //bounds와 markers는 setSearchResultForMap에 들어갈 값들.
+      const bounds = new kakao.maps.LatLngBounds();
+      const markers = data.map((place: any) => {
+        console.log({
+          position: {
+            lat: place.y,
+            lng: place.x,
+          },
+          content: place.place_name,
+        });
+        bounds.extend(new kakao.maps.LatLng(place.y, place.x));
+        return {
+          position: {
+            lat: place.y,
+            lng: place.x,
+          },
+          place_name: place.place_name,
+          road_address_name: place.road_address_name,
+        };
+      });
+      //결과 목록. setSearchResultForList에 들어갈 값.
+      const resultList = data.map((place: any) => {
+        console.log(place);
+        const { place_name, road_address_name, category_group_name, x, y } = place;
+        return {
+          place_name,
+          road_address_name,
+          category_group_name,
+          position: {
+            lat: place.x,
+            lng: place.y,
+          },
+        };
+      });
+
+      setPlaceSearchResultForMap({ markers, bounds });
+      setPlaceSearchResultForList(resultList);
+      // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+    }
+  };
+
+  //검색 키워드가 입력 되면 키워드 검색 함수가 실행됨.
   const onKeywordSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
     if (!placeKeyword || !placeKeyword.trim()) return;
     if (!location) return;
     console.log(location);
-    const { latitude, longitude } = location;
+    const { latitude, longitude } = location; //현재 사용자 위치 좌표.
     const ps = new kakao.maps.services.Places();
-    ps.keywordSearch(placeKeyword, OnKeywordSearch, {
+    //키워드 검색 함수
+    ps.keywordSearch(placeKeyword, OnSearch, {
+      //키워드 검색 옵션들. 현재 위치를 기준으로 거리순으로 15개 목록이 불러와짐.
       useMapBounds: true,
       location: new kakao.maps.LatLng(latitude, longitude),
       sort: kakao.maps.services.SortBy.DISTANCE,
     });
   };
 
+  //카테고리별 검색, 지하철,대형마트,편의점,식당,숙박,카페 중에서 선택할 수 있음.
   const categorySearch = (code: kakao.maps.services.CategoryGroupCode) => {
     if (!code) return;
     if (!location) return;
     console.log(location);
-    const { latitude, longitude } = location;
+    const { latitude, longitude } = location; //현재 사용자의 위치
     const ps = new kakao.maps.services.Places();
-    ps.categorySearch(code, OnCategorySearch, {
+    ps.categorySearch(code, OnSearch, {
+      //현재 위치를 기준으로 거리순으로 15개 항목을 불러오게 설정
       useMapBounds: true,
       location: new kakao.maps.LatLng(latitude, longitude),
       sort: kakao.maps.services.SortBy.DISTANCE,
@@ -240,9 +234,9 @@ export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: P
         ) : null}
       </div>
       {displayByMap ? (
-        <SearchMap {...location} categoryPlaceInfo={categoryPlaceInfoByMap} setLostPlace={setLostPlace} />
+        <SearchMap {...location} placeInfo={placeSearchResultForMap} setLostPlace={setLostPlace} />
       ) : (
-        <SearchList categoryPlaceInfo={categoryPlaceInfoByList} setLostPlace={setLostPlace} />
+        <SearchList placeInfo={placeSearchResultForList} setLostPlace={setLostPlace} />
       )}
       <div className="fixed bottom-0 flex flex-col w-full h-20 z-10 bg-white divide-y py-1 px-5">
         <div className="flex justify-between items-center py-1">
@@ -251,7 +245,7 @@ export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: P
             선택 완료
           </button>
         </div>
-        <span>{lostPlace || '선택안됨'}</span>
+        <span>{lostPlace.place || '선택안됨'}</span>
       </div>
     </div>
   );

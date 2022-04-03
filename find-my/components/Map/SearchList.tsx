@@ -1,28 +1,44 @@
 import React from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { LOST_PLACE } from '@libs/front/swrKey';
-interface IcategoryPlaceInfoByList {
+interface IPlaceSearchResultForList {
   place_name: string;
   road_address_name: string;
   category_group_name: string;
-}
-interface Props {
-  categoryPlaceInfo?: IcategoryPlaceInfoByList[];
-  setLostPlace: (place: string) => void;
+  position: {
+    lat: number;
+    lng: number;
+  };
 }
 
-function SearchList({ categoryPlaceInfo, setLostPlace }: Props) {
+interface Props {
+  placeInfo?: IPlaceSearchResultForList[];
+  setLostPlace: (place: ILostPlace) => void;
+}
+interface ILostPlace {
+  place: string;
+  latitude?: number;
+  longitude?: number;
+}
+function SearchList({ placeInfo, setLostPlace }: Props) {
   // const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
 
   return (
     <>
-      {categoryPlaceInfo ? (
+      {placeInfo ? (
         <div className="flex flex-col space-y-5  py-2  border-t-2">
-          {categoryPlaceInfo.map((info, i) => {
-            const { place_name, road_address_name, category_group_name } = info;
+          {placeInfo.map((info, i) => {
+            const {
+              place_name,
+              road_address_name,
+              category_group_name,
+              position: { lat, lng },
+            } = info;
             return (
               <div
-                onClick={() => setLostPlace(`${place_name}/${road_address_name}`)}
+                onClick={() =>
+                  setLostPlace({ place: `${place_name}/${road_address_name}`, latitude: lat, longitude: lng })
+                }
                 key={i}
                 className="flex border-b pb-4 cursor-pointer justify-between items-end px-4"
               >

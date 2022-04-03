@@ -36,11 +36,16 @@ const CATEGORY = [
   '가방',
   '기타',
 ];
+interface ILostPlace {
+  place: string;
+  latitude?: number;
+  longitude?: number;
+}
 const LOSTPLACE_NULL = '모르겠음';
 const Upload: NextPage = () => {
   const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST');
   const router = useRouter();
-  const [lostPlace, setLostPlace] = useState<string>('');
+  const [lostPlace, setLostPlace] = useState<ILostPlace>({ place: '' });
   //const { data: lostPlaceData, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE, () => lostPlace);
 
   //console.log(lostPlaceData);
@@ -55,10 +60,11 @@ const Upload: NextPage = () => {
   const onValid = (data: LostForm) => {
     console.log(data, loading);
     if (loading) return;
-    if (!lostPlace || !lostPlace.trim()) return;
-    if (lostPlace === LOSTPLACE_NULL) uploadLost({ ...data });
+    const { place, latitude, longitude } = lostPlace;
+    if (!place || !place.trim()) return;
+    if (place === LOSTPLACE_NULL) uploadLost({ ...data, place });
     else {
-      uploadLost({ ...data, lostPlace });
+      uploadLost({ ...data, place, latitude, longitude });
     }
   };
   const onInvalid = (errors: FieldErrors) => {
@@ -68,13 +74,13 @@ const Upload: NextPage = () => {
     setIsPlaceFinderOpen(true);
   };
   const onUnKnownClick = () => {
-    setLostPlace(LOSTPLACE_NULL);
+    setLostPlace({ place: LOSTPLACE_NULL });
   };
 
   useEffect(() => {
     if (uploadResult?.ok) {
       console.log('업로드 완료');
-      setLostPlace('');
+      setLostPlace({ place: '' });
       router.push(`/lost/${uploadResult.lost?.id}`);
     }
   }, [uploadResult, router]);
@@ -163,7 +169,7 @@ const Upload: NextPage = () => {
             <div className="mt-2 space-y-2">
               <div className="flex space-x-2">
                 <span>잃어 버린 곳</span>
-                <span className="text-blue-400">{lostPlace}</span>
+                <span className="text-blue-400">{lostPlace.place}</span>
               </div>
               <div
                 onClick={placeFinderOpen}
@@ -231,7 +237,7 @@ const Upload: NextPage = () => {
       ) : (
         <PlaceFinder
           setOpenFalse={() => setIsPlaceFinderOpen(false)}
-          setLostPlace={(place: string) => setLostPlace(place)}
+          setLostPlace={(place: ILostPlace) => setLostPlace(place)}
           lostPlace={lostPlace}
         />
       )}

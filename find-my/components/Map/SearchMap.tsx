@@ -11,8 +11,8 @@ interface Props {
   latitude?: number;
   longitude?: number;
   placeKeyword?: string;
-  categoryPlaceInfo?: { markers: Imarker[]; bounds: kakao.maps.LatLngBounds };
-  setLostPlace: (place: string) => void;
+  placeInfo?: { markers: Imarker[]; bounds: kakao.maps.LatLngBounds };
+  setLostPlace: (place: ILostPlace) => void;
 }
 interface Imarker {
   position: {
@@ -22,8 +22,12 @@ interface Imarker {
   place_name: string;
   road_address_name: string;
 }
-
-function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword, setLostPlace }: Props) {
+interface ILostPlace {
+  place: string;
+  latitude?: number;
+  longitude?: number;
+}
+function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>();
   // const { mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE);
   const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>();
@@ -57,7 +61,11 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword, setLostP
         pointMarker.setPosition(mouseEvent.latLng);
         pointMarker.setMap(map);
         console.log(mouseEvent.latLng);
-        setLostPlace(result[0].address.address_name);
+        setLostPlace({
+          place: result[0].address.address_name,
+          latitude: mouseEvent.latLng.getLat(),
+          longitude: mouseEvent.latLng.getLng(),
+        });
         // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
         //infowindow.setContent(content);
         //infowindow.open(map, marker);
@@ -70,11 +78,11 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword, setLostP
     });
   }, []);
   useEffect(() => {
-    if (!map || !categoryPlaceInfo) return;
+    if (!map || !placeInfo) return;
 
     console.log('바운드세팅');
-    map.setBounds(categoryPlaceInfo.bounds);
-  }, [categoryPlaceInfo]);
+    map.setBounds(placeInfo.bounds);
+  }, [placeInfo]);
   return (
     <div className="mt-20">
       <div className="relative ">
@@ -95,13 +103,17 @@ function Search({ latitude, longitude, categoryPlaceInfo, placeKeyword, setLostP
           onCreate={setMap}
           onClick={onMapClick}
         >
-          {categoryPlaceInfo &&
-            categoryPlaceInfo.markers?.map((marker) => (
+          {placeInfo &&
+            placeInfo.markers?.map((marker) => (
               <MapMarker
                 key={`marker-${marker.place_name}-${marker.position.lat},${marker.position.lng}`}
                 position={marker.position}
                 onClick={() => {
-                  setLostPlace(`${marker.place_name}/${marker.road_address_name}`);
+                  setLostPlace({
+                    place: `${marker.place_name}/${marker.road_address_name}`,
+                    latitude: marker.position.lat,
+                    longitude: marker.position.lng,
+                  });
                 }}
               ></MapMarker>
             ))}
