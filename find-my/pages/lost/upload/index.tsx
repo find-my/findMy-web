@@ -1,9 +1,9 @@
+//lost/upload
+//분실물 게시물 업로드 페이지
 import { NextPage } from 'next';
 import { FieldErrors, useForm } from 'react-hook-form';
 import UploadButton from '@components/UploadButton';
 import { useCallback, useState, useEffect } from 'react';
-import { LOST_PLACE } from '@libs/front/swrKey';
-import useSWR, { SWRConfig, useSWRConfig } from 'swr';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
@@ -14,11 +14,15 @@ interface LostForm {
   category: string;
   description: string;
 }
+
+//upload 결과 interface
 interface UploadLostState {
   ok: boolean;
   message?: string;
   lost?: Lost;
 }
+
+//물품 category found 업로드와 겹치므로 분리 예정.
 const CATEGORY = [
   '선택안함',
   '가방',
@@ -41,45 +45,50 @@ interface ILostPlace {
   latitude?: number;
   longitude?: number;
 }
-const LOSTPLACE_NULL = '모르겠음';
-const Upload: NextPage = () => {
-  const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST');
-  const router = useRouter();
-  const [lostPlace, setLostPlace] = useState<ILostPlace>({ place: '' });
-  //const { data: lostPlaceData, mutate: lostPlaceMutate } = useSWR<string>(LOST_PLACE, () => lostPlace);
 
-  //console.log(lostPlaceData);
-  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false);
+//분실물을 잃어 버린 위치를 모르겠을 때 설정 값. found 와 겹치므로 분리 예정
+const LOSTPLACE_NULL = '모르겠음';
+
+const Upload: NextPage = () => {
+  const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST'); //lost 생성 mutation
+  const router = useRouter();
+  const [lostPlace, setLostPlace] = useState<ILostPlace>({ place: '' }); //lostPlace 상태 관리
+  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false); //lostPlace 설정을 위한 페이지 생성 여부
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm<LostForm>();
+
+  //upload Form 이 채워지면 POST
   const onValid = (data: LostForm) => {
-    console.log(data, loading);
     if (loading) return;
-    const { place, latitude, longitude } = lostPlace;
-    console.log(lostPlace);
-    if (!place || !place.trim()) return;
+    if (!lostPlace.place || !lostPlace.place.trim()) return;
 
     uploadLost({ ...data, ...lostPlace });
   };
   const onInvalid = (errors: FieldErrors) => {
     console.dir(errors);
   };
+
+  //
   const placeFinderOpen = () => {
     setIsPlaceFinderOpen(true);
   };
+
+  //모르겠음 버튼 클릭 이벤트
   const onUnKnownClick = () => {
     setLostPlace({ place: LOSTPLACE_NULL });
   };
 
+  //업로드가 완료 되었으면 /lost/id로 이동
   useEffect(() => {
     if (uploadResult?.ok) {
       console.log('업로드 완료');
+      //상태 값 리셋
       setLostPlace({ place: '' });
+      reset();
       router.push(`/lost/${uploadResult.lost?.id}`);
     }
   }, [uploadResult, router]);
