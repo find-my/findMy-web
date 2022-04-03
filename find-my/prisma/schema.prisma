@@ -48,7 +48,9 @@ model Lost{
   userId Int
   photos LostPhoto[]
   title String
-  lostPlace String
+  lostPlace String?
+  latitude Float?
+  longitude Float?
   description String  @db.MediumText
   comments Comment[]
   category String
