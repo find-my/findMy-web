@@ -135,8 +135,8 @@ export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: P
           road_address_name,
           category_group_name,
           position: {
-            lat: place.x,
-            lng: place.y,
+            lat: place.y,
+            lng: place.x,
           },
         };
       });
