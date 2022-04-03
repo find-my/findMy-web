@@ -30,3 +30,8 @@ export interface CommentDetailResponse {
   ok: boolean;
   comment: ExtendedComment;
 }
+
+export interface LostListResponse {
+  ok: boolean;
+  lostList: ExtendedLost[];
+}

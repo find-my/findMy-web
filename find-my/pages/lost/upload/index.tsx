@@ -254,25 +254,3 @@ const Upload: NextPage = () => {
 };
 
 export default Upload;
-/* <span>영통역 수인분당선</span> */
-/*
- {CATEGORY.map((option) => (
-                  <option value={option.value}>{option.name}</option>
-                ))}
-*/
-/*
-  <option value='선택안함'>선택안함</option>
-                <option value="가방">가방</option>
-                <option value="지갑">지갑</option>
-                <option value="카드/현금">카드/현금</option>
-                <option value="의류">의류</option>
-                <option value='휴대폰'>휴대폰</option>
-                <option value="전자기기">전자기기</option>
-                <option value="귀금속">귀금속</option>
-                <option value="도서용품">도서용품</option>
-                <option value="서류/증명서">서류/증명서</option>
-                <option value='스포츠용품'>스포츠용품</option>
-                <option value="악기">악기</option>
-                <option value="자동차관련">자동차관련</option>
-                <option value="기타">기타</option>
-*/

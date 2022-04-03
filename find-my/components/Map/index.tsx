@@ -1,11 +1,13 @@
-// index.html
+//Map.tsx
+//홈 화면에서 lost/found 목록을 띄움
+//lost /found 는 빨강/파랑 색으로 구분됨
 import React, { useEffect, useState } from 'react';
 import { classNames } from '@libs/front/utils';
 import { Map, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useWatchLocation from '../../hooks/useWatchLocation';
 import Marker from '@components/Map/Marker';
-import { markerPositions } from '../../db';
-
+import useSWR from 'swr';
+import { LostListResponse } from '../../typeDefs/lost';
 // 컴포넌트 안쪽에서 선언하면 에러 발생
 const geolocationOptions = {
   enableHighAccuracy: true,
@@ -18,8 +20,8 @@ function MapContainer() {
   const { location, error } = useWatchLocation(geolocationOptions);
   const [map, setMap] = useState<kakao.maps.Map>();
   const [filter, setFilter] = useState<'lost' | 'found' | 'all'>('found');
-  //const user = useFetchUser();
-
+  const { data: lostListData } = useSWR<LostListResponse>('/api/losts');
+  console.log(lostListData);
   const setMapType = (maptype: 'roadmap' | 'skyview') => {
     if (!map) return;
 
@@ -75,21 +77,13 @@ function MapContainer() {
             averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
             minLevel={10} // 클러스터 할 최소 지도 레벨
           >
-            {filter !== 'all' ? (
+            {filter === 'lost' ? (
               <>
-                {markerPositions
-                  .filter((position) => position.type === filter)
-                  .map((position) => (
-                    <Marker key={`${position.title}-${position.latlng}`} position={position} />
-                  ))}
-              </>
-            ) : (
-              <>
-                {markerPositions.map((position) => (
-                  <Marker key={`${position.title}-${position.latlng}`} position={position} />
+                {lostListData?.lostList?.map((lost) => (
+                  <Marker key={lost.id} item={lost} itemType="lost" />
                 ))}
               </>
-            )}
+            ) : null}
           </MarkerClusterer>
         </Map>
         {/* 지도타입 컨트롤 div 입니다 */}
