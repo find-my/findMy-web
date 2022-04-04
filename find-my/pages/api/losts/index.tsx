@@ -15,11 +15,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         user: {
           select: {
             name: true,
+            id: true,
+            avatar: true,
           },
         },
         _count: {
           select: {
             scraps: true,
+            comments: true,
+          },
+        },
+        comments: {
+          select: {
+            _count: {
+              select: {
+                reComments: true,
+              },
+            },
           },
         },
       },

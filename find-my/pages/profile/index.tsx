@@ -4,6 +4,9 @@ import useSWR from 'swr';
 import { Review, User } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import { useState } from 'react';
+import GetLostResult from '@components/GetLostResult';
+import { ExtendedLost, LostListResponse } from '../../typeDefs/lost';
+
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -13,6 +16,7 @@ interface ReviewsResponse {
 }
 const Profile: NextPage = () => {
   const { user } = useUser();
+  const { data: userLostsData, error } = useSWR<LostListResponse>('/api/users/me/losts');
   const { data: reviewsData } = useSWR<ReviewsResponse>('/api/reviews');
   const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
   return (
@@ -44,25 +48,33 @@ const Profile: NextPage = () => {
           <span>사용자 리뷰</span>
         </button>
       </div>
-      {viewFilter === 'Lost' ? <Lost /> : null}
-      {viewFilter === 'UserReview' ? <UserReview reviews={reviewsData?.reviews} /> : null}
+      {viewFilter === 'Lost' ? <UserLosts userLostsData={userLostsData} /> : null}
+      {viewFilter === 'UserReview' ? <UserReviews reviewsData={reviewsData} /> : null}
     </div>
   );
 };
 export default Profile;
 
-function Lost() {
-  return <></>;
+interface UserLostsProps {
+  userLostsData: LostListResponse | undefined;
+}
+function UserLosts({ userLostsData }: UserLostsProps) {
+  if (!userLostsData || !userLostsData.ok) return null;
+  //GetLostResult 이 받는 interface를 userLostData.losts 만 받게 고치기
+  return (
+    <>
+      <GetLostResult contents={userLostsData} />
+    </>
+  );
 }
 interface ReviewsProps {
-  reviews: ExtendedReview[] | undefined;
+  reviewsData: ReviewsResponse | undefined;
 }
-function UserReview({ reviews }: ReviewsProps) {
-  console.log(reviews);
-  if (!reviews) return null;
+function UserReviews({ reviewsData }: ReviewsProps) {
+  if (!reviewsData || !reviewsData.ok) return null;
   return (
     <div className="divide-y py-7">
-      {reviews?.map((review, i) => (
+      {reviewsData?.reviews?.map((review, i) => (
         <div key={i} className="py-3">
           <div className="flex  space-x-1 items-start">
             <div className="w-10 h-10 rounded-full bg-slate-500" />
