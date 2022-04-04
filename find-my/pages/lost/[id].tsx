@@ -37,7 +37,7 @@ const LostDetail: NextPage = () => {
 
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
 
-  const [toggleScrap] = useMutation(`/api/users/me/scrap/${router.query.id}`, 'POST');
+  const [toggleScrap] = useMutation(`/api/users/me/scraps/${router.query.id}`, 'POST');
   const sumReCommentsCount = (comments: ExtendedComment[] | undefined) => {
     if (!comments) return 0;
     let sum = 0;
