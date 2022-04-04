@@ -22,39 +22,113 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       userData,
     });
   }
-  if (req.method === 'POST') {
-    const { email, password, name, phone } = req.body;
-
-    const existingUser = await client.user.findFirst({
+  if (req.method === 'PUT') {
+    const {
+      session: { user },
+      body: { email, phone, name, password },
+    } = req;
+    const currentUser = await client.user.findUnique({
       where: {
-        ...(email ? { email } : {}),
+        id: user?.id,
       },
     });
-    if (existingUser) {
-      return res.json({
-        ok: false,
-        message: '이미 존재하는 이메일 입니다.',
-      });
+
+    if (email && email !== currentUser?.email) {
+      const alreadyExists = Boolean(
+        await client.user.findUnique({
+          where: {
+            email,
+          },
+          select: {
+            id: true,
+          },
+        }),
+      );
+      if (alreadyExists) {
+        return res.json({
+          ok: false,
+          error: '이미 존재하는 이메일입니다.',
+        });
+      }
+      try {
+        await client.user.update({
+          where: {
+            id: user?.id,
+          },
+          data: {
+            email,
+          },
+        });
+      } catch {
+        return res.json({ ok: false, message: '알 수 없는 오류가 발생했습니다.' });
+      }
     }
-    const protecedPassword = await bcrypt.hash(password, 10);
-    const createdUser = await client.user.create({
-      data: {
-        name,
-        email,
-        phone,
-        password: protecedPassword,
-      },
-    });
-    if (!createdUser) {
-      return res.json({
-        ok: false,
-        message: '계정 생성에 실패 했습니다.',
-      });
+    if (phone && phone !== currentUser?.phone) {
+      const alreadyExists = Boolean(
+        await client.user.findUnique({
+          where: {
+            phone,
+          },
+          select: {
+            id: true,
+          },
+        }),
+      );
+      if (alreadyExists) {
+        return res.json({
+          ok: false,
+          error: '이미 사용 중인 휴대폰 번호입니다.',
+        });
+      }
+      try {
+        await client.user.update({
+          where: {
+            id: user?.id,
+          },
+          data: {
+            phone,
+          },
+        });
+      } catch {
+        return res.json({ ok: false, message: '알 수 없는 오류가 발생했습니다.' });
+      }
     }
-    return res.json({
-      ok: true,
-    });
+
+    if (password && currentUser) {
+      const passwordEqual = await bcrypt.compare(password, currentUser?.password);
+      if (!passwordEqual) {
+        const protectedNewPassword = await bcrypt.hash(password, 10);
+        try {
+          await client.user.update({
+            where: {
+              id: user?.id,
+            },
+            data: {
+              password: protectedNewPassword,
+            },
+          });
+        } catch {
+          return res.json({ ok: false, message: '알 수 없는 오류가 발생했습니다.' });
+        }
+      }
+    }
+    //session에 저장된 유저에 이름과 아바타 정보도 추가로 넣어 주기
+    if (name) {
+      try {
+        await client.user.update({
+          where: {
+            id: user?.id,
+          },
+          data: {
+            name,
+          },
+        });
+      } catch {
+        return res.json({ ok: false, message: '알 수 없는 오류가 발생했습니다.' });
+      }
+    }
+    return res.json({ ok: true, user });
   }
 }
 
-export default withApiSession(protectedHandler({ methods: ['GET', 'POST', 'DELETE', 'PUT'], handler }));
+export default withApiSession(protectedHandler({ methods: ['GET', 'DELETE', 'PUT'], handler }));

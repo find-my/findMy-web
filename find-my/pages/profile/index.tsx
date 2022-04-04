@@ -24,7 +24,7 @@ const Profile: NextPage = () => {
       <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
         <div className="w-14 h-14 rounded-full bg-slate-500" />
         <div className="flex flex-col">
-          <span className="font-semibold">오니</span>
+          <span className="font-semibold">{user?.name || null}</span>
           <button className="border border-slate-500 text-xs p-1 rounded">프로필 수정</button>
         </div>
       </div>

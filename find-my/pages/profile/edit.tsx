@@ -1,8 +1,63 @@
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import useUser from '@libs/front/hooks/useUser';
+import { useForm } from 'react-hook-form';
+import useMutation from '@libs/front/hooks/useMutation';
+import { classNames } from '@libs/front/utils';
+interface EditProfileForm {
+  email?: string;
+  password?: string;
+  phone?: string;
+  name?: string;
+  formErrors?: string;
+}
 
 const ProfileEdit: NextPage = () => {
+  const router = useRouter();
+  const { user } = useUser();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    watch,
+    clearErrors,
+
+    formState: { errors },
+  } = useForm<EditProfileForm>();
+  //프로필 업데이트 mutation
+  const [editProfile, { loading, data: editProfileResult }] = useMutation('/api/users/me', 'PUT');
+
+  //프로필 업데이트 실행. 이미 업데이트 중이거나 form이 비워져 있으면 업데이트 진행 되지 않음.
+  const onValid = (data: EditProfileForm) => {
+    if (loading) return;
+    if (errors?.formErrors?.type === 'emptyForm') return;
+    editProfile(data);
+  };
+  //모든 필드의 값들을 watch,필드 값들이 바뀔 때 마다 실행됨. form이 비워져 있으면 버튼이 비활성화 됨
+  useEffect(() => {
+    const subscription = watch((value) => {
+      const { name, password, email, phone } = value;
+      console.log(value);
+      const allEmpty = name === '' && password === '' && email === '' && phone === '';
+      if (allEmpty) {
+        //form이 비워져 있으면 에러 설정. type을 emptyForm 으로 해둠
+        setError('formErrors', { message: '변경사항 없음', type: 'emptyForm' });
+      }
+      if (errors?.formErrors && !allEmpty) {
+        clearErrors();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+  //프로필 업데이트 실행 완료
+  useEffect(() => {
+    if (editProfileResult && editProfileResult.ok) {
+      router.push('/profile');
+    }
+  }, [editProfileResult, user]);
   return (
-    <div className="py-10 px-4 space-y-4">
+    <form onSubmit={handleSubmit(onValid)} className="py-10 px-4 space-y-4">
       <div className="flex items-center space-x-3 justify-center ">
         <div className="w-24 h-24 rounded-full mb-2 bg-slate-500 relative">
           <label
@@ -34,14 +89,15 @@ const ProfileEdit: NextPage = () => {
         </div>
       </div>
       <div className="space-y-1">
-        <label htmlFor="닉네임" className="text-sm font-medium text-gray-700">
-          닉네임
+        <label htmlFor="name" className="text-sm font-medium text-gray-700">
+          이름
         </label>
         <input
-          id="nickName"
+          {...register('name')}
+          id="name"
           type="text"
           className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          required
+          placeholder={user?.name}
         />
       </div>
       <div className="space-y-1">
@@ -49,10 +105,11 @@ const ProfileEdit: NextPage = () => {
           이메일
         </label>
         <input
+          {...register('email')}
+          placeholder={user?.email}
           id="email"
           type="email"
           className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          required
         />
       </div>
       <div className="space-y-1">
@@ -60,32 +117,34 @@ const ProfileEdit: NextPage = () => {
           비밀번호
         </label>
         <input
-          id="password"
+          {...register('password')}
           type="password"
           className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          required
         />
       </div>
       <div className="space-y-1">
         <label htmlFor="phone" className="text-sm font-medium text-gray-700">
           휴대폰 번호
         </label>
-        <div className="flex rounded-md shadow-sm">
-          <span className="flex items-center justify-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 select-none text-sm">
-            +82
-          </span>
-          <input
-            id="input"
-            type="number"
-            className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md rounded-l-none shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-        </div>
+        <input
+          {...register('phone')}
+          id="phone"
+          type="text"
+          placeholder={user?.phone || ''}
+          className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
       </div>
-      <button className="mt-5 w-full bg-blue-400 hover:bg-blue-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:outline-none ">
+      <button
+        className={classNames(
+          'mt-5 w-full   text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium ',
+          errors?.formErrors?.type === 'emptyForm'
+            ? 'bg-blue-300 cursor-not-allowed'
+            : 'bg-blue-400 hover:bg-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:outline-none',
+        )}
+      >
         프로필 변경
       </button>
-    </div>
+    </form>
   );
 };
 
