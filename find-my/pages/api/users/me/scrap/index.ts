@@ -8,15 +8,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     session: { user },
   } = req;
   try {
-    const reviews = await client.review.findMany({
+    const scraps = await client.scrap.findMany({
       where: {
-        createdForId: user?.id,
+        userId: user?.id,
       },
-      include: { createdBy: { select: { id: true, name: true, avatar: true } } },
+      include: {
+        lost: true,
+      },
     });
     res.json({
       ok: true,
-      reviews,
+      scraps,
     });
   } catch {
     res.json({
