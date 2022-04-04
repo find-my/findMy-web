@@ -1,3 +1,5 @@
+//클라이언트쪽에서 보낸 정보 중
+//기존 유저의 정보와 일치하는 부분은 업데이트 하지 않음
 import { NextApiRequest, NextApiResponse } from 'next';
 import protectedHandler, { ResponseType } from '@libs/back/protectedHandler';
 import client from '@libs/back/client';
