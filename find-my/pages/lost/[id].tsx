@@ -63,10 +63,19 @@ const LostDetail: NextPage = () => {
 
     toggleScrap({});
   };
-  console.log(data?.lost?.photos);
+  console.log(process.env.IMAGE_DELIVERY);
   return (
     <>
-      <div className="w-full h-96 bg-slate-500" />
+      <div>
+        {data?.lost?.photos ? (
+          <img
+            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${data?.lost?.photos[0]?.file}/public`}
+            className="w-full h-96 bg-slate-500"
+          />
+        ) : (
+          <div className="w-full h-96 bg-slate-500" />
+        )}
+      </div>
       <div className="p-4 pb-14">
         <div className="border-b pb-3">
           <div className="flex justify-between items-center space-x-2 border-b pb-3 border-slate-300">

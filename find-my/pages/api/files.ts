@@ -5,7 +5,7 @@ import { withApiSession } from '@libs/back/session';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const response = await (
-    await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.IMAGE_API_ID}/images/v1/direct_upload`, {
+    await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.IMAGE_DELIVERY}/images/v1/direct_upload`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

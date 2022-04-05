@@ -25,6 +25,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
           photos: {
             select: {
               file: true,
+              id: true,
             },
           },
           _count: {
