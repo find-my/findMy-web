@@ -17,6 +17,7 @@ interface LoginForm {
 }
 const Login: NextPage = () => {
   const router = useRouter();
+
   //const { data, mutate: loginMutate } = useSWR<boolean>('isLoggedIn');
   const [login, { loading, data: loginResult, error }] = useMutation('/api/users/login', 'POST');
   const {
