@@ -1,15 +1,18 @@
 //lost/upload
 //분실물 게시물 업로드 페이지
 import { NextPage } from 'next';
-import { FieldErrors, useForm } from 'react-hook-form';
+import { FieldErrors, useForm, UseFormRegisterReturn } from 'react-hook-form';
 import UploadButton from '@components/UploadButton';
 import { useCallback, useState, useEffect } from 'react';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
 import { Lost } from '@prisma/client';
+
 interface LostForm {
-  images?: string[];
+  image1?: FileList;
+  image2?: FileList;
+  image3?: FileList;
   title: string;
   category: string;
   description: string;
@@ -48,7 +51,11 @@ interface ILostPlace {
 
 //분실물을 잃어 버린 위치를 모르겠을 때 설정 값. found 와 겹치므로 분리 예정
 const LOSTPLACE_NULL = '모르겠음';
-
+interface IselectedImage {
+  url?: string;
+  selected: boolean;
+  index: string;
+}
 const Upload: NextPage = () => {
   const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST'); //lost 생성 mutation
   const router = useRouter();
@@ -59,8 +66,12 @@ const Upload: NextPage = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
+    resetField,
   } = useForm<LostForm>();
-
+  const [imagePreview1, setImagePreview1] = useState<string>('');
+  const [imagePreview2, setImagePreview2] = useState<string>('');
+  const [imagePreview3, setImagePreview3] = useState<string>('');
   //upload Form 이 채워지면 POST
   const onValid = (data: LostForm) => {
     if (loading) return;
@@ -68,10 +79,6 @@ const Upload: NextPage = () => {
 
     uploadLost({ ...data, ...lostPlace });
   };
-  const onInvalid = (errors: FieldErrors) => {
-    console.dir(errors);
-  };
-
   //
   const placeFinderOpen = () => {
     setIsPlaceFinderOpen(true);
@@ -82,75 +89,76 @@ const Upload: NextPage = () => {
     setLostPlace({ place: LOSTPLACE_NULL });
   };
 
+  const image1 = watch('image1');
+  const image2 = watch('image2');
+  const image3 = watch('image3');
+
+  useEffect(() => {
+    if (image1 && image1.length > 0) {
+      const file = image1[0];
+
+      setImagePreview1(URL.createObjectURL(file));
+    }
+  }, [image1]);
+  useEffect(() => {
+    if (image2 && image2.length > 0) {
+      const file = image2[0];
+
+      setImagePreview2(URL.createObjectURL(file));
+    }
+  }, [image2]);
+  useEffect(() => {
+    if (image3 && image3.length > 0) {
+      const file = image3[0];
+
+      setImagePreview3(URL.createObjectURL(file));
+    }
+  }, [image3]);
   //업로드가 완료 되었으면 /lost/id로 이동
   useEffect(() => {
     if (uploadResult?.ok) {
       console.log('업로드 완료');
       //상태 값 리셋
       setLostPlace({ place: '' });
+      setImagePreview1('');
+      setImagePreview2('');
+      setImagePreview3('');
       reset();
       router.push(`/lost/${uploadResult.lost?.id}`);
     }
   }, [uploadResult, router]);
+
   return (
     <>
       {!isPlaceFinderOpen ? (
         <div>
           <form onSubmit={handleSubmit(onValid)} className="px-4 py-16">
-            <div>
-              <div className="flex space-x-4 border-b pb-4">
-                <div className="flex flex-col items-center justify-center border border-slate-400 rounded w-20 h-20">
-                  <label className="hover:text-blue-400 cursor-pointer">
-                    <svg className="h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                      <path
-                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <input className="hidden" type="file" />
-                  </label>
-                  <span className="-mt-2 ">2/10</span>
-                </div>
-                <div className="w-20 h-20 bg-slate-500 rounded relative">
-                  <button className="absolute text-white p-1 bg-black rounded-full -right-1 -top-1">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      ></path>
-                    </svg>
-                  </button>
-                  <div className="text-white bg-black w-20 text-center rounded-b absolute bottom-0 ">대표사진</div>
-                </div>
-                <div className="w-20 h-20 bg-slate-500 rounded relative">
-                  <button className="absolute text-white p-1 bg-black rounded-full -right-1 -top-1">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+            <div className="flex space-x-4 border-b pb-4">
+              <UploadPhoto
+                isFirst={true}
+                register={register('image1')}
+                previewImage={imagePreview1}
+                clear={() => {
+                  resetField('image1');
+                  setImagePreview1('');
+                }}
+              />
+              <UploadPhoto
+                register={register('image2')}
+                previewImage={imagePreview2}
+                clear={() => {
+                  resetField('image2');
+                  setImagePreview2('');
+                }}
+              />
+              <UploadPhoto
+                register={register('image3')}
+                previewImage={imagePreview3}
+                clear={() => {
+                  resetField('image3');
+                  setImagePreview3('');
+                }}
+              />
             </div>
             <div className="mt-2">
               <label htmlFor="title">제목</label>
@@ -254,3 +262,50 @@ const Upload: NextPage = () => {
 };
 
 export default Upload;
+
+interface IUploadPhoto {
+  isFirst?: boolean;
+  register: UseFormRegisterReturn;
+  previewImage?: string;
+  clear: () => void;
+}
+function UploadPhoto({ isFirst = false, register, previewImage, clear }: IUploadPhoto) {
+  return (
+    <div>
+      {!previewImage ? (
+        <div className="flex flex-col items-center justify-center border border-slate-400 rounded w-20 h-20">
+          <label className="hover:text-blue-400 cursor-pointer">
+            <svg className="h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+              <path
+                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <input {...register} className="hidden" type="file" accept="image/*" />
+          </label>
+          <span className="-mt-2 ">사진추가</span>
+        </div>
+      ) : (
+        <div className="w-20 h-20 bg-slate-500 rounded relative z-10">
+          <img src={previewImage} className="w-20 h-20 bg-slate-500 rounded" />
+          <button onClick={clear} className="absolute text-white p-1 bg-black rounded-full -right-1 -top-1">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          {isFirst ? (
+            <div className="text-white bg-black w-20 text-center rounded-b absolute bottom-0 ">대표사진</div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
