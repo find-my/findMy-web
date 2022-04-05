@@ -22,6 +22,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
               avatar: true,
             },
           },
+          photos: {
+            select: {
+              file: true,
+            },
+          },
           _count: {
             select: {
               scraps: true,

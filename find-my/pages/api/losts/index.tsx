@@ -1,12 +1,13 @@
+//lost get,post
+//post시 photo도 동시에 생성함
 import { NextApiRequest, NextApiResponse } from 'next';
 import client from '@libs/back/client';
-import bcrypt from 'bcrypt';
 import protectedHandler, { ResponseType } from '@libs/back/protectedHandler';
 import { withApiSession } from '@libs/back/session';
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   //views 기능 추가 필요
   const {
-    body: { title, category, description, place, latitude, longitude },
+    body: { title, category, description, place, latitude, longitude, photos },
     session: { user },
   } = req;
   if (req.method === 'GET') {
@@ -71,6 +72,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         message: '알 수 없는 오류가 발생했습니다.',
       });
     }
+    //lost 생성과 동시에 photo도 만듦
+    photos.forEach(async (photo: string) => {
+      if (!photo || !photo.trim()) return;
+      try {
+        await client.lostPhoto.create({
+          data: {
+            file: photo,
+            lost: {
+              connect: {
+                id: lost.id,
+              },
+            },
+          },
+        });
+      } catch {
+        return res.json({
+          ok: false,
+          message: '알 수 없는 오류가 발생했습니다.',
+        });
+      }
+    });
     return res.json({
       ok: true,
       lost,

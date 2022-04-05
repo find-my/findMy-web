@@ -63,7 +63,7 @@ const LostDetail: NextPage = () => {
 
     toggleScrap({});
   };
-
+  console.log(data?.lost?.photos);
   return (
     <>
       <div className="w-full h-96 bg-slate-500" />

@@ -1,4 +1,4 @@
-import { Lost, User, Comment, ReComment } from '@prisma/client';
+import { Lost, User, Comment, ReComment, LostPhoto } from '@prisma/client';
 export interface ExtendedReComment extends ReComment {
   user: User;
 }
@@ -11,6 +11,7 @@ export interface ExtendedComment extends Comment {
 }
 export interface ExtendedLost extends Lost {
   user: User;
+  photos: LostPhoto[];
   _count: {
     scraps: number;
     comments: number;

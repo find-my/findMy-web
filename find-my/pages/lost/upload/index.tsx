@@ -8,6 +8,7 @@ import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
 import { Lost } from '@prisma/client';
+import useUser from '@libs/front/hooks/useUser';
 
 interface LostForm {
   image1?: FileList;
@@ -57,6 +58,7 @@ interface IselectedImage {
   index: string;
 }
 const Upload: NextPage = () => {
+  const { user } = useUser();
   const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST'); //lost 생성 mutation
   const router = useRouter();
   const [lostPlace, setLostPlace] = useState<ILostPlace>({ place: '' }); //lostPlace 상태 관리
@@ -73,11 +75,38 @@ const Upload: NextPage = () => {
   const [imagePreview2, setImagePreview2] = useState<string>('');
   const [imagePreview3, setImagePreview3] = useState<string>('');
   //upload Form 이 채워지면 POST
-  const onValid = (data: LostForm) => {
+  const onValid = async (data: LostForm) => {
     if (loading) return;
     if (!lostPlace.place || !lostPlace.place.trim()) return;
-
-    uploadLost({ ...data, ...lostPlace });
+    let imageIds: string[] = [];
+    if (image1 && image1.length > 0 && user) {
+      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const form = new FormData();
+      form.append('file', image1[0], user?.id + '');
+      const {
+        result: { id },
+      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
+      imageIds?.push(id);
+    }
+    if (image2 && image2.length > 0 && user) {
+      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const form = new FormData();
+      form.append('file', image2[0], user?.id + '');
+      const {
+        result: { id },
+      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
+      imageIds?.push(id);
+    }
+    if (image1 && image1.length > 0 && user) {
+      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const form = new FormData();
+      form.append('file', image1[0], user?.id + '');
+      const {
+        result: { id },
+      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
+      imageIds?.push(id);
+    }
+    uploadLost({ ...data, ...lostPlace, photos: imageIds });
   };
   //
   const placeFinderOpen = () => {
@@ -96,7 +125,6 @@ const Upload: NextPage = () => {
   useEffect(() => {
     if (image1 && image1.length > 0) {
       const file = image1[0];
-
       setImagePreview1(URL.createObjectURL(file));
     }
   }, [image1]);
