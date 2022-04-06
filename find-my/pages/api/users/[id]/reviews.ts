@@ -28,10 +28,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   }
   if (req.method === 'POST') {
     const {
-      body: { review },
+      body: { review, score },
     } = req;
-    if(user?.id===+id.toString()){
-      res.json({
+    if (user?.id === +id.toString()) {
+      return res.json({
+        ok: false,
+      });
+    }
+    if (score < 1 || score > 6) {
+      return res.json({
         ok: false,
       });
     }
@@ -49,6 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
             },
           },
           review,
+          score,
         },
       });
       return res.json({
