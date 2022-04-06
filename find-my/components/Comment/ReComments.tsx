@@ -54,7 +54,7 @@ function ReComments({ lostId, commentId, state, lostUserId, reComment }: Props) 
   }, []);
   const onDelete = () => {
     if (removeLoading) return;
-    if (+reComment?.user?.id === +user?.id) {
+    if (+reComment?.user?.id === +(user?.id || -1)) {
       remove({});
     }
   };
@@ -107,7 +107,14 @@ function ReComments({ lostId, commentId, state, lostUserId, reComment }: Props) 
   return (
     <div>
       <div className="flex w-full justify-between space-x-2 items-start">
-        <div className="w-5 h-5 bg-purple-500 rounded-full" />
+        {reComment?.user?.avatar ? (
+          <img
+            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${reComment?.user?.avatar}/public`}
+            className="w-5 h-5 bg-purple-500 rounded-full"
+          />
+        ) : (
+          <div className="w-5 h-5 bg-purple-500 rounded-full" />
+        )}
         <div className="w-full ">
           <div className="text-sm flex items-start justify-between">
             <div className="cursor-pointer flex items-center space-x-1">
@@ -133,7 +140,7 @@ function ReComments({ lostId, commentId, state, lostUserId, reComment }: Props) 
               </button>
 
               <div className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap opacity-0 hover:opacity-100">
-                {+reComment?.user?.id === +user?.id ? (
+                {+reComment?.user?.id === +(user?.id || -1) ? (
                   <>
                     <button onClick={onUpdate} className="p-1">
                       수정

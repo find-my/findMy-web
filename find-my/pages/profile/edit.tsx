@@ -1,11 +1,12 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useUser from '@libs/front/hooks/useUser';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormRegisterReturn } from 'react-hook-form';
 import useMutation from '@libs/front/hooks/useMutation';
 import { classNames } from '@libs/front/utils';
 interface EditProfileForm {
+  avatar: FileList;
   email?: string;
   password?: string;
   phone?: string;
@@ -22,18 +23,35 @@ const ProfileEdit: NextPage = () => {
     setError,
     watch,
     clearErrors,
-
+    reset,
     formState: { errors },
   } = useForm<EditProfileForm>();
   //프로필 업데이트 mutation
   const [editProfile, { loading, data: editProfileResult }] = useMutation('/api/users/me', 'PUT');
-
+  const [avatarPreview, setAvatarPreview] = useState<string>('');
   //프로필 업데이트 실행. 이미 업데이트 중이거나 form이 비워져 있으면 업데이트 진행 되지 않음.
-  const onValid = (data: EditProfileForm) => {
+  const avatar = watch('avatar');
+  const onValid = async ({ email, phone, name, password }: EditProfileForm) => {
     if (loading) return;
-    if (errors?.formErrors?.type === 'emptyForm') return;
-    editProfile(data);
+    if (errors?.formErrors?.type === 'emptyForm' && !avatar) return;
+
+    if (avatar && avatar.length > 0 && user) {
+      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const form = new FormData();
+      form.append('file', avatar[0], user?.id + '');
+      const {
+        result: { id },
+      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
+      editProfile({ email, phone, name, password, avatar: id });
+    }
+    editProfile({ email, phone, name, password });
   };
+  useEffect(() => {
+    if (avatar && avatar.length > 0) {
+      const file = avatar[0];
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  }, [avatar]);
   //모든 필드의 값들을 watch,필드 값들이 바뀔 때 마다 실행됨. form이 비워져 있으면 버튼이 비활성화 됨
   useEffect(() => {
     const subscription = watch((value) => {
@@ -58,36 +76,7 @@ const ProfileEdit: NextPage = () => {
   }, [editProfileResult, user]);
   return (
     <form onSubmit={handleSubmit(onValid)} className="py-10 px-4 space-y-4">
-      <div className="flex items-center space-x-3 justify-center ">
-        <div className="w-24 h-24 rounded-full mb-2 bg-slate-500 relative">
-          <label
-            htmlFor="picture"
-            className="absolute bottom-1 -right-1 cursor-pointer text-white bg-gray-700 p-1 rounded-full "
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-              ></path>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-              ></path>
-            </svg>
-            <input id="picture" type="file" className="hidden" accept="image/*" />
-          </label>
-        </div>
-      </div>
+      <UploadPhoto register={register('avatar')} previewImage={avatarPreview} />
       <div className="space-y-1">
         <label htmlFor="name" className="text-sm font-medium text-gray-700">
           이름
@@ -149,3 +138,48 @@ const ProfileEdit: NextPage = () => {
 };
 
 export default ProfileEdit;
+
+interface IUploadPhoto {
+  register: UseFormRegisterReturn;
+  previewImage: string;
+}
+function UploadPhoto({ register, previewImage }: IUploadPhoto) {
+  return (
+    <div>
+      <div className="flex items-center space-x-3 justify-center ">
+        <div className="w-24 h-24 rounded-full mb-2 bg-slate-500 relative">
+          <>
+            {' '}
+            {previewImage ? <img src={previewImage} className="w-24 h-24 rounded-full mb-2 bg-slate-500 z-10" /> : null}
+          </>
+          <label
+            htmlFor="picture"
+            className="absolute bottom-1 -right-1 cursor-pointer text-white bg-gray-700 p-1 rounded-full "
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+              ></path>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+              ></path>
+            </svg>
+            <input {...register} id="picture" type="file" className="hidden" accept="image/*" />
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}

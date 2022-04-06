@@ -27,8 +27,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   if (req.method === 'PUT') {
     const {
       session: { user },
-      body: { email, phone, name, password },
+      body: { email, phone, name, password, avatar },
     } = req;
+    console.log(email, phone, name, password, avatar);
     const currentUser = await client.user.findUnique({
       where: {
         id: user?.id,
@@ -114,6 +115,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         }
       }
     }
+    if (avatar) {
+      try {
+        await client.user.update({
+          where: {
+            id: user?.id,
+          },
+          data: {
+            avatar,
+          },
+        });
+      } catch {
+        return res.json({ ok: false, message: '알 수 없는 오류가 발생했습니다.' });
+      }
+    }
     //session에 저장된 유저에 이름과 아바타 정보도 추가로 넣어 주기
     if (name) {
       try {
@@ -129,7 +144,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         return res.json({ ok: false, message: '알 수 없는 오류가 발생했습니다.' });
       }
     }
-    return res.json({ ok: true, user });
+    return res.json({ ok: true });
   }
 }
 

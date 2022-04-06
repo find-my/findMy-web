@@ -4,22 +4,25 @@ import client from '@libs/back/client';
 import { withApiSession } from '@libs/back/session';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
-  const response = await (
-    await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.IMAGE_API_ID}/images/v1/direct_upload`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.IMAGE_TOKEN}`,
+  const {
+    query: { id },
+  } = req;
+  try {
+    const reviews = await client.review.findMany({
+      where: {
+        createdForId: +id.toString(),
       },
-    })
-  ).json();
-
-  console.log(response);
-
-  res.json({
-    ok: true,
-    ...response.result,
-  });
+      include: { createdBy: { select: { id: true, name: true, avatar: true } } },
+    });
+    res.json({
+      ok: true,
+      reviews,
+    });
+  } catch {
+    res.json({
+      ok: false,
+    });
+  }
 }
 
 export default withApiSession(

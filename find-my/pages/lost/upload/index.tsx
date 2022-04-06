@@ -52,11 +52,7 @@ interface ILostPlace {
 
 //분실물을 잃어 버린 위치를 모르겠을 때 설정 값. found 와 겹치므로 분리 예정
 const LOSTPLACE_NULL = '모르겠음';
-interface IselectedImage {
-  url?: string;
-  selected: boolean;
-  index: string;
-}
+
 const Upload: NextPage = () => {
   const { user } = useUser();
   const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST'); //lost 생성 mutation

@@ -52,7 +52,7 @@ function Comments() {
               {
                 ...createCommentResult.comment,
                 reComment: [],
-                user: { avatar: user.avatar, id: user.id, name: user.name },
+                user: { avatar: user?.avatar, id: user?.id, name: user?.name },
               },
             ],
           },

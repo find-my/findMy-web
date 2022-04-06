@@ -67,7 +67,7 @@ const LostDetail: NextPage = () => {
   return (
     <>
       <div>
-        {data?.lost?.photos ? (
+        {data?.lost?.photos[0]?.file ? (
           <img
             src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${data?.lost?.photos[0]?.file}/public`}
             className="w-full h-96 bg-slate-500"
@@ -82,8 +82,14 @@ const LostDetail: NextPage = () => {
             <div className="flex items-center space-x-2">
               <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
                 <a>
-                  {' '}
-                  <div className="w-12 h-12 rounded-full bg-green-500" />
+                  {data?.lost?.user?.avatar ? (
+                    <img
+                      src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${data?.lost?.user?.avatar}/public`}
+                      className="w-12 h-12 rounded-full bg-green-500"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-green-500" />
+                  )}
                 </a>
               </Link>
               <div>

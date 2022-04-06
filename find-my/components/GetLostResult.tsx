@@ -1,18 +1,9 @@
 import { Lost, User } from '@prisma/client';
-
+import { LostListResponse } from '../typeDefs/lost';
 interface Props {
   contents: LostListResponse;
 }
-interface ExtendedLost extends Lost {
-  user: User;
-  _count: {
-    scraps: number;
-  };
-}
-interface LostListResponse {
-  ok: boolean;
-  lostList: ExtendedLost[];
-}
+
 function GetLostResult({ contents }: Props) {
   function displayedAt(createdAt: string) {
     if (!createdAt) return;
@@ -50,6 +41,7 @@ function GetLostResult({ contents }: Props) {
     <div className="flex flex-col space-y-5  py-10">
       {contents?.lostList.map((lost, i) => {
         const {
+          photos,
           title,
           lostPlace,
           createdAt,
@@ -65,7 +57,16 @@ function GetLostResult({ contents }: Props) {
         return (
           <div key={i} className="flex border-b pb-4 cursor-pointer justify-between items-end px-4">
             <div className="flex space-x-4">
-              <div className="w-20 h-20 rounded bg-slate-500" />
+              <>
+                {photos && photos[0]?.file ? (
+                  <img
+                    src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${photos[0]?.file}/public`}
+                    className="w-20 h-20 rounded bg-slate-500"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded bg-slate-500" />
+                )}
+              </>
               <div className="flex flex-col justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">{title}</h3>

@@ -5,12 +5,12 @@ import { withApiSession } from '@libs/back/session';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const {
-    session: { user },
+    query: { id },
   } = req;
   try {
     const lostList = await client.lost.findMany({
       where: {
-        userId: user?.id,
+        userId: +id.toString(),
       },
       include: {
         user: {

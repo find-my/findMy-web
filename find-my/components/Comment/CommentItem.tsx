@@ -57,7 +57,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
   const onDelete = () => {
     if (removeLoading) return;
     if (!commentData) return;
-    if (+commentData.comment.userId === +user?.id) {
+    if (+commentData.comment.userId === +(user?.id || -1)) {
       remove({});
     }
   };
@@ -95,9 +95,9 @@ function CommentItem({ commentId, lostUserId }: Props) {
               {
                 ...createdReCommentResult?.reComment,
                 user: {
-                  id: user.id,
-                  name: user.name,
-                  avatar: user.avatar,
+                  id: user?.id,
+                  name: user?.name,
+                  avatar: user?.avatar,
                 },
               },
             ],
@@ -129,7 +129,14 @@ function CommentItem({ commentId, lostUserId }: Props) {
   }, [updateResult]);
   return (
     <div className="flex w-full justify-between space-x-2 items-start">
-      <div className="w-5 h-5 bg-purple-500 rounded-full" />
+      {commentData?.comment?.user?.avatar ? (
+        <img
+          src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${commentData?.comment?.user?.avatar}/public`}
+          className="w-5 h-5 bg-purple-500 rounded-full"
+        />
+      ) : (
+        <div className="w-5 h-5 bg-purple-500 rounded-full" />
+      )}
       <div className="w-full ">
         <div className="text-sm flex items-start justify-between">
           <div className="cursor-pointer flex items-center space-x-1">

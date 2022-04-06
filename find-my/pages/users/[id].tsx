@@ -6,7 +6,7 @@ import { classNames } from '@libs/front/utils';
 import { useState } from 'react';
 import GetLostResult from '@components/GetLostResult';
 import { ExtendedLost, LostListResponse } from '../../typeDefs/lost';
-
+import { useRouter } from 'next/router';
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -15,25 +15,30 @@ interface ReviewsResponse {
   reviews: ExtendedReview[];
 }
 const Profile: NextPage = () => {
-  const { user } = useUser();
-  const { data: userLostsData, error } = useSWR<LostListResponse>('/api/users/me/losts');
-  const { data: reviewsData } = useSWR<ReviewsResponse>('/api/users/me/reviews');
+  const router = useRouter();
+  console.log();
+  const { user: userLoggedIn } = useUser();
+  const { data: user } = useSWR(router.query.id ? `/api/users/${router.query.id}` : null);
+  const { data: userLostsData, error } = useSWR<LostListResponse>(`/api/users/${router.query.id}/losts`);
+  const { data: reviewsData } = useSWR<ReviewsResponse>(`/api/users/${router.query.id}/reviews`);
   const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
   console.log(user);
   return (
     <div className="py-10 px-4">
       <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
-        {user?.avatar ? (
+        {user?.userData?.avatar ? (
           <img
-            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${user?.avatar}/public`}
+            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${user?.userData?.avatar}/public`}
             className="w-14 h-14 rounded-full bg-slate-500"
           />
         ) : (
           <div className="w-14 h-14 rounded-full bg-slate-500" />
         )}
         <div className="flex flex-col">
-          <span className="font-semibold">{user?.name || null}</span>
-          <button className="border border-slate-500 text-xs p-1 rounded">프로필 수정</button>
+          <span className="font-semibold">{user?.userData?.name || null}</span>
+          <button className="border border-slate-500 text-xs p-1 rounded">
+            {userLoggedIn?.id === +(router.query.id || -1) ? <>프로필 수정</> : <>리뷰 작성</>}
+          </button>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-2 p-2 border-b ">
@@ -56,6 +61,7 @@ const Profile: NextPage = () => {
           <span>사용자 리뷰</span>
         </button>
       </div>
+
       {viewFilter === 'Lost' ? <UserLosts userLostsData={userLostsData} /> : null}
       {viewFilter === 'UserReview' ? <UserReviews reviewsData={reviewsData} /> : null}
     </div>
