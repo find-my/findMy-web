@@ -5,7 +5,7 @@ import { Review, User } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import { useState } from 'react';
 import GetLostResult from '@components/GetLostResult';
-import { ExtendedLost, LostListResponse } from '../../typeDefs/lost';
+import { ExtendedLost, LostListResponse } from '../../../typeDefs/lost';
 import { useRouter } from 'next/router';
 interface ExtendedReview extends Review {
   createdBy: User;
