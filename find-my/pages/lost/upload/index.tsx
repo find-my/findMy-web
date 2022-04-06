@@ -185,7 +185,7 @@ const Upload: NextPage = () => {
               />
             </div>
             <div className="mt-2">
-              <label htmlFor="title">습득물명</label>
+              <label htmlFor="title">분실물명</label>
               <div className="mt-1">
                 <input
                   {...register('title', { required: true })}
