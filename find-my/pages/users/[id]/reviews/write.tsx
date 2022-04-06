@@ -10,6 +10,11 @@ import useUser from '@libs/front/hooks/useUser';
 import Rating from 'react-rating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
+import { Review } from '@prisma/client';
+interface ReviewResponse {
+  ok: boolean;
+  review: Review;
+}
 interface ReviewForm {
   review: string;
 }
@@ -18,20 +23,30 @@ const writeReview: NextPage = () => {
   const { user } = useUser();
   const router = useRouter();
   const [score, setScore] = useState<number>(1);
+  const [uploadReview, { data: uploadResult, loading }] = useMutation<ReviewResponse>(
+    `/api/users/${router.query.id}/reviews`,
+    'POST',
+  );
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
-    resetField,
   } = useForm<ReviewForm>();
   useEffect(() => {
     console.log(score);
   }, [score]);
   const onValid = async ({ review }: ReviewForm) => {
-    //do someting
+    if (loading) return;
+    uploadReview({ review, score });
   };
+  useEffect(() => {
+    if (uploadResult && uploadResult.ok) {
+      reset();
+      setScore(1);
+      router.push(`/users/${router.query.id}`);
+    }
+  }, [uploadResult]);
   return (
     <>
       {' '}

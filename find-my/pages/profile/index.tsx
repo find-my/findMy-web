@@ -6,6 +6,7 @@ import { classNames } from '@libs/front/utils';
 import { useState } from 'react';
 import GetLostResult from '@components/GetLostResult';
 import { ExtendedLost, LostListResponse } from '../../typeDefs/lost';
+import Router, { useRouter } from 'next/router';
 
 interface ExtendedReview extends Review {
   createdBy: User;
@@ -80,11 +81,74 @@ interface ReviewsProps {
 }
 function UserReviews({ reviewsData }: ReviewsProps) {
   if (!reviewsData || !reviewsData.ok) return null;
+  const { user } = useUser();
+  const router = useRouter();
+  const onDelete = () => {};
+  const onUpdate = () => {
+    router.push(`/users/${router.query.id}/writeReview`);
+  };
   return (
     <div className="divide-y py-7">
       {reviewsData?.reviews?.map((review, i) => (
-        <div key={i} className="py-3">
-          <div className="flex  space-x-1 items-start">
+        <div className="flex w-full justify-between space-x-2 items-start py-3">
+          {review?.createdBy?.avatar ? (
+            <img
+              src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${review?.createdBy?.avatar}/public`}
+              className="w-10 h-10 rounded-full bg-slate-500"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-slate-500" />
+          )}
+          <div className="w-full ">
+            <div className="text-sm flex items-start justify-between">
+              <div className="cursor-pointer flex items-center space-x-1">
+                <span>{review?.createdBy?.name || null}</span>
+              </div>
+              <div className="relative">
+                <button>
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    ></path>
+                  </svg>
+                </button>
+
+                <div className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap opacity-0 hover:opacity-100">
+                  {review?.createdBy?.id === user?.id ? (
+                    <>
+                      <button onClick={onUpdate} className="p-1">
+                        수정
+                      </button>
+                      <button onClick={onDelete} className="p-1">
+                        삭제
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+            <div className="flex space-x-1 text-xs text-slate-500">
+              <span>3/15</span>
+              <span>20:54</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+/*
+
+ <div className="flex  space-x-1 items-start">
             <div className="w-10 h-10 rounded-full bg-slate-500" />
             <div className="flex flex-col  text-sm space-y-2">
               <div>
@@ -110,8 +174,5 @@ function UserReviews({ reviewsData }: ReviewsProps) {
               </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+
+*/
