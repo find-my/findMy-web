@@ -30,6 +30,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     const {
       body: { review },
     } = req;
+    if(user?.id===+id.toString()){
+      res.json({
+        ok: false,
+      });
+    }
     try {
       const reviews = await client.review.create({
         data: {
@@ -46,12 +51,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
           review,
         },
       });
-      res.json({
+      return res.json({
         ok: true,
         reviews,
       });
     } catch {
-      res.json({
+      return res.json({
         ok: false,
       });
     }
