@@ -9,7 +9,8 @@ import { useForm } from 'react-hook-form';
 import React, { useEffect } from 'react';
 import Comments from '@components/Comments';
 import useUser from '@libs/front/hooks/useUser';
-import { LostDetailResponse, ExtendedComment } from '../../typeDefs/lost';
+import { LostDetailResponse, ExtendedComment } from '../../../typeDefs/lost';
+import { userInfo } from 'os';
 
 function displayedAt(createdAt: string) {
   if (!createdAt) return;
@@ -34,7 +35,7 @@ function displayedAt(createdAt: string) {
 }
 const LostDetail: NextPage = () => {
   const router = useRouter();
-
+  const { user } = useUser();
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
 
   const [toggleScrap] = useMutation(`/api/users/me/scraps/${router.query.id}`, 'POST');
@@ -104,9 +105,20 @@ const LostDetail: NextPage = () => {
                 </span>
               </div>
             </div>
-            <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
-              작성자에게 채팅 보내기
-            </button>
+            {data?.lost?.userId === user?.id ? (
+              <div className="space-x-2">
+                <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
+                  수정
+                </button>
+                <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
+                  삭제
+                </button>
+              </div>
+            ) : (
+              <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
+                작성자에게 채팅 보내기
+              </button>
+            )}
           </div>
 
           <div>

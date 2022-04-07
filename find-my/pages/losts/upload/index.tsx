@@ -93,10 +93,10 @@ const Upload: NextPage = () => {
       } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
       imageIds?.push(id);
     }
-    if (image1 && image1.length > 0 && user) {
+    if (image3 && image3.length > 0 && user) {
       const { uploadURL } = await (await fetch(`/api/files`)).json();
       const form = new FormData();
-      form.append('file', image1[0], user?.id + '');
+      form.append('file', image3[0], user?.id + '');
       const {
         result: { id },
       } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();

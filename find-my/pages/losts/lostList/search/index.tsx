@@ -9,16 +9,8 @@ import { useState } from 'react';
 import GetLostResult from '@components/GetLostResult';
 import { withRouter, NextRouter } from 'next/router';
 import SearchInput from '@components/SearchInput';
-interface ExtendedLost extends Lost {
-  user: User;
-  _count: {
-    scraps: number;
-  };
-}
-interface LostListResponse {
-  ok: boolean;
-  lostList: ExtendedLost[];
-}
+import { LostListResponse } from '../../../../typeDefs/lost';
+
 interface WithRouterProps {
   router: NextRouter;
 }
