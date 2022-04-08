@@ -11,7 +11,7 @@ interface Props {
   reComment: ExtendedReComment;
   lostUserId: number;
 }
-function ReComments({ commentId, lostUserId, reComment }: Props) {
+function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
   const router = useRouter();
   const { user } = useUser();
   const { data, mutate } = useSWR<CommentDetailResponse>(
@@ -114,7 +114,7 @@ function ReComments({ commentId, lostUserId, reComment }: Props) {
   );
 }
 
-export default ReComments;
+export default React.memo(ReCommentItem);
 /*
  <form onSubmit={handleSubmit(onValid)}>
       <SquareMessageInput register={register('reComment', { required: true })} placeholder="대댓글을 입력해 주세요." />

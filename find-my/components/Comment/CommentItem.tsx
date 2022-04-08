@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import useMutation from '@libs/front/hooks/useMutation';
 import useUser from '@libs/front/hooks/useUser';
-import ReComments from '@components/Comment/ReCommentList';
+import ReCommentItem from '@components/Comment/ReCommentItem';
 import { CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
 import CreateRecomment from '@components/Comment/create/reComment';
 import EditComment from '@components/Comment/Edit/comment';
@@ -116,7 +116,12 @@ function CommentItem({ commentId, lostUserId }: Props) {
         </div>
         {addReCommentMode ? <CreateRecomment commentId={commentId} ModeOff={() => setAddReCommentMode(false)} /> : null}
         {commentData?.comment?.reComments?.map((reCo) => (
-          <ReComments key={reCo.id} commentId={commentData.comment.id + ''} reComment={reCo} lostUserId={lostUserId} />
+          <ReCommentItem
+            key={reCo.id}
+            commentId={commentData.comment.id + ''}
+            reComment={reCo}
+            lostUserId={lostUserId}
+          />
         ))}
       </div>
     </div>
