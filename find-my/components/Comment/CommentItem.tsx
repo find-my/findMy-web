@@ -7,7 +7,7 @@ import useMutation from '@libs/front/hooks/useMutation';
 import useUser from '@libs/front/hooks/useUser';
 import { useForm } from 'react-hook-form';
 import TextareaAutosize from 'react-textarea-autosize';
-import ReComments from '@components/Comment/ReComments';
+import ReComments from '@components/Comment/ReCommentList';
 import SquareMessageInput from '@components/SquareMessageInput';
 import { CommentsResponse, CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
 

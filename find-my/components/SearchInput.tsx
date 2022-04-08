@@ -17,7 +17,7 @@ const SearchInput = () => {
     setSearhTerm(data.searchTerm);
   };
   useEffect(() => {
-    if (!searchTerm || !searchTerm.trim()) return;
+    if (!searchTerm.trim()) return;
     router.push({ pathname: `/lost/lostList/search`, query: { searchTerm } });
   }, [searchTerm]);
   return (

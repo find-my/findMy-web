@@ -1,15 +1,15 @@
-import { Lost, User } from '@prisma/client';
-import { LostListResponse } from '../../typeDefs/lost';
+import { ExtendedLost } from '../../typeDefs/lost';
 import LostItem from '@components/Lost/LostItem';
+import React from 'react';
 interface Props {
-  contents: LostListResponse;
+  lostList: ExtendedLost[];
 }
 
-function LostList({ contents }: Props) {
+function LostList({ lostList }: Props) {
   return (
     <div className="flex flex-col space-y-5  py-10">
-      {contents?.lostList?.map((lost, i) => {
-        return <LostItem lost={lost} />;
+      {lostList?.map((lost) => {
+        return <LostItem key={lost.id} lost={lost} />;
       })}
       <button className="fixed bottom-16 right-2 hover:bg-blue-500 transition-colors p-2 text-white bg-blue-400 rounded-full">
         <svg
@@ -27,4 +27,4 @@ function LostList({ contents }: Props) {
   );
 }
 
-export default LostList;
+export default React.memo(LostList);

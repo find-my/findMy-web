@@ -1,37 +1,15 @@
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import useSWR, { SWRConfig } from 'swr';
+import useSWR from 'swr';
 import Link from 'next/link';
-import { Lost, User, Comment, ReComment } from '@prisma/client';
-import { classNames } from '@libs/front/utils';
 import useMutation from '@libs/front/hooks/useMutation';
-import { useForm } from 'react-hook-form';
 import React, { useEffect } from 'react';
-import Comments from '@components/Comments';
+import CommentList from '@components/Comment/CommentList';
 import useUser from '@libs/front/hooks/useUser';
 import { LostDetailResponse, ExtendedComment } from '../../../typeDefs/lost';
 import { deleteCFImage } from '@libs/front/cfImage';
-function displayedAt(createdAt: string) {
-  if (!createdAt) return;
-  const now = new Date();
-  const year = now.getFullYear();
+import { displayTimeForDetail } from '@libs/front/displayTime';
 
-  const createdArr = createdAt.split('-');
-  const createdY = createdArr[0];
-  const createdM = createdArr[1];
-  const createdD = createdArr[2].split('T')[0];
-  const createdH = createdArr[2].split('T')[1].split(':')[0];
-  const createdMin = createdArr[2].split('T')[1].split(':')[1];
-  //createdAt.getTime();
-  console.log(now, createdArr, createdY, createdM, createdD, createdH, createdMin);
-
-  const Y_SAME = year === +createdY;
-
-  if (Y_SAME) {
-    return `${createdM}/${createdD} ${createdH}:${createdMin}`;
-  }
-  return `${createdY}/${createdM}/${createdD} ${createdH}:${createdMin}`;
-}
 const LostDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
@@ -111,7 +89,7 @@ const LostDetail: NextPage = () => {
                 </Link>
                 <span className="text-sm text-slate-500">
                   {' '}
-                  {displayedAt(data?.lost?.createdAt?.toString() || '') || null}
+                  {displayTimeForDetail(data?.lost?.createdAt?.toString() || '') || null}
                 </span>
               </div>
             </div>
@@ -225,7 +203,7 @@ const LostDetail: NextPage = () => {
           </div>
         </div>
 
-        <Comments />
+        <CommentList />
       </div>
     </>
   );

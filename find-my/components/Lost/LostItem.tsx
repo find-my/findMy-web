@@ -1,5 +1,6 @@
 import { ExtendedLost } from '../../typeDefs/lost';
-import { ConvertDate } from '@libs/front/convertDate';
+import { displayTimeForList } from '@libs/front/displayTime';
+import React from 'react';
 interface Props {
   lost: ExtendedLost;
 }
@@ -17,7 +18,7 @@ function LostItem({ lost }: Props) {
   let recommentCount = 0;
   lost?.comments?.forEach((comment) => (recommentCount += comment._count.reComments));
 
-  const ago = ConvertDate(createdAt.toString());
+  const ago = displayTimeForList(createdAt.toString());
   return (
     <div className="flex border-b pb-4 cursor-pointer justify-between items-end px-4">
       <div className="flex space-x-4 w-2/3">
@@ -100,4 +101,4 @@ function LostItem({ lost }: Props) {
   );
 }
 
-export default LostItem;
+export default React.memo(LostItem);

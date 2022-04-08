@@ -6,8 +6,8 @@ import { useForm } from 'react-hook-form';
 import useUser from '@libs/front/hooks/useUser';
 import useMutation from '@libs/front/hooks/useMutation';
 import MessageInput from '@components/MessageInput';
-import CommentItem from './Comment/CommentItem';
-import { LostDetailResponse, CommentDetailResponse, CommentsResponse } from '../typeDefs/lost';
+import CommentItem from './CommentItem';
+import { LostDetailResponse, CommentDetailResponse, CommentsResponse } from '../../typeDefs/lost';
 
 interface CommentForm {
   comment: string;
