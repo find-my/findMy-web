@@ -1,3 +1,4 @@
+//사진 변경시 cloudflare 사진 삭제하도록 수정
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
