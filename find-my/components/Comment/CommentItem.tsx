@@ -24,15 +24,9 @@ function CommentItem({ commentId, lostUserId }: Props) {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [addReCommentMode, setAddReCommentMode] = useState<boolean>(false);
   const router = useRouter();
-  const { register: CommentRegister, handleSubmit: CommentHandleSubmit, reset: CommentReset } = useForm<CommentForm>();
-
   const [remove, { data: removeResult, loading: removeLoading }] = useMutation(
     `/api/losts/${router.query.id}/comments/${commentId}`,
     'DELETE',
-  );
-  const [update, { data: updateResult, loading: updateLoading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}`,
-    'PUT',
   );
   const { data: lostData, mutate: lostMutate } = useSWR<LostDetailResponse>(
     router.query.id ? `/api/losts/${router.query.id}` : null,
@@ -53,10 +47,6 @@ function CommentItem({ commentId, lostUserId }: Props) {
   const onUpdate = () => {
     setEditMode(true);
   };
-  const onCommentValid = (comment: CommentForm) => {
-    if (updateLoading) return;
-    update(comment);
-  };
 
   useEffect(() => {
     if (removeResult && removeResult.ok) {
@@ -68,24 +58,6 @@ function CommentItem({ commentId, lostUserId }: Props) {
     }
   }, [removeResult]);
 
-  useEffect(() => {
-    console.log(updateResult && updateResult.ok);
-    if (updateResult && updateResult.ok) {
-      if (!commentData) return;
-      commentMutate(
-        {
-          ...commentData,
-          comment: {
-            ...commentData.comment,
-            content: updateResult.comment,
-          },
-        },
-        false,
-      );
-      CommentReset();
-      setEditMode(false);
-    }
-  }, [updateResult]);
   return (
     <div className="flex w-full justify-between space-x-2 items-start">
       {commentData?.comment?.user?.avatar ? (
@@ -139,25 +111,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
         </div>
         <p className="mt-1">
           {editMode ? (
-            <form onSubmit={CommentHandleSubmit(onCommentValid)} className="flex items-end">
-              <TextareaAutosize
-                {...CommentRegister('comment', { required: true })}
-                placeholder="댓글 입력"
-                className="rounded  w-3/4 mx-4 "
-              />
-              <label>
-                <input type="submit" className="hidden" />
-
-                <svg
-                  className="w-6 h-6 text-gray-400 hover:text-blue-400 cursor-pointer rotate-90"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-                </svg>
-              </label>
-            </form>
+            <EditComment commentId={commentId} ModeOff={() => setEditMode(false)} />
           ) : (
             commentData?.comment?.content
           )}
@@ -166,9 +120,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
           <span>3/15</span>
           <span>20:54</span>
         </div>
-        {addReCommentMode ? (
-          <CreateRecomment commentId={commentId} AddReCommentModeOff={() => setAddReCommentMode(false)} />
-        ) : null}
+        {addReCommentMode ? <CreateRecomment commentId={commentId} ModeOff={() => setAddReCommentMode(false)} /> : null}
         {commentData?.comment?.reComments?.map((reCo) => (
           <ReComments
             key={reCo.id}
@@ -188,11 +140,72 @@ export default React.memo(CommentItem);
 interface ReCommentForm {
   reComment: string;
 }
-interface CreateRecommnetProps {
+
+interface TempProps {
   commentId: number;
-  AddReCommentModeOff: () => void;
+  ModeOff: () => void;
 }
-function CreateRecomment({ commentId, AddReCommentModeOff }: CreateRecommnetProps) {
+
+function EditComment({ commentId, ModeOff }: TempProps) {
+  const router = useRouter();
+  const { register, handleSubmit, reset } = useForm<CommentForm>();
+
+  const [update, { data: updateResult, loading }] = useMutation(
+    `/api/losts/${router.query.id}/comments/${commentId}`,
+    'PUT',
+  );
+  const { data, mutate } = useSWR<CommentDetailResponse>(
+    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
+  );
+
+  const onValid = useCallback(
+    (comment: CommentForm) => {
+      if (loading) return;
+      update(comment);
+    },
+    [loading],
+  );
+  useEffect(() => {
+    if (updateResult && updateResult.ok) {
+      if (!data) return;
+      mutate(
+        {
+          ...data,
+          comment: {
+            ...data.comment,
+            content: updateResult.comment,
+          },
+        },
+        false,
+      );
+      reset();
+      ModeOff();
+    }
+  }, [updateResult]);
+  return (
+    <form onSubmit={handleSubmit(onValid)} className="flex items-end">
+      <TextareaAutosize
+        {...register('comment', { required: true })}
+        placeholder="댓글 입력"
+        className="rounded  w-3/4 mx-4 "
+      />
+      <label>
+        <input type="submit" className="hidden" />
+
+        <svg
+          className="w-6 h-6 text-gray-400 hover:text-blue-400 cursor-pointer rotate-90"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+        </svg>
+      </label>
+    </form>
+  );
+}
+
+function CreateRecomment({ commentId, ModeOff }: TempProps) {
   const { user } = useUser();
   const router = useRouter();
   const { data, mutate } = useSWR<CommentDetailResponse>(
@@ -203,10 +216,13 @@ function CreateRecomment({ commentId, AddReCommentModeOff }: CreateRecommnetProp
     'POST',
   );
   const { register, handleSubmit, reset } = useForm<ReCommentForm>();
-  const onValid = (reComment: ReCommentForm) => {
-    if (createdReCommentLoading) return;
-    createdReComment(reComment);
-  };
+  const onValid = useCallback(
+    (reComment: ReCommentForm) => {
+      if (createdReCommentLoading) return;
+      createdReComment(reComment);
+    },
+    [createdReCommentLoading],
+  );
   useEffect(() => {
     if (createdReCommentResult && createdReCommentResult.ok) {
       console.log(createdReCommentResult.reComment);
@@ -233,7 +249,7 @@ function CreateRecomment({ commentId, AddReCommentModeOff }: CreateRecommnetProp
         false,
       );
       reset();
-      AddReCommentModeOff();
+      ModeOff();
     }
   }, [createdReCommentResult]);
   return (
