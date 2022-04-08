@@ -1,3 +1,4 @@
+//댓글 대댓글 추가 삭제시 count mutate 적용되게 수정해야함
 //댓글 업데이트,삭제,대댓글 작성
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
@@ -17,9 +18,6 @@ interface Props {
 interface CommentForm {
   comment: string;
 }
-interface ReCommentForm {
-  reComment: string;
-}
 
 function CommentItem({ commentId, lostUserId }: Props) {
   const { user } = useUser();
@@ -27,15 +25,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
   const [addReCommentMode, setAddReCommentMode] = useState<boolean>(false);
   const router = useRouter();
   const { register: CommentRegister, handleSubmit: CommentHandleSubmit, reset: CommentReset } = useForm<CommentForm>();
-  const {
-    register: ReCommentRegister,
-    handleSubmit: ReCommentHandleSubmit,
-    reset: ReCommentReset,
-  } = useForm<ReCommentForm>();
-  const [createdReComment, { data: createdReCommentResult, loading: createdReCommentLoading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}/recomments`,
-    'POST',
-  );
+
   const [remove, { data: removeResult, loading: removeLoading }] = useMutation(
     `/api/losts/${router.query.id}/comments/${commentId}`,
     'DELETE',
@@ -67,10 +57,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
     if (updateLoading) return;
     update(comment);
   };
-  const onReCommentValid = (reComment: ReCommentForm) => {
-    if (createdReCommentLoading) return;
-    createdReComment(reComment);
-  };
+
   useEffect(() => {
     if (removeResult && removeResult.ok) {
       if (!lostData || !user) return;
@@ -80,34 +67,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
       );
     }
   }, [removeResult]);
-  useEffect(() => {
-    if (createdReCommentResult && createdReCommentResult.ok) {
-      console.log(createdReCommentResult.reComment);
-      if (!commentData) return;
-      commentMutate(
-        {
-          ...commentData,
-          comment: {
-            ...commentData.comment,
-            reComments: [
-              ...commentData.comment.reComments,
-              {
-                ...createdReCommentResult?.reComment,
-                user: {
-                  id: user?.id,
-                  name: user?.name,
-                  avatar: user?.avatar,
-                },
-              },
-            ],
-          },
-        },
-        false,
-      );
-    }
-    ReCommentReset();
-    setAddReCommentMode(false);
-  }, [createdReCommentResult]);
+
   useEffect(() => {
     console.log(updateResult && updateResult.ok);
     if (updateResult && updateResult.ok) {
@@ -207,12 +167,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
           <span>20:54</span>
         </div>
         {addReCommentMode ? (
-          <form onSubmit={ReCommentHandleSubmit(onReCommentValid)}>
-            <SquareMessageInput
-              register={ReCommentRegister('reComment', { required: true })}
-              placeholder="대댓글을 입력해 주세요."
-            />
-          </form>
+          <CreateRecomment commentId={commentId} AddReCommentModeOff={() => setAddReCommentMode(false)} />
         ) : null}
         {commentData?.comment?.reComments?.map((reCo) => (
           <ReComments
@@ -229,3 +184,61 @@ function CommentItem({ commentId, lostUserId }: Props) {
   );
 }
 export default React.memo(CommentItem);
+
+interface ReCommentForm {
+  reComment: string;
+}
+interface CreateRecommnetProps {
+  commentId: number;
+  AddReCommentModeOff: () => void;
+}
+function CreateRecomment({ commentId, AddReCommentModeOff }: CreateRecommnetProps) {
+  const { user } = useUser();
+  const router = useRouter();
+  const { data, mutate } = useSWR<CommentDetailResponse>(
+    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
+  );
+  const [createdReComment, { data: createdReCommentResult, loading: createdReCommentLoading }] = useMutation(
+    `/api/losts/${router.query.id}/comments/${commentId}/recomments`,
+    'POST',
+  );
+  const { register, handleSubmit, reset } = useForm<ReCommentForm>();
+  const onValid = (reComment: ReCommentForm) => {
+    if (createdReCommentLoading) return;
+    createdReComment(reComment);
+  };
+  useEffect(() => {
+    if (createdReCommentResult && createdReCommentResult.ok) {
+      console.log(createdReCommentResult.reComment);
+      if (!data) return;
+      mutate(
+        //대댓글 mutate
+        {
+          ...data,
+          comment: {
+            ...data.comment,
+            reComments: [
+              ...data.comment.reComments,
+              {
+                ...createdReCommentResult?.reComment,
+                user: {
+                  id: user?.id,
+                  name: user?.name,
+                  avatar: user?.avatar,
+                },
+              },
+            ],
+          },
+        },
+        false,
+      );
+      reset();
+      AddReCommentModeOff();
+    }
+  }, [createdReCommentResult]);
+  return (
+    <form onSubmit={handleSubmit(onValid)}>
+      <SquareMessageInput register={register('reComment', { required: true })} placeholder="대댓글을 입력해 주세요." />
+    </form>
+  );
+}
