@@ -1,60 +1,67 @@
-import React, { useEffect, useCallback } from 'react';
-import { useRouter } from 'next/router';
-import { useForm } from 'react-hook-form';
 import TextareaAutosize from 'react-textarea-autosize';
-import { CommentDetailResponse, LostDetailResponse } from '../../../typeDefs/lost';
+import { useForm } from 'react-hook-form';
 import useMutation from '@libs/front/hooks/useMutation';
+import React, { useEffect, useCallback } from 'react';
 import useSWR from 'swr';
+import { useRouter } from 'next/router';
+import { CommentDetailResponse } from '../../../typeDefs/lost';
 
 interface Props {
-  commentId: number;
+  commentId: string;
+  reCommentId: number;
   ModeOff: () => void;
 }
-interface CommentForm {
-  comment: string;
+interface ReCommentForm {
+  reComment: string;
 }
-
-function EditComment({ commentId, ModeOff }: Props) {
+function EditRecomment({ commentId, reCommentId, ModeOff }: Props) {
   const router = useRouter();
-  const { register, handleSubmit, reset } = useForm<CommentForm>();
-
-  const [update, { data: updateResult, loading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}`,
-    'PUT',
-  );
   const { data, mutate } = useSWR<CommentDetailResponse>(
     commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
   );
-
-  const onValid = useCallback(
-    (comment: CommentForm) => {
-      if (loading) return;
-      update(comment);
-    },
-    [loading],
+  const [update, { data: updateResult, loading }] = useMutation(
+    `/api/losts/${router.query.id}/comments/${commentId}/recomments/${reCommentId}`,
+    'PUT',
   );
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ReCommentForm>();
+  const onValid = (reComment: ReCommentForm) => {
+    console.log(123);
+    if (loading) return;
+    update(reComment);
+  };
   useEffect(() => {
     if (updateResult && updateResult.ok) {
+      console.log(456);
       if (!data) return;
       mutate(
         {
           ...data,
           comment: {
             ...data.comment,
-            content: updateResult.comment,
+            reComments: data.comment.reComments.map((rc) => {
+              if (rc.id !== reCommentId) return rc;
+              else {
+                return { ...rc, content: updateResult.reComment };
+              }
+            }),
           },
         },
         false,
       );
-      reset();
       ModeOff();
+      reset();
     }
   }, [updateResult]);
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex items-end">
       <TextareaAutosize
-        {...register('comment', { required: true })}
-        placeholder="댓글 입력"
+        {...register('reComment', { required: true })}
+        placeholder="대댓글 수정"
         className="rounded  w-3/4 mx-4 "
       />
       <label>
@@ -73,4 +80,4 @@ function EditComment({ commentId, ModeOff }: Props) {
   );
 }
 
-export default React.memo(EditComment);
+export default React.memo(EditRecomment);

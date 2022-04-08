@@ -103,27 +103,20 @@ function CommentItem({ commentId, lostUserId }: Props) {
             </div>
           </div>
         </div>
-        <p className="mt-1">
+        <div className="mt-1">
           {editMode ? (
             <EditComment commentId={commentId} ModeOff={() => setEditMode(false)} />
           ) : (
             commentData?.comment?.content
           )}
-        </p>
+        </div>
         <div className="flex space-x-1 text-xs text-slate-500">
           <span>3/15</span>
           <span>20:54</span>
         </div>
         {addReCommentMode ? <CreateRecomment commentId={commentId} ModeOff={() => setAddReCommentMode(false)} /> : null}
         {commentData?.comment?.reComments?.map((reCo) => (
-          <ReComments
-            key={reCo.id}
-            lostId={router.query.id + ''}
-            commentId={commentData.comment.id + ''}
-            state={'create'}
-            reComment={reCo}
-            lostUserId={lostUserId}
-          />
+          <ReComments key={reCo.id} commentId={commentData.comment.id + ''} reComment={reCo} lostUserId={lostUserId} />
         ))}
       </div>
     </div>
