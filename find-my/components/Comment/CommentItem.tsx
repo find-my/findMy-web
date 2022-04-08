@@ -5,18 +5,13 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import useMutation from '@libs/front/hooks/useMutation';
 import useUser from '@libs/front/hooks/useUser';
-import { useForm } from 'react-hook-form';
-import TextareaAutosize from 'react-textarea-autosize';
 import ReComments from '@components/Comment/ReCommentList';
-import SquareMessageInput from '@components/SquareMessageInput';
 import { CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
-
+import CreateRecomment from '@components/Comment/create/reComment';
+import EditComment from '@components/Comment/Edit/comment';
 interface Props {
   commentId: number;
   lostUserId: number;
-}
-interface CommentForm {
-  comment: string;
 }
 
 function CommentItem({ commentId, lostUserId }: Props) {
@@ -31,7 +26,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
   const { data: lostData, mutate: lostMutate } = useSWR<LostDetailResponse>(
     router.query.id ? `/api/losts/${router.query.id}` : null,
   );
-  const { data: commentData, mutate: commentMutate } = useSWR<CommentDetailResponse>(
+  const { data: commentData } = useSWR<CommentDetailResponse>(
     commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
   );
   const onReCommentClick = useCallback(() => {
@@ -91,7 +86,6 @@ function CommentItem({ commentId, lostUserId }: Props) {
                 ></path>
               </svg>
             </button>
-
             <div className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap opacity-0 hover:opacity-100">
               <button onClick={onReCommentClick} className="p-1">
                 대댓글 달기
@@ -136,125 +130,3 @@ function CommentItem({ commentId, lostUserId }: Props) {
   );
 }
 export default React.memo(CommentItem);
-
-interface ReCommentForm {
-  reComment: string;
-}
-
-interface TempProps {
-  commentId: number;
-  ModeOff: () => void;
-}
-
-function EditComment({ commentId, ModeOff }: TempProps) {
-  const router = useRouter();
-  const { register, handleSubmit, reset } = useForm<CommentForm>();
-
-  const [update, { data: updateResult, loading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}`,
-    'PUT',
-  );
-  const { data, mutate } = useSWR<CommentDetailResponse>(
-    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
-  );
-
-  const onValid = useCallback(
-    (comment: CommentForm) => {
-      if (loading) return;
-      update(comment);
-    },
-    [loading],
-  );
-  useEffect(() => {
-    if (updateResult && updateResult.ok) {
-      if (!data) return;
-      mutate(
-        {
-          ...data,
-          comment: {
-            ...data.comment,
-            content: updateResult.comment,
-          },
-        },
-        false,
-      );
-      reset();
-      ModeOff();
-    }
-  }, [updateResult]);
-  return (
-    <form onSubmit={handleSubmit(onValid)} className="flex items-end">
-      <TextareaAutosize
-        {...register('comment', { required: true })}
-        placeholder="댓글 입력"
-        className="rounded  w-3/4 mx-4 "
-      />
-      <label>
-        <input type="submit" className="hidden" />
-
-        <svg
-          className="w-6 h-6 text-gray-400 hover:text-blue-400 cursor-pointer rotate-90"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-        </svg>
-      </label>
-    </form>
-  );
-}
-
-function CreateRecomment({ commentId, ModeOff }: TempProps) {
-  const { user } = useUser();
-  const router = useRouter();
-  const { data, mutate } = useSWR<CommentDetailResponse>(
-    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
-  );
-  const [createdReComment, { data: createdReCommentResult, loading: createdReCommentLoading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}/recomments`,
-    'POST',
-  );
-  const { register, handleSubmit, reset } = useForm<ReCommentForm>();
-  const onValid = useCallback(
-    (reComment: ReCommentForm) => {
-      if (createdReCommentLoading) return;
-      createdReComment(reComment);
-    },
-    [createdReCommentLoading],
-  );
-  useEffect(() => {
-    if (createdReCommentResult && createdReCommentResult.ok) {
-      console.log(createdReCommentResult.reComment);
-      if (!data) return;
-      mutate(
-        //대댓글 mutate
-        {
-          ...data,
-          comment: {
-            ...data.comment,
-            reComments: [
-              ...data.comment.reComments,
-              {
-                ...createdReCommentResult?.reComment,
-                user: {
-                  id: user?.id,
-                  name: user?.name,
-                  avatar: user?.avatar,
-                },
-              },
-            ],
-          },
-        },
-        false,
-      );
-      reset();
-      ModeOff();
-    }
-  }, [createdReCommentResult]);
-  return (
-    <form onSubmit={handleSubmit(onValid)}>
-      <SquareMessageInput register={register('reComment', { required: true })} placeholder="대댓글을 입력해 주세요." />
-    </form>
-  );
-}
