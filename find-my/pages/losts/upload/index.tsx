@@ -1,7 +1,7 @@
 //lost/upload
 //분실물 게시물 업로드 페이지
 import { NextPage } from 'next';
-import { FieldErrors, useForm, UseFormRegisterReturn } from 'react-hook-form';
+import { useForm, UseFormRegisterReturn } from 'react-hook-form';
 import UploadButton from '@components/UploadButton';
 import { useCallback, useState, useEffect } from 'react';
 import Router, { useRouter } from 'next/router';
@@ -9,7 +9,7 @@ import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
 import { Lost } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
-
+import { uploadCFImage } from '@libs/front/cfImage';
 interface LostForm {
   image1?: FileList;
   image2?: FileList;
@@ -72,36 +72,19 @@ const Upload: NextPage = () => {
   const [imagePreview3, setImagePreview3] = useState<string>('');
   //upload Form 이 채워지면 POST
   const onValid = async (data: LostForm) => {
-    if (loading) return;
+    if (loading || !user) return;
     if (!lostPlace.place || !lostPlace.place.trim()) return;
     let imageIds: string[] = [];
-    if (image1 && image1.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`, { method: 'GET' })).json();
-      const form = new FormData();
-      form.append('file', image1[0], user?.id + '');
-      const {
-        result: { id },
-      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-      imageIds?.push(id);
-    }
-    if (image2 && image2.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`, { method: 'GET' })).json();
-      const form = new FormData();
-      form.append('file', image2[0], user?.id + '');
-      const {
-        result: { id },
-      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-      imageIds?.push(id);
-    }
-    if (image3 && image3.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`, { method: 'GET' })).json();
-      const form = new FormData();
-      form.append('file', image3[0], user?.id + '');
-      const {
-        result: { id },
-      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-      imageIds?.push(id);
-    }
+    await Promise.all(
+      [image1, image2, image3].map(async (image) => {
+        if (image && image.length > 0) {
+          const id = await uploadCFImage(image || [], user?.id);
+          if (id) {
+            imageIds?.push(id);
+          }
+        }
+      }),
+    );
     uploadLost({ ...data, ...lostPlace, photos: imageIds });
   };
   //
