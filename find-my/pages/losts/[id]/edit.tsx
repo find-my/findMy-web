@@ -19,6 +19,7 @@ interface LostForm {
   title: string;
   category: string;
   description: string;
+  errorMessage?: string;
 }
 
 //upload 결과 interface
@@ -73,6 +74,7 @@ const Upload: NextPage = () => {
     watch,
     setValue,
     resetField,
+    setError,
   } = useForm<LostForm>();
   const [imagePreview1, setImagePreview1] = useState<string>('');
   const [imagePreview2, setImagePreview2] = useState<string>('');
@@ -84,46 +86,111 @@ const Upload: NextPage = () => {
     if (!lostPlace.place || !lostPlace.place.trim()) return;
     let imageIds: string[] = [];
 
-    if (image1 && image1.length > 0 && user) {
+    if (imagePreview1 && user) {
       //이미지 변경사항이 있는가?
-      if (imagePreview1 && imagePreview1.includes('imagedelivery')) {
-        if (prevLost?.lost?.photos[0].file) imageIds?.push(prevLost?.lost?.photos[0].file);
+      if (imagePreview1.includes('imagedelivery')) {
+        if (prevLost?.lost?.photos[0]?.file) imageIds?.push(prevLost?.lost?.photos[0].file);
       } else {
-        const { uploadURL } = await (await fetch(`/api/files`)).json();
-        const form = new FormData();
-        form.append('file', image1[0], user?.id + '');
-        const {
-          result: { id },
-        } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-        imageIds?.push(id);
+        if (prevLost?.lost?.photos[0]?.file) {
+          //기존 게시물에 파일이 있었다면 삭제 이 칸은 새로운 이미지가 들어왔으니 삭제 필요
+
+          //실패 시 로직 추가하기
+          await (
+            await fetch(`/api/files`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ deleteFileId: prevLost?.lost?.photos[0]?.file }),
+            })
+          ).json(); //삭제 처리 되었는지 확인 필요
+        }
+        if (image1 && image1.length > 0) {
+          const { uploadURL } = await (await fetch(`/api/files`)).json();
+          const form = new FormData();
+          form.append('file', image1[0], user?.id + '');
+          const {
+            result: { id },
+          } = await (
+            await fetch(uploadURL, {
+              method: 'POST',
+              body: form,
+            })
+          ).json();
+          imageIds?.push(id);
+        }
       }
     }
-    if (image2 && image2.length > 0 && user) {
-      if (imagePreview2 && imagePreview2.includes('imagedelivery')) {
-        if (prevLost?.lost?.photos[1].file) imageIds?.push(prevLost?.lost?.photos[1].file);
+    if (imagePreview2 && user) {
+      //이미지 변경사항이 있는가?
+      if (imagePreview2.includes('imagedelivery')) {
+        if (prevLost?.lost?.photos[1]?.file) imageIds?.push(prevLost?.lost?.photos[1].file);
       } else {
-        const { uploadURL } = await (await fetch(`/api/files`)).json();
-        const form = new FormData();
-        form.append('file', image2[0], user?.id + '');
-        const {
-          result: { id },
-        } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-        imageIds?.push(id);
+        if (prevLost?.lost?.photos[1]?.file) {
+          //기존 게시물에 파일이 있었다면 삭제 이 칸은 새로운 이미지가 들어왔으니 삭제 필요
+          const { success } = await (
+            await fetch(`/api/files`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ deleteFileId: prevLost?.lost?.photos[1]?.file }),
+            })
+          ).json(); //삭제 처리 되었는지 확인 필요
+          if (!success) {
+            setError('errorMessage', { message: '이미지 수정 중에 문제가 발생했습니다.' });
+            return;
+          }
+        }
+        if (image2 && image2.length > 0) {
+          const { uploadURL } = await (await fetch(`/api/files`)).json();
+          const form = new FormData();
+          form.append('file', image2[0], user?.id + '');
+          const {
+            result: { id },
+          } = await (
+            await fetch(uploadURL, {
+              method: 'POST',
+              body: form,
+            })
+          ).json();
+          imageIds?.push(id);
+        }
       }
     }
-    if (image3 && image3.length > 0 && user) {
-      if (imagePreview3 && imagePreview3.includes('imagedelivery')) {
-        if (prevLost?.lost?.photos[2].file) imageIds?.push(prevLost?.lost?.photos[2].file);
+    if (imagePreview3 && user) {
+      //이미지 변경사항이 있는가?
+      if (imagePreview3.includes('imagedelivery')) {
+        if (prevLost?.lost?.photos[2]?.file) imageIds?.push(prevLost?.lost?.photos[2].file);
       } else {
-        const { uploadURL } = await (await fetch(`/api/files`)).json();
-        const form = new FormData();
-        form.append('file', image3[0], user?.id + '');
-        const {
-          result: { id },
-        } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-        imageIds?.push(id);
+        if (prevLost?.lost?.photos[2]?.file) {
+          //기존 게시물에 파일이 있었다면 삭제 이 칸은 새로운 이미지가 들어왔으니 삭제 필요
+          const { success } = await (
+            await fetch(`/api/files`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ deleteFileId: prevLost?.lost?.photos[2]?.file }),
+            })
+          ).json(); //삭제 처리 되었는지 확인 필요
+          if (!success) {
+            setError('errorMessage', { message: '이미지 수정 중에 문제가 발생했습니다.' });
+            return;
+          }
+        }
+        if (image3 && image3.length > 0) {
+          const { uploadURL } = await (await fetch(`/api/files`)).json();
+          const form = new FormData();
+          form.append('file', image3[0], user?.id + '');
+          const {
+            result: { id },
+          } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
+          imageIds?.push(id);
+        }
       }
     }
+    console.log(imageIds);
     editLost({ ...data, ...lostPlace, photos: imageIds });
   };
   //
@@ -197,7 +264,7 @@ const Upload: NextPage = () => {
       setImagePreview2('');
       setImagePreview3('');
       reset();
-      router.push(`/lost/${editResult.lost?.id}`);
+      router.push(`/losts/${router?.query?.id}`);
     }
   }, [editResult, router]);
   console.log(prevLost);
@@ -320,6 +387,7 @@ const Upload: NextPage = () => {
               </div>
             </div>
             {loading ? '업로드중' : null}
+            {error}
             <UploadButton isCompleted={errors !== null} />
           </form>
         </div>

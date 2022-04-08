@@ -76,7 +76,7 @@ const Upload: NextPage = () => {
     if (!lostPlace.place || !lostPlace.place.trim()) return;
     let imageIds: string[] = [];
     if (image1 && image1.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const { uploadURL } = await (await fetch(`/api/files`, { method: 'GET' })).json();
       const form = new FormData();
       form.append('file', image1[0], user?.id + '');
       const {
@@ -85,7 +85,7 @@ const Upload: NextPage = () => {
       imageIds?.push(id);
     }
     if (image2 && image2.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const { uploadURL } = await (await fetch(`/api/files`, { method: 'GET' })).json();
       const form = new FormData();
       form.append('file', image2[0], user?.id + '');
       const {
@@ -94,7 +94,7 @@ const Upload: NextPage = () => {
       imageIds?.push(id);
     }
     if (image3 && image3.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const { uploadURL } = await (await fetch(`/api/files`, { method: 'GET' })).json();
       const form = new FormData();
       form.append('file', image3[0], user?.id + '');
       const {
@@ -148,7 +148,7 @@ const Upload: NextPage = () => {
       setImagePreview2('');
       setImagePreview3('');
       reset();
-      router.push(`/lost/${uploadResult.lost?.id}`);
+      router.push(`/losts/${uploadResult.lost?.id}`);
     }
   }, [uploadResult, router]);
 
