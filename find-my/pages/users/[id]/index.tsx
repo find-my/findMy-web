@@ -4,11 +4,10 @@ import useSWR from 'swr';
 import { Review, User } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import { useEffect, useState } from 'react';
-import GetLostResult from '@components/GetLostResult';
-import { ExtendedLost, LostListResponse } from '../../../typeDefs/lost';
+import GetLostResult from '@components/Lost/LostList';
+import { LostListResponse } from '../../../typeDefs/lost';
 import { useRouter } from 'next/router';
 import useMutation from '@libs/front/hooks/useMutation';
-import { prepareServerlessUrl } from 'next/dist/server/base-server';
 interface ExtendedReview extends Review {
   createdBy: User;
 }

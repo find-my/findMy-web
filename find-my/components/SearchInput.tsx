@@ -22,8 +22,12 @@ const SearchInput = () => {
   }, [searchTerm]);
   return (
     <>
-      <form onSubmit={handleSubmit(onValid)}>
-        <input {...register('searchTerm', { required: true })} placeholder="검색어를 입력해 주세요." />
+      <form onSubmit={handleSubmit(onValid)} className="border border-2">
+        <input
+          {...register('searchTerm', { required: true })}
+          placeholder="검색어를 입력해 주세요."
+          className="border border-2 w-full"
+        />
       </form>
     </>
   );

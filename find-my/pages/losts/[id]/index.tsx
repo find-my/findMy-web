@@ -10,8 +10,7 @@ import React, { useEffect } from 'react';
 import Comments from '@components/Comments';
 import useUser from '@libs/front/hooks/useUser';
 import { LostDetailResponse, ExtendedComment } from '../../../typeDefs/lost';
-import { userInfo } from 'os';
-
+import { deleteCFImage } from '@libs/front/cfImage';
 function displayedAt(createdAt: string) {
   if (!createdAt) return;
   const now = new Date();
@@ -37,13 +36,19 @@ const LostDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
   const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
-
+  const [remove, { data: removeResult, loading }] = useMutation(`/api/losts/${router.query.id}`, 'DELETE');
   const [toggleScrap] = useMutation(`/api/users/me/scraps/${router.query.id}`, 'POST');
   const sumReCommentsCount = (comments: ExtendedComment[] | undefined) => {
     if (!comments) return 0;
     let sum = 0;
     data?.lost?.comments?.forEach((comment) => (sum += comment._count.reComments));
     return sum;
+  };
+  const deleteLost = () => {
+    if (loading) return;
+    data?.lost?.photos?.map(async (photo) => await deleteCFImage(photo?.file));
+
+    remove({});
   };
   const onScrapClick = () => {
     if (!data) return;
@@ -64,6 +69,11 @@ const LostDetail: NextPage = () => {
 
     toggleScrap({});
   };
+  useEffect(() => {
+    if (removeResult && removeResult.ok) {
+      router.push('/losts');
+    }
+  }, [removeResult]);
   console.log(process.env.IMAGE_DELIVERY);
   return (
     <>
@@ -110,7 +120,10 @@ const LostDetail: NextPage = () => {
                 <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
                   수정
                 </button>
-                <button className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white">
+                <button
+                  onClick={deleteLost}
+                  className="bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:bg-blue-500 transition-colors shadow p-2 rounded-xl text-white"
+                >
                   삭제
                 </button>
               </div>

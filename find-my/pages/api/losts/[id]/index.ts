@@ -144,11 +144,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       res.json({ ok: false, message: '예상치 못한 오류가 발생했습니다.' });
     }
   }
+  if (req.method === 'DELETE') {
+    try {
+      await client.lost.delete({
+        where: {
+          id: +id.toString(),
+        },
+      });
+      res.json({ ok: true });
+    } catch {
+      res.json({ ok: false });
+    }
+  }
 }
 
 export default withApiSession(
   withHandler({
-    methods: ['GET', 'PUT'],
+    methods: ['GET', 'PUT', 'DELETE'],
     handler,
   }),
 );

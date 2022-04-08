@@ -11,6 +11,7 @@ import { Lost, LostPhoto } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
 import useSWR from 'swr';
 import { LostDetailResponse } from '../../../typeDefs/lost';
+import { uploadCFImage, deleteCFImage } from '@libs/front/cfImage';
 
 interface LostForm {
   image1?: FileList;
@@ -99,45 +100,17 @@ const Upload: NextPage = () => {
               //기존 게시물에 파일이 있었다면 삭제 이 칸은 새로운 이미지가 들어왔으니 삭제 필요
 
               //실패 시 로직 추가하기
-              await (
-                await fetch(`/api/files`, {
-                  method: 'DELETE',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ deleteFileId: prevLost?.lost?.photos[i]?.file }),
-                })
-              ).json(); //삭제 처리 되었는지 확인 필요
+              deleteCFImage(prevLost?.lost?.photos[i]?.file);
             }
 
-            if (images[i] && (images[i]?.length || -1) > 0) {
-              console.log((images[i] || [])[0]);
-              const { uploadURL } = await (await fetch(`/api/files`)).json();
-              const form = new FormData();
-              form.append('file', (images[i] || [])[0], user?.id + '');
-              const {
-                result: { id },
-              } = await (
-                await fetch(uploadURL, {
-                  method: 'POST',
-                  body: form,
-                })
-              ).json();
+            const id = await uploadCFImage(images[i] || [], user?.id);
+            if (id) {
               imageIds?.push(id);
-              console.log(imageIds, 125);
             }
           }
         } else if (prevLost?.lost?.photos[i]) {
           //미리보기 이미지는 비어져 있지만 기존 이미지가 있을 경우 삭제 필요
-          await (
-            await fetch(`/api/files`, {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ deleteFileId: prevLost?.lost?.photos[i].file }),
-            })
-          ).json(); //삭제 처리 되었는지 확인 필요
+          deleteCFImage(prevLost?.lost?.photos[i].file);
         }
       }),
     );

@@ -2,11 +2,10 @@ import useUser from '@libs/front/hooks/useUser';
 import type { NextPage } from 'next';
 import useSWR from 'swr';
 import { Review, User } from '@prisma/client';
-import { classNames } from '@libs/front/utils';
 import { useState } from 'react';
-import GetLostResult from '@components/GetLostResult';
-import { ExtendedLost, LostListResponse } from '../../typeDefs/lost';
-import Router, { useRouter } from 'next/router';
+import LostList from '@components/Lost/LostList';
+import { LostListResponse } from '../../typeDefs/lost';
+import { useRouter } from 'next/router';
 
 interface ExtendedReview extends Review {
   createdBy: User;
@@ -72,7 +71,7 @@ function UserLosts({ userLostsData }: UserLostsProps) {
   //GetLostResult 이 받는 interface를 userLostData.losts 만 받게 고치기
   return (
     <>
-      <GetLostResult contents={userLostsData} />
+      <LostList contents={userLostsData} />
     </>
   );
 }
