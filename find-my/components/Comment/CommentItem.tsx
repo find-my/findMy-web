@@ -1,15 +1,14 @@
-import { ReactJSXElement } from '@emotion/react/types/jsx-namespace';
-import { Lost, User, Comment, ReComment } from '@prisma/client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+//댓글 업데이트,삭제,대댓글 작성
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import useSWR, { SWRConfig } from 'swr';
+import useSWR from 'swr';
 import useMutation from '@libs/front/hooks/useMutation';
 import useUser from '@libs/front/hooks/useUser';
 import { useForm } from 'react-hook-form';
 import TextareaAutosize from 'react-textarea-autosize';
 import ReComments from '@components/Comment/ReCommentList';
 import SquareMessageInput from '@components/SquareMessageInput';
-import { CommentsResponse, CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
+import { CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
 
 interface Props {
   commentId: number;
@@ -23,7 +22,7 @@ interface ReCommentForm {
 }
 
 function CommentItem({ commentId, lostUserId }: Props) {
-  const { user, isLoading: userLoading } = useUser();
+  const { user } = useUser();
   const [editMode, setEditMode] = useState<boolean>(false);
   const [addReCommentMode, setAddReCommentMode] = useState<boolean>(false);
   const router = useRouter();
@@ -74,7 +73,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
   };
   useEffect(() => {
     if (removeResult && removeResult.ok) {
-      if (!lostData) return;
+      if (!lostData || !user) return;
       lostMutate(
         { ...lostData, lost: { ...lostData.lost, comments: lostData.lost.comments.filter((c) => c.id !== commentId) } },
         false,
@@ -229,15 +228,4 @@ function CommentItem({ commentId, lostUserId }: Props) {
     </div>
   );
 }
-export default CommentItem;
-
-/*  
-  <div className="border divide-y">
-          {comment?.reComment?.map((reCo) => (
-            <div key={reCo.id} className="">
-              {reCo.content} {reCo.user?.name} {reCo.user?.avatar}
-            </div>
-          ))}
-        </div>
-
-*/
+export default React.memo(CommentItem);

@@ -1,42 +1,64 @@
-import React, { useState, useEffect } from 'react';
+//댓글 추가
+import React, { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import useSWR, { SWRConfig } from 'swr';
-import { Lost, User, Comment, ReComment } from '@prisma/client';
+import useSWR from 'swr';
 import { useForm } from 'react-hook-form';
 import useUser from '@libs/front/hooks/useUser';
 import useMutation from '@libs/front/hooks/useMutation';
 import MessageInput from '@components/MessageInput';
 import CommentItem from './CommentItem';
-import { LostDetailResponse, CommentDetailResponse, CommentsResponse } from '../../typeDefs/lost';
+import { LostDetailResponse } from '../../typeDefs/lost';
 
 interface CommentForm {
   comment: string;
 }
 
-function Comments() {
+function CommentList() {
+  const router = useRouter();
+  const { data } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  return (
+    <div>
+      <div>
+        {data?.lost?.comments?.map((comment) => (
+          <div key={comment.id} className="border-b p-2">
+            <CommentItem commentId={comment.id} lostUserId={data?.lost?.userId} />
+          </div>
+        ))}
+      </div>
+      <CreateComment />
+    </div>
+  );
+}
+
+export default React.memo(CommentList);
+
+function CreateComment() {
   const router = useRouter();
   const [createComment, { loading, data: createCommentResult }] = useMutation(
     `/api/losts/${router.query.id}/comments`,
     'POST',
   );
-  const { user, isLoading: userLoading } = useUser();
-  const { data, mutate, error } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  const { user } = useUser();
+  const { data, mutate } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm<CommentForm>();
-  const onValid = (comment: CommentForm) => {
-    if (loading) return;
-    reset();
-    createComment(comment);
-  };
+  const onValid = useCallback(
+    (comment: CommentForm) => {
+      if (loading) return;
+      createComment(comment);
+    },
+    [loading],
+  );
 
   useEffect(() => {
     if (createCommentResult && createCommentResult.ok) {
-      if (!data) return;
+      reset();
+      if (!data || !user) return;
+      //댓글 추가 mutate (optimistic ui 구현)
       mutate(
         {
           ...data,
@@ -61,20 +83,10 @@ function Comments() {
       );
     }
   }, [createCommentResult]);
+
   return (
-    <div>
-      <div>
-        {data?.lost?.comments?.map((comment: any, i: number) => (
-          <div key={comment.id} className="border-b p-2">
-            <CommentItem commentId={comment.id} lostUserId={data?.lost?.userId} />
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSubmit(onValid)}>
-        <MessageInput register={register('comment', { required: true })} placeholder="댓글을 입력해 주세요." />
-      </form>
-    </div>
+    <form onSubmit={handleSubmit(onValid)}>
+      <MessageInput register={register('comment', { required: true })} placeholder="댓글을 입력해 주세요." />
+    </form>
   );
 }
-
-export default React.memo(Comments);

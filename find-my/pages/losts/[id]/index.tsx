@@ -203,7 +203,7 @@ const LostDetail: NextPage = () => {
           </div>
         </div>
 
-        <CommentList />
+        {<CommentList />}
       </div>
     </>
   );
