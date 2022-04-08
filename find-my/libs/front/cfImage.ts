@@ -1,3 +1,6 @@
+export const CFImageUrl = (id: string, variant: string = 'public'): string =>
+  `https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${id}/${variant}`;
+
 export async function uploadCFImage(file: FileList | [], userId: number): Promise<string | null> {
   if (!file) return null;
   const { uploadURL } = await (await fetch(`/api/files`)).json();

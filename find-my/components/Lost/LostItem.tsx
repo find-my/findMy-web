@@ -1,6 +1,7 @@
 import { ExtendedLost } from '../../typeDefs/lost';
 import { displayTimeForList } from '@libs/front/displayTime';
 import React from 'react';
+import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
   lost: ExtendedLost;
 }
@@ -24,10 +25,7 @@ function LostItem({ lost }: Props) {
       <div className="flex space-x-4 w-2/3">
         <>
           {photos && photos[0]?.file ? (
-            <img
-              src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${photos[0]?.file}/public`}
-              className="w-20 h-20 min-w-fit rounded bg-slate-500"
-            />
+            <img src={CFImageUrl(photos[0]?.file)} className="w-20 h-20 min-w-fit rounded bg-slate-500" />
           ) : (
             <div className="w-20 h-20 min-w-fit rounded bg-slate-500" />
           )}

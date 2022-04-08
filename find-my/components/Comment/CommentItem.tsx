@@ -9,6 +9,7 @@ import ReCommentItem from '@components/Comment/ReCommentItem';
 import { CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
 import CreateRecomment from '@components/Comment/create/reComment';
 import EditComment from '@components/Comment/Edit/comment';
+import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
   commentId: number;
   lostUserId: number;
@@ -56,10 +57,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
   return (
     <div className="flex w-full justify-between space-x-2 items-start">
       {commentData?.comment?.user?.avatar ? (
-        <img
-          src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${commentData?.comment?.user?.avatar}/public`}
-          className="w-5 h-5 bg-purple-500 rounded-full"
-        />
+        <img src={CFImageUrl(commentData?.comment?.user?.avatar)} className="w-5 h-5 bg-purple-500 rounded-full" />
       ) : (
         <div className="w-5 h-5 bg-purple-500 rounded-full" />
       )}

@@ -5,7 +5,7 @@ import useUser from '@libs/front/hooks/useUser';
 import { useRouter } from 'next/router';
 import { ExtendedReComment, CommentDetailResponse } from '../../typeDefs/lost';
 import EditRecomment from '@components/Comment/Edit/reComment';
-
+import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
   commentId: string;
   reComment: ExtendedReComment;
@@ -52,10 +52,7 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
     <div>
       <div className="flex w-full justify-between space-x-2 items-start">
         {reComment?.user?.avatar ? (
-          <img
-            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${reComment?.user?.avatar}/public`}
-            className="w-5 h-5 bg-purple-500 rounded-full"
-          />
+          <img src={CFImageUrl(reComment?.user?.avatar)} className="w-5 h-5 bg-purple-500 rounded-full" />
         ) : (
           <div className="w-5 h-5 bg-purple-500 rounded-full" />
         )}
