@@ -43,6 +43,9 @@ function CreateRecomment({ commentId, ModeOff }: Props) {
     `/api/losts/${router.query.id}/comments/${commentId}/recomments`,
     'POST',
   );
+  const { data: lostData, mutate: lostMutate } = useSWR<LostDetailResponse>(
+    router.query.id ? `/api/losts/${router.query.id}` : null,
+  );
   const { register, handleSubmit, reset } = useForm<ReCommentForm>();
   const onValid = useCallback(
     (reComment: ReCommentForm) => {
@@ -54,7 +57,7 @@ function CreateRecomment({ commentId, ModeOff }: Props) {
   useEffect(() => {
     if (createResult && createResult.ok) {
       console.log(createResult.reComment);
-      if (!data) return;
+      if (!data || !lostData) return;
       mutate(
         //대댓글 mutate
         {
@@ -75,7 +78,11 @@ function CreateRecomment({ commentId, ModeOff }: Props) {
           },
         },
         false,
-      );
+      ); //댓글 수 임의 조작
+      lostMutate({
+        ...lostData,
+        lost: { ...lostData.lost, _count: { ...lostData.lost._count, comments: lostData.lost._count.comments + 1 } },
+      });
       reset();
       ModeOff();
     }

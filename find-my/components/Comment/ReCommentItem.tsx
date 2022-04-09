@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import useSWR from 'swr';
 import useUser from '@libs/front/hooks/useUser';
 import { useRouter } from 'next/router';
-import { ExtendedReComment, CommentDetailResponse } from '../../typeDefs/lost';
+import { ExtendedReComment, CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
 import EditRecomment from '@components/Comment/Edit/reComment';
 import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
@@ -37,6 +37,9 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
   const { data, mutate } = useSWR<CommentDetailResponse>(
     commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
   );
+  const { data: lostData, mutate: lostMutate } = useSWR<LostDetailResponse>(
+    router.query.id ? `/api/losts/${router.query.id}` : null,
+  );
   const [editMode, setEditMode] = useState<boolean>(false);
   const [remove, { data: removeResult, loading: removeLoading }] = useMutation(
     `/api/losts/${router.query.id}/comments/${commentId}/recomments/${reComment.id}`,
@@ -54,7 +57,7 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
 
   useEffect(() => {
     if (removeResult && removeResult.ok) {
-      if (!data) return;
+      if (!data || !lostData) return;
       mutate(
         {
           ...data,
@@ -65,6 +68,10 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
         },
         false,
       );
+      lostMutate({
+        ...lostData,
+        lost: { ...lostData.lost, _count: { ...lostData.lost._count, comments: lostData.lost._count.comments - 1 } },
+      });
     }
   }, [removeResult]);
 

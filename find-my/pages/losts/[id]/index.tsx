@@ -22,7 +22,6 @@ const LostDetail: NextPage = () => {
   const { user } = useUser();
   const { data } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
   const [remove, { data: removeResult, loading }] = useMutation(`/api/losts/${router.query.id}`, 'DELETE');
-
   const deleteLost = () => {
     if (loading) return;
     data?.lost?.photos?.map(async (photo) => await deleteCFImage(photo?.file));
@@ -62,7 +61,7 @@ const LostDetail: NextPage = () => {
               <div>
                 <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
                   <a>
-                    <p className="font-bold text-lg">{data?.lost?.user?.name}</p>
+                    <p className="font-bold text-lg">{data?.lost?.user?.name || null}</p>
                   </a>
                 </Link>
                 <span className="text-sm text-slate-500">
@@ -91,16 +90,16 @@ const LostDetail: NextPage = () => {
           </div>
 
           <div>
-            <h1 className="font-bold text-xl ">{data?.lost?.title}</h1>
+            <h1 className="font-bold text-xl ">{data?.lost?.title || null}</h1>
             <div className="text-sm text-slate-500">
               <span>카테고리 : </span>
-              <span>{data?.lost?.category}</span>
+              <span>{data?.lost?.category || null}</span>
             </div>
             <div className="text-sm text-slate-500">
               <span>잃어 버린 곳 : </span>
-              <span>{data?.lost?.lostPlace}</span>
+              <span>{data?.lost?.lostPlace || null}</span>
             </div>
-            <p className="mt-7">{data?.lost?.description}</p>
+            <p className="mt-7">{data?.lost?.description || null}</p>
             <div className="mt-3 flex space-x-2 text-slate-500 items-center">
               <div className="text-black flex items-center">
                 <svg
@@ -140,7 +139,7 @@ const LostDetail: NextPage = () => {
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   ></path>
                 </svg>
-                <span>{(data?.lost?._count?.comments || 0) + countRecomments(data?.lost?.comments || [])}</span>
+                <span>{(data?.lost?._count?.comments || 0) + countRecomments(data?.lost?.comments || []) || null}</span>
               </div>
               <div className="text-yellow-400 flex items-center">
                 <svg

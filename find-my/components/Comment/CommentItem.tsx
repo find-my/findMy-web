@@ -67,7 +67,14 @@ function CommentItem({ commentId, lostUserId }: Props) {
     if (removeResult && removeResult.ok) {
       if (!lostData || !user) return;
       lostMutate(
-        { ...lostData, lost: { ...lostData.lost, comments: lostData.lost.comments.filter((c) => c.id !== commentId) } },
+        {
+          ...lostData,
+          lost: {
+            ...lostData.lost,
+            comments: lostData.lost.comments.filter((c) => c.id !== commentId),
+            _count: { ...lostData.lost._count, comments: lostData.lost._count.comments - 1 },
+          },
+        },
         false,
       );
     }
