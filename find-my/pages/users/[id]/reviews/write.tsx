@@ -1,11 +1,9 @@
 import type { NextPage } from 'next';
-import { FieldErrors, useForm, UseFormRegisterReturn } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import UploadButton from '@components/UploadButton';
-import { useCallback, useState, useEffect } from 'react';
-import Router, { useRouter } from 'next/router';
-import PlaceFinder from 'components/Map/placeFinder';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import useMutation from '@libs/front/hooks/useMutation';
-import { Post } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
 import Rating from 'react-rating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

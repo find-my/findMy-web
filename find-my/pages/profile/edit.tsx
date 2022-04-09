@@ -6,6 +6,7 @@ import useUser from '@libs/front/hooks/useUser';
 import { useForm, UseFormRegisterReturn } from 'react-hook-form';
 import useMutation from '@libs/front/hooks/useMutation';
 import { classNames } from '@libs/front/utils';
+import { uploadCFImage, deleteCFImage, CFImageUrl } from '@libs/front/cfImage';
 interface EditProfileForm {
   avatar: FileList;
   email?: string;
@@ -25,6 +26,7 @@ const ProfileEdit: NextPage = () => {
     watch,
     clearErrors,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<EditProfileForm>();
   //프로필 업데이트 mutation
@@ -35,17 +37,30 @@ const ProfileEdit: NextPage = () => {
   const onValid = async ({ email, phone, name, password }: EditProfileForm) => {
     if (loading) return;
     if (errors?.formErrors?.type === 'emptyForm' && !avatar) return;
+    let imageId: string = '';
 
-    if (avatar && avatar.length > 0 && user) {
-      const { uploadURL } = await (await fetch(`/api/files`)).json();
-      const form = new FormData();
-      form.append('file', avatar[0], user?.id + '');
-      const {
-        result: { id },
-      } = await (await fetch(uploadURL, { method: 'POST', body: form })).json();
-      editProfile({ email, phone, name, password, avatar: id });
+    if (avatarPreview && user) {
+      //이미지 변경사항이 있는가?
+
+      if (avatarPreview.includes('imagedelivery')) {
+        if (user?.avatar) imageId = user?.avatar;
+      } else {
+        if (user?.avatar) {
+          //기존 게시물에 파일이 있었다면 삭제 이 칸은 새로운 이미지가 들어왔으니 삭제 필요
+          //실패 시 로직 추가하기
+          deleteCFImage(user?.avatar);
+        }
+        const id = await uploadCFImage(avatar || [], user?.id);
+        if (id) {
+          imageId = id;
+        }
+      }
+    } else if (user?.avatar) {
+      //미리보기 이미지는 비어져 있지만 기존 이미지가 있을 경우 삭제 필요
+      deleteCFImage(user?.avatar);
     }
-    editProfile({ email, phone, name, password });
+
+    editProfile({ email, phone, name, password, avatar: imageId });
   };
   useEffect(() => {
     if (avatar && avatar.length > 0) {
@@ -53,6 +68,16 @@ const ProfileEdit: NextPage = () => {
       setAvatarPreview(URL.createObjectURL(file));
     }
   }, [avatar]);
+  useEffect(() => {
+    if (!user) return;
+    setValue('name', user.name);
+    setValue('email', user.email);
+    setValue('password', '');
+    setValue('phone', user.phone || '');
+    if (user.avatar) {
+      setAvatarPreview(CFImageUrl(user.avatar));
+    }
+  }, [setValue, user]);
   //모든 필드의 값들을 watch,필드 값들이 바뀔 때 마다 실행됨. form이 비워져 있으면 버튼이 비활성화 됨
   useEffect(() => {
     const subscription = watch((value) => {

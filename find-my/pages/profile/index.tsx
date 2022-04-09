@@ -6,7 +6,7 @@ import { useState } from 'react';
 import PostList from '@components/Post/PostList';
 import { ExtendedPost, PostListResponse } from '../../typeDefs/post';
 import { useRouter } from 'next/router';
-
+import { CFImageUrl } from '@libs/front/cfImage';
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -24,10 +24,7 @@ const Profile: NextPage = () => {
     <div className="py-10 px-4">
       <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
         {user?.avatar ? (
-          <img
-            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${user?.avatar}/public`}
-            className="w-14 h-14 rounded-full bg-slate-500"
-          />
+          <img src={CFImageUrl(user?.avatar)} className="w-14 h-14 rounded-full bg-slate-500" />
         ) : (
           <div className="w-14 h-14 rounded-full bg-slate-500" />
         )}

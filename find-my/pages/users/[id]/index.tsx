@@ -1,13 +1,14 @@
 import useUser from '@libs/front/hooks/useUser';
 import type { NextPage } from 'next';
 import useSWR from 'swr';
-import { Review, User } from '@prisma/client';
+import { Review, User, PostType } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import { useEffect, useState } from 'react';
 import PostList from '@components/Post/PostList';
-import { PostListResponse } from '../../../typeDefs/post';
+import { PostListResponse, ExtendedPost } from '../../../typeDefs/post';
 import { useRouter } from 'next/router';
 import useMutation from '@libs/front/hooks/useMutation';
+import { CFImageUrl } from '@libs/front/cfImage';
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -20,18 +21,15 @@ const Profile: NextPage = () => {
   console.log();
   const { user: userLoggedIn } = useUser();
   const { data: user } = useSWR(router.query.id ? `/api/users/${router.query.id}` : null);
-  const { data: userPostsData, error } = useSWR<PostListResponse>(`/api/users/${router.query.id}/posts`);
+  const { data: userPostsData } = useSWR<PostListResponse>(`/api/users/${router.query.id}/posts`);
   const { data: reviewsData } = useSWR<ReviewsResponse>(`/api/users/${router.query.id}/reviews`);
-  const [viewFilter, setViewFilter] = useState<'Post' | 'Found' | 'UserReview'>('UserReview');
+  const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
   console.log(user);
   return (
     <div className="py-10 px-4">
       <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
         {user?.userData?.avatar ? (
-          <img
-            src={`https://imagedelivery.net/lYEA_AOTbvtd1AYkvFp-oQ/${user?.userData?.avatar}/public`}
-            className="w-14 h-14 rounded-full bg-slate-500"
-          />
+          <img src={CFImageUrl(user?.userData?.avatar)} className="w-14 h-14 rounded-full bg-slate-500" />
         ) : (
           <div className="w-14 h-14 rounded-full bg-slate-500" />
         )}
@@ -44,7 +42,7 @@ const Profile: NextPage = () => {
       </div>
       <div className="grid grid-cols-3 gap-2 p-2 border-b ">
         <button
-          onClick={() => setViewFilter('Post')}
+          onClick={() => setViewFilter('Lost')}
           className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400"
         >
           <span>찾고 있는 물건</span>
@@ -63,8 +61,11 @@ const Profile: NextPage = () => {
         </button>
       </div>
 
-      {viewFilter === 'Post' ? <Userposts userPostsData={userPostsData} /> : null}
-      {viewFilter === 'UserReview' ? <UserReviews reviewsData={reviewsData} /> : null}
+      {viewFilter === 'UserReview' ? (
+        <UserReviews reviewsData={reviewsData} />
+      ) : (
+        <UserPosts userPostsData={userPostsData} viewFilter={viewFilter} />
+      )}
     </div>
   );
 };
@@ -72,15 +73,17 @@ export default Profile;
 
 interface UserPostsProps {
   userPostsData: PostListResponse | undefined;
+  viewFilter: 'Lost' | 'Found';
 }
-function Userposts({ userPostsData }: UserPostsProps) {
-  if (!userPostsData || !userPostsData.ok) return null;
-  //GetpostResult 이 받는 interface를 userpostData.posts 만 받게 고치기
-  return (
-    <>
-      <PostList postList={userPostsData.postList} />
-    </>
-  );
+function UserPosts({ userPostsData, viewFilter }: UserPostsProps) {
+  let list: ExtendedPost[];
+  if (viewFilter === 'Lost') {
+    list = userPostsData?.postList?.filter((post) => post.type === PostType.LOST) || [];
+  } else {
+    list = userPostsData?.postList?.filter((post) => post.type === PostType.FOUND) || [];
+  }
+  //GetLostResult 이 받는 interface를 userLostData.losts 만 받게 고치기
+  return <>{list ? <PostList postList={list} /> : null}</>;
 }
 
 interface ReviewsProps {
