@@ -1,7 +1,7 @@
 import TextareaAutosize from 'react-textarea-autosize';
 import { useForm } from 'react-hook-form';
 import useMutation from '@libs/front/hooks/useMutation';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import { CommentDetailResponse } from '../../../typeDefs/lost';
@@ -14,8 +14,26 @@ interface Props {
 interface ReCommentForm {
   reComment: string;
 }
+function useOutsideClick(ref: any, ModeOff: any) {
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      console.log(ref);
+      if (ref.current && !ref.current.contains(event.target)) {
+        ModeOff();
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+}
 function EditRecomment({ commentId, reCommentId, ModeOff }: Props) {
   const router = useRouter();
+  const outsideRef = useRef(null);
+  useOutsideClick(outsideRef, ModeOff);
   const { data, mutate } = useSWR<CommentDetailResponse>(
     commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
   );
@@ -58,7 +76,7 @@ function EditRecomment({ commentId, reCommentId, ModeOff }: Props) {
     }
   }, [updateResult]);
   return (
-    <form onSubmit={handleSubmit(onValid)} className="flex items-end">
+    <form onSubmit={handleSubmit(onValid)} ref={outsideRef} className="flex items-end">
       <TextareaAutosize
         {...register('reComment', { required: true })}
         placeholder="대댓글 수정"

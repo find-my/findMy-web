@@ -11,17 +11,18 @@ import { deleteCFImage } from '@libs/front/cfImage';
 import { displayTimeForDetail } from '@libs/front/displayTime';
 import ScrapButton from '@components/Lost/ScrapButton';
 import { CFImageUrl } from '@libs/front/cfImage';
+function countRecomments(comments: ExtendedComment[]): number {
+  if (!comments || comments === []) return 0;
+  let recommentCount = 0;
+  comments?.forEach((comment) => (recommentCount += comment?._count?.reComments));
+  return recommentCount;
+}
 const LostDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
   const { data } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
   const [remove, { data: removeResult, loading }] = useMutation(`/api/losts/${router.query.id}`, 'DELETE');
-  const sumReCommentsCount = (comments: ExtendedComment[] | undefined) => {
-    if (!comments) return 0;
-    let sum = 0;
-    data?.lost?.comments?.forEach((comment) => (sum += comment._count.reComments));
-    return sum;
-  };
+
   const deleteLost = () => {
     if (loading) return;
     data?.lost?.photos?.map(async (photo) => await deleteCFImage(photo?.file));
@@ -35,6 +36,7 @@ const LostDetail: NextPage = () => {
     }
   }, [removeResult]);
   console.log(process.env.IMAGE_DELIVERY);
+
   return (
     <>
       <div>
@@ -60,12 +62,12 @@ const LostDetail: NextPage = () => {
               <div>
                 <Link href={`/users/profiles/${data?.lost?.user?.id}`}>
                   <a>
-                    <p className="font-bold text-lg">{data?.lost?.user?.name || null}</p>
+                    <p className="font-bold text-lg">{data?.lost?.user?.name}</p>
                   </a>
                 </Link>
                 <span className="text-sm text-slate-500">
                   {' '}
-                  {displayTimeForDetail(data?.lost?.createdAt?.toString() || '') || null}
+                  {displayTimeForDetail(data?.lost?.createdAt?.toString() || '')}
                 </span>
               </div>
             </div>
@@ -89,16 +91,16 @@ const LostDetail: NextPage = () => {
           </div>
 
           <div>
-            <h1 className="font-bold text-xl ">{data?.lost?.title || null}</h1>
+            <h1 className="font-bold text-xl ">{data?.lost?.title}</h1>
             <div className="text-sm text-slate-500">
               <span>카테고리 : </span>
-              <span>{data?.lost?.category || null}</span>
+              <span>{data?.lost?.category}</span>
             </div>
             <div className="text-sm text-slate-500">
               <span>잃어 버린 곳 : </span>
-              <span>{data?.lost?.lostPlace || null}</span>
+              <span>{data?.lost?.lostPlace}</span>
             </div>
-            <p className="mt-7">{data?.lost?.description || null}</p>
+            <p className="mt-7">{data?.lost?.description}</p>
             <div className="mt-3 flex space-x-2 text-slate-500 items-center">
               <div className="text-black flex items-center">
                 <svg
@@ -138,7 +140,7 @@ const LostDetail: NextPage = () => {
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   ></path>
                 </svg>
-                <span>{data?.lost?._count?.comments || 0}</span>
+                <span>{(data?.lost?._count?.comments || 0) + countRecomments(data?.lost?.comments || [])}</span>
               </div>
               <div className="text-yellow-400 flex items-center">
                 <svg

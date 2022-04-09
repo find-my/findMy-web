@@ -1,5 +1,5 @@
 import useMutation from '@libs/front/hooks/useMutation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import useSWR from 'swr';
 import useUser from '@libs/front/hooks/useUser';
 import { useRouter } from 'next/router';
@@ -11,9 +11,29 @@ interface Props {
   reComment: ExtendedReComment;
   lostUserId: number;
 }
+function useOutsideClick(ref: any, ModeOff: any) {
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      console.log(ref);
+      if (ref.current && !ref.current.contains(event.target)) {
+        ModeOff();
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+}
 function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
   const router = useRouter();
   const { user } = useUser();
+  const outsideRef = useRef(null);
+
+  const [showMene, setShowMenu] = useState<boolean>(false);
+  useOutsideClick(outsideRef, () => setShowMenu(false));
   const { data, mutate } = useSWR<CommentDetailResponse>(
     commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
   );
@@ -63,7 +83,7 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
               <span>{+reComment?.user?.id === lostUserId ? <>(글쓴이)</> : null}</span>
             </div>
             <div className="relative">
-              <button>
+              <button onClick={() => setShowMenu(true)}>
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -80,18 +100,23 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
                 </svg>
               </button>
 
-              <div className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap opacity-0 hover:opacity-100">
-                {+reComment?.user?.id === +(user?.id || -1) ? (
-                  <>
-                    <button onClick={onUpdate} className="p-1">
-                      수정
-                    </button>
-                    <button onClick={onDelete} className="p-1">
-                      삭제
-                    </button>
-                  </>
-                ) : null}
-              </div>
+              {showMene ? (
+                <div
+                  ref={outsideRef}
+                  className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap z-10"
+                >
+                  {+reComment?.user?.id === +(user?.id || -1) ? (
+                    <>
+                      <button onClick={onUpdate} className="p-1">
+                        수정
+                      </button>
+                      <button onClick={onDelete} className="p-1">
+                        삭제
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="mt-1">

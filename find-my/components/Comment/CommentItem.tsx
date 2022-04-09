@@ -1,6 +1,6 @@
 //댓글 대댓글 추가 삭제시 count mutate 적용되게 수정해야함
 //댓글 업데이트,삭제,대댓글 작성
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import useMutation from '@libs/front/hooks/useMutation';
@@ -14,9 +14,28 @@ interface Props {
   commentId: number;
   lostUserId: number;
 }
+function useOutsideClick(ref: any, ModeOff: any) {
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      console.log(ref);
+      if (ref.current && !ref.current.contains(event.target)) {
+        ModeOff();
+      }
+    }
 
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+}
 function CommentItem({ commentId, lostUserId }: Props) {
   const { user } = useUser();
+  const outsideRef = useRef(null);
+
+  const [showMene, setShowMenu] = useState<boolean>(false);
+  useOutsideClick(outsideRef, () => setShowMenu(false));
   const [editMode, setEditMode] = useState<boolean>(false);
   const [addReCommentMode, setAddReCommentMode] = useState<boolean>(false);
   const router = useRouter();
@@ -68,7 +87,7 @@ function CommentItem({ commentId, lostUserId }: Props) {
             <span>{commentData?.comment?.user?.id === lostUserId ? <>(글쓴이)</> : null}</span>
           </div>
           <div className="relative">
-            <button>
+            <button onClick={() => setShowMenu(true)}>
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -84,21 +103,26 @@ function CommentItem({ commentId, lostUserId }: Props) {
                 ></path>
               </svg>
             </button>
-            <div className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap opacity-0 hover:opacity-100">
-              <button onClick={onReCommentClick} className="p-1">
-                대댓글 달기
-              </button>
-              {commentData?.comment?.user?.id === user?.id ? (
-                <>
-                  <button onClick={onUpdate} className="p-1">
-                    수정
-                  </button>
-                  <button onClick={onDelete} className="p-1">
-                    삭제
-                  </button>
-                </>
-              ) : null}
-            </div>
+            {showMene ? (
+              <div
+                ref={outsideRef}
+                className="absolute right-0 top-0 shadow-md bg-white p-2 flex flex-col items-start whitespace-nowrap z-10"
+              >
+                <button onClick={onReCommentClick} className="p-1">
+                  대댓글 달기
+                </button>
+                {commentData?.comment?.user?.id === user?.id ? (
+                  <>
+                    <button onClick={onUpdate} className="p-1">
+                      수정
+                    </button>
+                    <button onClick={onDelete} className="p-1">
+                      삭제
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="mt-1">

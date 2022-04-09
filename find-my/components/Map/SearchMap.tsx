@@ -2,9 +2,10 @@
 // 지도 상에서 클릭한 위치로 lost/found place 설정
 // 키워드/카테고리 검색 결과 display
 // 검색 결과를 기반으로 lost/found place 설정
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
 interface Props {
   latitude?: number;
   longitude?: number;
@@ -28,6 +29,15 @@ interface ILostPlace {
 function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>(); //지도
   const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>(); //지도 상에서 클릭한 위치에 생성될 마커
+  const panTo = useCallback(() => {
+    // 이동할 위도 경도 위치를 생성합니다
+    if (!map || !latitude || !longitude) return;
+    var moveLatLon = new kakao.maps.LatLng(latitude, longitude);
+
+    // 지도 중심을 부드럽게 이동시킵니다
+    // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다
+    map.panTo(moveLatLon);
+  }, [location, map]);
   //지도 줌인
   const zoomIn = () => {
     if (!map) return;
@@ -125,6 +135,9 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: 
               <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_minus.png" alt="축소" />
             </span>
           </div>
+          <button onClick={panTo} className="absolute top-40 right-4 z-10 bg-white rounded p-2">
+            <FontAwesomeIcon icon={faLocationCrosshairs} size="lg" />
+          </button>
         </div>
       </div>
     </div>

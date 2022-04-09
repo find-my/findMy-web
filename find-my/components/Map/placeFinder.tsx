@@ -3,7 +3,7 @@
 // 검색 결과를 SearchMap 과 SearchList 컴포넌트에 넘겨줌
 // lost or found place 설정
 import SearchMap from '@components/Map/SearchMap';
-import useWatchLocation from '../../hooks/useWatchLocation';
+import { useWatchLocation } from '@libs/front/location';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTrainSubway,
@@ -16,9 +16,8 @@ import {
   faMap,
 } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useCallback } from 'react';
-import { CategoryGroupCode } from 'components/Map/types';
+import { CategoryGroupCode } from '@components/Map/CategoryGroupCode';
 import SearchList from '@components/Map/SearchList';
-import { LOST_PLACE } from '@libs/front/swrKey';
 import Router, { useRouter } from 'next/router';
 const geolocationOptions = {
   enableHighAccuracy: true,
@@ -73,7 +72,7 @@ interface ILostPlace {
   longitude?: number;
 }
 export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: Props) {
-  const { location, error } = useWatchLocation(geolocationOptions); //현재 유저의 위치
+  const { location, error, watchPositonId, cancelLocationWatch } = useWatchLocation(geolocationOptions); //현재 유저의 위치
   const [placeSearchOn, setPlaceSearchOn] = useState<boolean>(true); //유저가 검색을 할 의도를 갖고 있는지 확인, search 영역이 활성화됨
   const [placeKeyword, setPlaceKeyword] = useState<string>(); //검색 키워드(장소 이름)
   const [displayByMap, setDisplayByMap] = useState<boolean>(true); //검색 결과를 지도상에서 확인 할 것인지 리스트목록으로 볼 것인지 확인
@@ -178,7 +177,10 @@ export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: P
       sort: kakao.maps.services.SortBy.DISTANCE,
     });
   };
-
+  useEffect(() => {
+    if (watchPositonId === undefined) return;
+    return cancelLocationWatch(watchPositonId);
+  }, [watchPositonId]);
   //mt-10
 
   return (

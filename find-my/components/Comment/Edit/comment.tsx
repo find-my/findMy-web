@@ -1,8 +1,8 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import TextareaAutosize from 'react-textarea-autosize';
-import { CommentDetailResponse, LostDetailResponse } from '../../../typeDefs/lost';
+import { CommentDetailResponse } from '../../../typeDefs/lost';
 import useMutation from '@libs/front/hooks/useMutation';
 import useSWR from 'swr';
 
@@ -13,10 +13,28 @@ interface Props {
 interface CommentForm {
   comment: string;
 }
+//any 고치기
+function useOutsideClick(ref: any, ModeOff: any) {
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      console.log(ref);
+      if (ref.current && !ref.current.contains(event.target)) {
+        ModeOff();
+      }
+    }
 
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+}
 function EditComment({ commentId, ModeOff }: Props) {
   const router = useRouter();
-  const { register, handleSubmit, reset } = useForm<CommentForm>();
+  const outsideRef = useRef(null);
+  useOutsideClick(outsideRef, ModeOff);
+  const { register, handleSubmit, reset, setValue } = useForm<CommentForm>();
 
   const [update, { data: updateResult, loading }] = useMutation(
     `/api/losts/${router.query.id}/comments/${commentId}`,
@@ -50,8 +68,14 @@ function EditComment({ commentId, ModeOff }: Props) {
       ModeOff();
     }
   }, [updateResult]);
+
+  useEffect(() => {
+    if (data?.comment?.content) {
+      setValue('comment', data?.comment?.content);
+    }
+  }, [setValue, data]);
   return (
-    <form onSubmit={handleSubmit(onValid)} className="flex items-end">
+    <form onSubmit={handleSubmit(onValid)} ref={outsideRef} className="flex items-end">
       <TextareaAutosize
         {...register('comment', { required: true })}
         placeholder="댓글 입력"

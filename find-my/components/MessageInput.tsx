@@ -26,7 +26,7 @@ function MessageInput({ register, placeholder }: Props) {
         {
           //글자 긴거 줄 바꿈 처리되게 바꾸기
         }
-        <TextareaAutosize {...register} className="rounded-2xl  w-3/4 mx-4 " placeholder={placeholder} />
+        <TextareaAutosize {...register} className="rounded-2xl  w-3/4 mx-4" placeholder={placeholder} />
         <label>
           <input type="submit" className="hidden" />
 

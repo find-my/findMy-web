@@ -1,11 +1,15 @@
-import { ExtendedLost } from '../../typeDefs/lost';
+import { ExtendedLost, ExtendedComment } from '../../typeDefs/lost';
 import { displayTimeForList } from '@libs/front/displayTime';
 import React from 'react';
 import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
   lost: ExtendedLost;
 }
-
+function countRecomments(comments: ExtendedComment[]): number {
+  let recommentCount = 0;
+  comments?.forEach((comment) => (recommentCount += comment._count.reComments));
+  return recommentCount;
+}
 function LostItem({ lost }: Props) {
   const {
     photos,
@@ -16,9 +20,8 @@ function LostItem({ lost }: Props) {
     _count: { scraps: scrapCount, comments: commentCount },
   } = lost;
   //대댓글 수를 세는 함수 따로 분리하기
-  let recommentCount = 0;
-  lost?.comments?.forEach((comment) => (recommentCount += comment._count.reComments));
 
+  const recommentCount = countRecomments(lost?.comments);
   const ago = displayTimeForList(createdAt.toString());
   return (
     <div className="flex border-b pb-4 cursor-pointer justify-between items-end px-4">
