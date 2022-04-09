@@ -21,7 +21,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   const containTitle = terms('description', searchTerm.toString());
   const containCategory = terms('category', searchTerm.toString());
 
-  const result = await client.lost.findMany({
+  const result = await client.post.findMany({
     where: {
       OR: [...containDescription, ...containTitle, ...containCategory],
     },
@@ -41,7 +41,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
 
   return res.json({
     ok: true,
-    lostList: result,
+    postList: result,
   });
 }
 

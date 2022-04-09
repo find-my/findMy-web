@@ -5,7 +5,7 @@ import { useCallback, useState, useEffect } from 'react';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
-import { Lost } from '@prisma/client';
+import { Post } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
 import Rating from 'react-rating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

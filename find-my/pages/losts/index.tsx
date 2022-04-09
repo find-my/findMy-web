@@ -1,15 +1,15 @@
 import { NextPage } from 'next';
 import SearchInput from '@components/SearchInput';
 import useSWR from 'swr';
-import LostList from '@components/Lost/LostList';
-import { LostListResponse } from '../../typeDefs/lost';
+import PostList from '@components/Post/PostList';
+import { PostListResponse } from '../../typeDefs/post';
 
 const Losts: NextPage = () => {
-  const { data } = useSWR<LostListResponse>('/api/losts');
+  const { data } = useSWR<PostListResponse>('/api/losts');
   return (
     <>
       <SearchInput />
-      {data ? <LostList lostList={data.lostList} /> : null}
+      {data ? <PostList postList={data.postList} /> : null}
     </>
   );
 };

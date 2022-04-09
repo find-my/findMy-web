@@ -6,16 +6,16 @@ import useUser from '@libs/front/hooks/useUser';
 import useMutation from '@libs/front/hooks/useMutation';
 import MessageInput from '@components/MessageInput';
 
-import { LostDetailResponse } from '../../../typeDefs/lost';
+import { PostDetailResponse } from '../../../typeDefs/post';
 
 interface CommentForm {
   comment: string;
 }
 function CreateComment() {
   const router = useRouter();
-  const [create, { loading, data: createResult }] = useMutation(`/api/losts/${router.query.id}/comments`, 'POST');
+  const [create, { loading, data: createResult }] = useMutation(`/api/posts/${router.query.id}/comments`, 'POST');
   const { user } = useUser();
-  const { data, mutate } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  const { data, mutate } = useSWR<PostDetailResponse>(router.query.id ? `/api/posts/${router.query.id}` : null);
   const {
     register,
     handleSubmit,
@@ -38,15 +38,15 @@ function CreateComment() {
       mutate(
         {
           ...data,
-          lost: {
-            ...data.lost,
+          post: {
+            ...data.post,
             _count: {
-              ...data.lost._count,
-              comments: data.lost._count.comments + 1,
+              ...data.post._count,
+              comments: data.post._count.comments + 1,
             },
             //임시적으로 로그인된 user의 name과 avatar url ,id을 넣어줌
             comments: [
-              ...data.lost.comments,
+              ...data.post.comments,
               {
                 ...createResult.comment,
                 reComment: [],

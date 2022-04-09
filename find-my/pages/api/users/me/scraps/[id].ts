@@ -10,7 +10,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   } = req;
   const alreadyExists = await client.scrap.findFirst({
     where: {
-      lostId: +id.toString(),
+      postId: +id.toString(),
       userId: user?.id,
     },
   });
@@ -28,7 +28,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
             id: user?.id,
           },
         },
-        lost: {
+        post: {
           connect: {
             id: +id.toString(),
           },

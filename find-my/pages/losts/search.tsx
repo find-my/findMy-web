@@ -1,24 +1,24 @@
 import useSearch from '@libs/front/hooks/useSearch';
-import LostList from '@components/Lost/LostList';
+import PostList from '@components/Post/PostList';
 import { withRouter, NextRouter } from 'next/router';
 import SearchInput from '@components/SearchInput';
-import { LostListResponse } from '../../typeDefs/lost';
+import { PostListResponse } from '../../typeDefs/post';
 
 interface WithRouterProps {
   router: NextRouter;
 }
-const LostSearch = ({ router }: WithRouterProps) => {
+const PostSearch = ({ router }: WithRouterProps) => {
   const {
     query: { searchTerm },
   } = router;
-  const { data: searchResult, isLoading } = useSearch<LostListResponse>(searchTerm?.toString() || '');
+  const { data: searchResult, isLoading } = useSearch<PostListResponse>(searchTerm?.toString() || '');
 
   return (
     <>
       <SearchInput />
-      {isLoading ? null : <LostList lostList={searchResult.lostList} />}
+      {isLoading ? null : <PostList postList={searchResult.postList} />}
     </>
   );
 };
 
-export default withRouter(LostSearch);
+export default withRouter(PostSearch);

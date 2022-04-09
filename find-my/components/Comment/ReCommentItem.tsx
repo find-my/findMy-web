@@ -3,13 +3,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import useSWR from 'swr';
 import useUser from '@libs/front/hooks/useUser';
 import { useRouter } from 'next/router';
-import { ExtendedReComment, CommentDetailResponse, LostDetailResponse } from '../../typeDefs/lost';
+import { ExtendedReComment, CommentDetailResponse, PostDetailResponse } from '../../typeDefs/post';
 import EditRecomment from '@components/Comment/Edit/reComment';
 import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
   commentId: string;
   reComment: ExtendedReComment;
-  lostUserId: number;
+  postUserId: number;
 }
 function useOutsideClick(ref: any, ModeOff: any) {
   useEffect(() => {
@@ -27,7 +27,7 @@ function useOutsideClick(ref: any, ModeOff: any) {
     };
   }, [ref]);
 }
-function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
+function ReCommentItem({ commentId, postUserId, reComment }: Props) {
   const router = useRouter();
   const { user } = useUser();
   const outsideRef = useRef(null);
@@ -35,14 +35,14 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
   const [showMene, setShowMenu] = useState<boolean>(false);
   useOutsideClick(outsideRef, () => setShowMenu(false));
   const { data, mutate } = useSWR<CommentDetailResponse>(
-    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
+    commentId ? `/api/posts/${router.query.id}/comments/${commentId}` : null,
   );
-  const { data: lostData, mutate: lostMutate } = useSWR<LostDetailResponse>(
-    router.query.id ? `/api/losts/${router.query.id}` : null,
+  const { data: postData, mutate: postMutate } = useSWR<PostDetailResponse>(
+    router.query.id ? `/api/posts/${router.query.id}` : null,
   );
   const [editMode, setEditMode] = useState<boolean>(false);
   const [remove, { data: removeResult, loading: removeLoading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}/recomments/${reComment.id}`,
+    `/api/posts/${router.query.id}/comments/${commentId}/recomments/${reComment.id}`,
     'DELETE',
   );
   const onDelete = () => {
@@ -57,7 +57,7 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
 
   useEffect(() => {
     if (removeResult && removeResult.ok) {
-      if (!data || !lostData) return;
+      if (!data || !postData) return;
       mutate(
         {
           ...data,
@@ -68,9 +68,9 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
         },
         false,
       );
-      lostMutate({
-        ...lostData,
-        lost: { ...lostData.lost, _count: { ...lostData.lost._count, comments: lostData.lost._count.comments - 1 } },
+      postMutate({
+        ...postData,
+        post: { ...postData.post, _count: { ...postData.post._count, comments: postData.post._count.comments - 1 } },
       });
     }
   }, [removeResult]);
@@ -87,7 +87,7 @@ function ReCommentItem({ commentId, lostUserId, reComment }: Props) {
           <div className="text-sm flex items-start justify-between">
             <div className="cursor-pointer flex items-center space-x-1">
               <span>{reComment?.user?.name || null}</span>
-              <span>{+reComment?.user?.id === lostUserId ? <>(글쓴이)</> : null}</span>
+              <span>{+reComment?.user?.id === postUserId ? <>(글쓴이)</> : null}</span>
             </div>
             <div className="relative">
               <button onClick={() => setShowMenu(true)}>

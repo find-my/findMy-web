@@ -7,6 +7,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   const {
     query: { id, reviewId },
   } = req;
+
   if (req.method === 'GET') {
     try {
       const review = await client.review.findUnique({

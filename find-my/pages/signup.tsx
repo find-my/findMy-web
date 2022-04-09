@@ -15,7 +15,7 @@ interface SignUpForm {
   errors?: string;
 }
 const SignUp: NextPage = () => {
-  const [signUp, { loading, data, error }] = useMutation('/api/users/me', 'POST');
+  const [signUp, { loading, data, error }] = useMutation('/api/users/signup', 'POST');
   const {
     register,
     handleSubmit,

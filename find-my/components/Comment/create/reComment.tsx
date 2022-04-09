@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import TextareaAutosize from 'react-textarea-autosize';
 import SquareMessageInput from '@components/SquareMessageInput';
-import { CommentDetailResponse, LostDetailResponse } from '../../../typeDefs/lost';
+import { CommentDetailResponse, PostDetailResponse } from '../../../typeDefs/post';
 import useMutation from '@libs/front/hooks/useMutation';
 import useSWR from 'swr';
 import useUser from '@libs/front/hooks/useUser';
@@ -37,14 +37,14 @@ function CreateRecomment({ commentId, ModeOff }: Props) {
   const outsideRef = useRef(null);
   useOutsideClick(outsideRef, ModeOff);
   const { data, mutate } = useSWR<CommentDetailResponse>(
-    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
+    commentId ? `/api/posts/${router.query.id}/comments/${commentId}` : null,
   );
   const [create, { data: createResult, loading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}/recomments`,
+    `/api/posts/${router.query.id}/comments/${commentId}/recomments`,
     'POST',
   );
-  const { data: lostData, mutate: lostMutate } = useSWR<LostDetailResponse>(
-    router.query.id ? `/api/losts/${router.query.id}` : null,
+  const { data: postData, mutate: postMutate } = useSWR<PostDetailResponse>(
+    router.query.id ? `/api/posts/${router.query.id}` : null,
   );
   const { register, handleSubmit, reset } = useForm<ReCommentForm>();
   const onValid = useCallback(
@@ -57,7 +57,7 @@ function CreateRecomment({ commentId, ModeOff }: Props) {
   useEffect(() => {
     if (createResult && createResult.ok) {
       console.log(createResult.reComment);
-      if (!data || !lostData) return;
+      if (!data || !postData) return;
       mutate(
         //대댓글 mutate
         {
@@ -79,9 +79,9 @@ function CreateRecomment({ commentId, ModeOff }: Props) {
         },
         false,
       ); //댓글 수 임의 조작
-      lostMutate({
-        ...lostData,
-        lost: { ...lostData.lost, _count: { ...lostData.lost._count, comments: lostData.lost._count.comments + 1 } },
+      postMutate({
+        ...postData,
+        post: { ...postData.post, _count: { ...postData.post._count, comments: postData.post._count.comments + 1 } },
       });
       reset();
       ModeOff();

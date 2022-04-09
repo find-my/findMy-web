@@ -11,7 +11,7 @@ interface Props {
   longitude?: number;
   placeKeyword?: string;
   placeInfo?: { markers: Imarker[]; bounds: kakao.maps.LatLngBounds };
-  setLostPlace: (place: ILostPlace) => void;
+  setPostPlace: (place: IPostPlace) => void;
 }
 interface Imarker {
   position: {
@@ -21,12 +21,12 @@ interface Imarker {
   place_name: string;
   road_address_name: string;
 }
-interface ILostPlace {
+interface IPostPlace {
   place: string;
   latitude?: number;
   longitude?: number;
 }
-function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: Props) {
+function Search({ latitude, longitude, placeInfo, placeKeyword, setPostPlace }: Props) {
   const [map, setMap] = useState<kakao.maps.Map>(); //지도
   const [pointMarker, setPointMarker] = useState<kakao.maps.Marker>(); //지도 상에서 클릭한 위치에 생성될 마커
   const panTo = useCallback(() => {
@@ -68,7 +68,7 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: 
         pointMarker.setPosition(mouseEvent.latLng);
         pointMarker.setMap(map);
         console.log(mouseEvent.latLng);
-        setLostPlace({
+        setPostPlace({
           place: result[0].address.address_name,
           latitude: mouseEvent.latLng.getLat(),
           longitude: mouseEvent.latLng.getLng(),
@@ -115,7 +115,7 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setLostPlace }: 
                 key={`marker-${marker.place_name}-${marker.position.lat},${marker.position.lng}`}
                 position={marker.position}
                 onClick={() => {
-                  setLostPlace({
+                  setPostPlace({
                     place: `${marker.place_name}/${marker.road_address_name}`,
                     latitude: marker.position.lat,
                     longitude: marker.position.lng,

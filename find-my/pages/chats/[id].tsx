@@ -35,8 +35,9 @@ const ChatDetail: NextPage = () => {
           </div>
         </div>
       </div>
-
-      <MessageInput placeholder="메시지를 입력하세요." />
+      {
+        //<MessageInput register={} placeholder="메시지를 입력하세요." />
+      }
     </div>
   );
 };

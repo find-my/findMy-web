@@ -1,7 +1,7 @@
 //placeFinder.tsx
 //키워드 or 카테 고리 검색 실행
 // 검색 결과를 SearchMap 과 SearchList 컴포넌트에 넘겨줌
-// lost or found place 설정
+// post or found place 설정
 import SearchMap from '@components/Map/SearchMap';
 import { useWatchLocation } from '@libs/front/location';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,7 +18,7 @@ import {
 import React, { useState, useEffect, useCallback } from 'react';
 import { CategoryGroupCode } from '@components/Map/CategoryGroupCode';
 import SearchList from '@components/Map/SearchList';
-import Router, { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 const geolocationOptions = {
   enableHighAccuracy: true,
   timeout: 1000 * 60 * 1, // 1 min (1000 ms * 60 sec * 1 minute = 60 000ms)
@@ -35,8 +35,8 @@ const placeCategory = [
 ];
 interface Props {
   setOpenFalse: () => void;
-  setLostPlace: (place: ILostPlace) => void;
-  lostPlace: ILostPlace;
+  setPostPlace: (place: IPostPlace) => void;
+  postPlace: IPostPlace;
 }
 
 //검색으로 도출된 marker의 interface
@@ -66,12 +66,12 @@ interface IPlaceSearchResultForList {
 }
 
 //공통으로 사용되는 interface 분리 예정.
-interface ILostPlace {
+interface IPostPlace {
   place: string;
   latitude?: number;
   longitude?: number;
 }
-export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: Props) {
+export default function placeFinder({ setOpenFalse, setPostPlace, postPlace }: Props) {
   const { location, error, watchPositonId, cancelLocationWatch } = useWatchLocation(geolocationOptions); //현재 유저의 위치
   const [placeSearchOn, setPlaceSearchOn] = useState<boolean>(true); //유저가 검색을 할 의도를 갖고 있는지 확인, search 영역이 활성화됨
   const [placeKeyword, setPlaceKeyword] = useState<string>(); //검색 키워드(장소 이름)
@@ -239,9 +239,9 @@ export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: P
         ) : null}
       </div>
       {displayByMap ? (
-        <SearchMap {...location} placeInfo={placeSearchResultForMap} setLostPlace={setLostPlace} />
+        <SearchMap {...location} placeInfo={placeSearchResultForMap} setPostPlace={setPostPlace} />
       ) : (
-        <SearchList placeInfo={placeSearchResultForList} setLostPlace={setLostPlace} />
+        <SearchList placeInfo={placeSearchResultForList} setPostPlace={setPostPlace} />
       )}
       <div className="fixed bottom-0 flex flex-col w-full h-20 z-10 bg-white divide-y py-1 px-5">
         <div className="flex justify-between items-center py-1">
@@ -250,7 +250,7 @@ export default function placeFinder({ setOpenFalse, setLostPlace, lostPlace }: P
             선택 완료
           </button>
         </div>
-        <span>{lostPlace.place || '선택안됨'}</span>
+        <span>{postPlace.place || '선택안됨'}</span>
       </div>
     </div>
   );

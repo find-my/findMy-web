@@ -1,27 +1,27 @@
-import { ExtendedLost, ExtendedComment } from '../../typeDefs/lost';
+import { ExtendedPost, ExtendedComment } from '../../typeDefs/post';
 import { displayTimeForList } from '@libs/front/displayTime';
 import React from 'react';
 import { CFImageUrl } from '@libs/front/cfImage';
 interface Props {
-  lost: ExtendedLost;
+  post: ExtendedPost;
 }
 function countRecomments(comments: ExtendedComment[]): number {
   let recommentCount = 0;
   comments?.forEach((comment) => (recommentCount += comment._count.reComments));
   return recommentCount;
 }
-function LostItem({ lost }: Props) {
+function PostItem({ post }: Props) {
   const {
     photos,
     title,
-    lostPlace,
+    place,
     createdAt,
     user: { name },
     _count: { scraps: scrapCount, comments: commentCount },
-  } = lost;
+  } = post;
   //대댓글 수를 세는 함수 따로 분리하기
 
-  const recommentCount = countRecomments(lost?.comments);
+  const recommentCount = countRecomments(post?.comments);
   const ago = displayTimeForList(createdAt.toString());
   return (
     <div className="flex border-b pb-4 cursor-pointer justify-between items-end px-4">
@@ -37,7 +37,7 @@ function LostItem({ lost }: Props) {
           <div>
             <h3 className="text-base font-semibold">{title}</h3>
 
-            <span className="block text-sm font-medium">{lostPlace}</span>
+            <span className="block text-sm font-medium">{place}</span>
           </div>
           <div className="flex items-end text-xs font-medium text-slate-500">
             <span className="text-xs font-medium">{ago}</span> <span> ㅣ </span>{' '}
@@ -102,4 +102,4 @@ function LostItem({ lost }: Props) {
   );
 }
 
-export default React.memo(LostItem);
+export default React.memo(PostItem);

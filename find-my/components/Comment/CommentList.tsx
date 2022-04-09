@@ -3,18 +3,18 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import CommentItem from './CommentItem';
-import { LostDetailResponse } from '../../typeDefs/lost';
+import { PostDetailResponse } from '../../typeDefs/post';
 import CreateComment from '@components/Comment/create/comment';
 
 function CommentList() {
   const router = useRouter();
-  const { data } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  const { data } = useSWR<PostDetailResponse>(router.query.id ? `/api/posts/${router.query.id}` : null);
   return (
     <div>
       <div>
-        {data?.lost?.comments?.map((comment) => (
+        {data?.post?.comments?.map((comment) => (
           <div key={comment.id} className="border-b p-2">
-            <CommentItem commentId={comment.id} lostUserId={data?.lost?.userId} />
+            <CommentItem commentId={comment.id} postUserId={data?.post?.userId} />
           </div>
         ))}
       </div>

@@ -1,15 +1,16 @@
 //Map.tsx
-//홈 화면에서 lost/found 목록을 띄움
-//lost /found 는 빨강/파랑 색으로 구분됨
+//홈 화면에서 post/found 목록을 띄움
+//post /found 는 빨강/파랑 색으로 구분됨
 import React, { useCallback, useEffect, useState } from 'react';
 import { classNames } from '@libs/front/utils';
 import { Map, MarkerClusterer } from 'react-kakao-maps-sdk';
 import { useWatchLocation, useCurrentLocation } from '@libs/front/location';
 import Marker from '@components/Map/Marker';
 import useSWR from 'swr';
-import { LostListResponse } from '../../typeDefs/lost';
+import { PostListResponse } from '../../typeDefs/post';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
+import { PostType } from '@prisma/client';
 // 컴포넌트 안쪽에서 선언하면 에러 발생
 const geolocationOptions = {
   enableHighAccuracy: true,
@@ -22,7 +23,7 @@ function MapContainer() {
   const { location, watchPositonId, cancelLocationWatch } = useWatchLocation(geolocationOptions);
   const [map, setMap] = useState<kakao.maps.Map>();
   const [filter, setFilter] = useState<'lost' | 'found' | 'all'>('found');
-  const { data: lostListData } = useSWR<LostListResponse>('/api/losts');
+  const { data: postListData } = useSWR<PostListResponse>('/api/posts');
   const panTo = useCallback(() => {
     // 이동할 위도 경도 위치를 생성합니다
     if (!map || !location) return;
@@ -38,7 +39,7 @@ function MapContainer() {
   const SetMapTypeToSkyView = () => {
     setMapType('skyview');
   };
-  console.log(lostListData);
+  console.log(postListData);
   const setMapType = (maptype: 'roadmap' | 'skyview') => {
     if (!map) return;
 
@@ -97,9 +98,11 @@ function MapContainer() {
           >
             {filter === 'lost' ? (
               <>
-                {lostListData?.lostList?.map((lost) => (
-                  <Marker key={lost.id} item={lost} itemType="lost" />
-                ))}
+                {postListData?.postList
+                  ?.filter((post) => post.type === PostType.LOST)
+                  .map((post) => (
+                    <Marker key={post.id} item={post} itemType="lost" />
+                  ))}
               </>
             ) : null}
           </MarkerClusterer>

@@ -16,14 +16,14 @@ interface IPlaceSearchResultForList {
 
 interface Props {
   placeInfo?: IPlaceSearchResultForList[];
-  setLostPlace: (place: ILostPlace) => void;
+  setPostPlace: (place: IPostPlace) => void;
 }
-interface ILostPlace {
+interface IPostPlace {
   place: string;
   latitude?: number;
   longitude?: number;
 }
-function SearchList({ placeInfo, setLostPlace }: Props) {
+function SearchList({ placeInfo, setPostPlace }: Props) {
   return (
     <>
       {placeInfo ? (
@@ -38,7 +38,7 @@ function SearchList({ placeInfo, setLostPlace }: Props) {
             return (
               <div
                 onClick={() =>
-                  setLostPlace({ place: `${place_name}/${road_address_name}`, latitude: lat, longitude: lng })
+                  setPostPlace({ place: `${place_name}/${road_address_name}`, latitude: lat, longitude: lng })
                 }
                 key={i}
                 className="flex border-b pb-4 cursor-pointer justify-between items-end px-4"

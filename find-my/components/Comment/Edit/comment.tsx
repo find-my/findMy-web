@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import TextareaAutosize from 'react-textarea-autosize';
-import { CommentDetailResponse } from '../../../typeDefs/lost';
+import { CommentDetailResponse } from '../../../typeDefs/post';
 import useMutation from '@libs/front/hooks/useMutation';
 import useSWR from 'swr';
 
@@ -37,11 +37,11 @@ function EditComment({ commentId, ModeOff }: Props) {
   const { register, handleSubmit, reset, setValue } = useForm<CommentForm>();
 
   const [update, { data: updateResult, loading }] = useMutation(
-    `/api/losts/${router.query.id}/comments/${commentId}`,
+    `/api/posts/${router.query.id}/comments/${commentId}`,
     'PUT',
   );
   const { data, mutate } = useSWR<CommentDetailResponse>(
-    commentId ? `/api/losts/${router.query.id}/comments/${commentId}` : null,
+    commentId ? `/api/posts/${router.query.id}/comments/${commentId}` : null,
   );
 
   const onValid = useCallback(

@@ -5,12 +5,12 @@ import { withApiSession } from '@libs/back/session';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const {
-    query: { id },
+    session: { user },
   } = req;
   try {
-    const lostList = await client.lost.findMany({
+    const postList = await client.post.findMany({
       where: {
-        userId: +id.toString(),
+        userId: user?.id,
       },
       include: {
         user: {
@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     });
     res.json({
       ok: true,
-      lostList,
+      postList,
     });
   } catch {
     res.json({

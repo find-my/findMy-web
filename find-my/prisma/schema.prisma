@@ -21,36 +21,31 @@ model User {
   avatar String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tokens Token[]
-  losts Lost[]
+  posts Post[]
   Comments Comment[]
-  reComments ReComment[]
+  ReComments ReComment[]
   scrap Scrap[]
   writtenReviews  Review[]    @relation(name: "writtenReviews")
   receivedReviews Review[]    @relation(name: "receivedReviews")
 }
 
-model Token {
-  id        Int      @id @default(autoincrement())
-  payload   String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@index([userId])
-}
 
+enum PostType {
+  LOST
+  FOUND
+}
 //views 기능 추가 필요
 //lostPlace string 고치기 
-model Lost{
+model Post{
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  type    PostType   
   user User @relation(fields: [userId],references: [id],onDelete: Cascade)
   userId Int
-  photos LostPhoto[]
+  photos Photo[]
   title String
-  lostPlace String?
+  place String
   latitude Float?
   longitude Float?
   description String  @db.MediumText
@@ -62,22 +57,25 @@ model Lost{
 }
 
 
+
+
+
 model Scrap {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id],onDelete: Cascade)
   userId    Int
-  lost      Lost     @relation(fields: [lostId], references: [id],onDelete: Cascade)
-  lostId    Int
+  post      Post     @relation(fields: [postId], references: [id],onDelete: Cascade)
+  postId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 
 
-model LostPhoto {
+model Photo {
   id        Int       @id @default(autoincrement())
-  lost      Lost      @relation(fields: [lostId], references: [id],onDelete: Cascade)
-  lostId    Int
+  post      Post      @relation(fields: [postId], references: [id],onDelete: Cascade)
+  postId    Int
   file      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -87,8 +85,8 @@ model Comment {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
-  lost      Lost      @relation(fields: [lostId], references: [id],onDelete: Cascade)
-  lostId    Int
+  post      Post      @relation(fields: [postId], references: [id],onDelete: Cascade)
+  postId    Int
   content String    @db.MediumText
   reComments ReComment[]
   createdAt DateTime @default(now())
@@ -117,3 +115,4 @@ model Review {
   createdForId Int
   score        Int   @default(1)
 }
+

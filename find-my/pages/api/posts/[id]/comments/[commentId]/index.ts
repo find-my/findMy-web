@@ -21,6 +21,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
               avatar: true,
             },
           },
+
           _count: {
             select: {
               reComments: true,

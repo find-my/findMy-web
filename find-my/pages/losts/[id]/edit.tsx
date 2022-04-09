@@ -1,4 +1,4 @@
-//lost/upload
+//post/upload
 //분실물 게시물 업로드 페이지
 import { NextPage } from 'next';
 import { useForm, UseFormRegisterReturn } from 'react-hook-form';
@@ -7,13 +7,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
-import { Lost, LostPhoto } from '@prisma/client';
+import { Post, Photo } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
 import useSWR from 'swr';
-import { LostDetailResponse } from '../../../typeDefs/lost';
+import { PostDetailResponse } from '../../../typeDefs/post';
 import { uploadCFImage, deleteCFImage, CFImageUrl } from '@libs/front/cfImage';
-import UploadPhotoBlock from '@components/Lost/UploadPhotoBlock';
-interface LostForm {
+import UploadPhotoBlock from '@components/Post/UploadPhotoBlock';
+interface postForm {
   image1?: FileList;
   image2?: FileList;
   image3?: FileList;
@@ -24,10 +24,10 @@ interface LostForm {
 }
 
 //upload 결과 interface
-interface MutateLostState {
+interface MutatePostState {
   ok: boolean;
   message?: string;
-  lost?: Lost;
+  post?: Post;
 }
 
 //물품 category found 업로드와 겹치므로 분리 예정.
@@ -48,25 +48,25 @@ const CATEGORY = [
   '가방',
   '기타',
 ];
-interface ILostPlace {
+interface IpostPlace {
   place: string;
   latitude?: number;
   longitude?: number;
 }
 
 //분실물을 잃어 버린 위치를 모르겠을 때 설정 값. found 와 겹치므로 분리 예정
-const LOSTPLACE_NULL = '모르겠음';
+const POSTPLACE_NULL = '모르겠음';
 
 const Upload: NextPage = () => {
   const { user } = useUser();
   const router = useRouter();
-  const [editLost, { loading, data: editResult, error }] = useMutation<MutateLostState>(
-    `/api/losts/${router.query.id}`,
+  const [editPost, { loading, data: editResult, error }] = useMutation<MutatePostState>(
+    `/api/posts/${router.query.id}`,
     'PUT',
-  ); //lost 생성 mutation
-  const { data: prevLost } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
-  const [lostPlace, setLostPlace] = useState<ILostPlace>({ place: '' }); //lostPlace 상태 관리
-  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false); //lostPlace 설정을 위한 페이지 생성 여부
+  ); //post 생성 mutation
+  const { data: prevPost } = useSWR<PostDetailResponse>(router.query.id ? `/api/posts/${router.query.id}` : null);
+  const [postPlace, setPostPlace] = useState<IpostPlace>({ place: '' }); //postPlace 상태 관리
+  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false); //postPlace 설정을 위한 페이지 생성 여부
   const {
     register,
     handleSubmit,
@@ -76,15 +76,15 @@ const Upload: NextPage = () => {
     setValue,
     resetField,
     setError,
-  } = useForm<LostForm>();
+  } = useForm<postForm>();
   const [imagePreview1, setImagePreview1] = useState<string>('');
   const [imagePreview2, setImagePreview2] = useState<string>('');
   const [imagePreview3, setImagePreview3] = useState<string>('');
 
   //upload Form 이 채워지면 POST
-  const onValid = async (data: LostForm) => {
+  const onValid = async (data: postForm) => {
     if (loading) return;
-    if (!lostPlace.place || !lostPlace.place.trim()) return;
+    if (!postPlace.place || !postPlace.place.trim()) return;
     let imageIds: string[] = [];
     const images = [image1, image2, image3];
     await Promise.all(
@@ -93,26 +93,26 @@ const Upload: NextPage = () => {
           //이미지 변경사항이 있는가?
           console.log(imagePreview);
           if (imagePreview.includes('imagedelivery')) {
-            if (prevLost?.lost?.photos[i]?.file) imageIds?.push(prevLost?.lost?.photos[i].file);
+            if (prevPost?.post?.photos[i]?.file) imageIds?.push(prevPost?.post?.photos[i].file);
           } else {
-            if (prevLost?.lost?.photos[i]?.file) {
+            if (prevPost?.post?.photos[i]?.file) {
               //기존 게시물에 파일이 있었다면 삭제 이 칸은 새로운 이미지가 들어왔으니 삭제 필요
               //실패 시 로직 추가하기
-              deleteCFImage(prevLost?.lost?.photos[i]?.file);
+              deleteCFImage(prevPost?.post?.photos[i]?.file);
             }
             const id = await uploadCFImage(images[i] || [], user?.id);
             if (id) {
               imageIds?.push(id);
             }
           }
-        } else if (prevLost?.lost?.photos[i]) {
+        } else if (prevPost?.post?.photos[i]) {
           //미리보기 이미지는 비어져 있지만 기존 이미지가 있을 경우 삭제 필요
-          deleteCFImage(prevLost?.lost?.photos[i].file);
+          deleteCFImage(prevPost?.post?.photos[i].file);
         }
       }),
     );
     console.log(imageIds);
-    editLost({ ...data, ...lostPlace, photos: imageIds });
+    editPost({ ...data, ...postPlace, photos: imageIds });
   };
   //
   const placeFinderOpen = () => {
@@ -121,29 +121,29 @@ const Upload: NextPage = () => {
 
   //모르겠음 버튼 클릭 이벤트
   const onUnKnownClick = () => {
-    setLostPlace({ place: LOSTPLACE_NULL });
+    setPostPlace({ place: POSTPLACE_NULL });
   };
 
   const image1 = watch('image1');
   const image2 = watch('image2');
   const image3 = watch('image3');
   useEffect(() => {
-    if (prevLost && prevLost.lost) {
-      setValue('title', prevLost.lost.title);
-      setValue('description', prevLost.lost.description);
-      setValue('category', prevLost.lost.category);
-      setLostPlace({
-        place: prevLost.lost.lostPlace || '',
-        latitude: prevLost?.lost?.latitude || undefined,
-        longitude: prevLost?.lost?.latitude || undefined,
+    if (prevPost && prevPost.post) {
+      setValue('title', prevPost.post.title);
+      setValue('description', prevPost.post.description);
+      setValue('category', prevPost.post.category);
+      setPostPlace({
+        place: prevPost.post.place || '',
+        latitude: prevPost?.post?.latitude || undefined,
+        longitude: prevPost?.post?.latitude || undefined,
       });
       [setImagePreview1, setImagePreview2, setImagePreview3].forEach((setImagePreview, i) => {
         setImagePreview(
-          prevLost?.lost?.photos && prevLost?.lost?.photos[i] ? CFImageUrl(prevLost?.lost?.photos[i].file) : '',
+          prevPost?.post?.photos && prevPost?.post?.photos[i] ? CFImageUrl(prevPost?.post?.photos[i].file) : '',
         );
       });
     }
-  }, [setValue, prevLost]);
+  }, [setValue, prevPost]);
   useEffect(() => {
     if (image1 && image1.length > 0) {
       const file = image1[0];
@@ -162,12 +162,12 @@ const Upload: NextPage = () => {
       setImagePreview3(URL.createObjectURL(file));
     }
   }, [image3]);
-  //업로드가 완료 되었으면 /lost/id로 이동
+  //업로드가 완료 되었으면 /post/id로 이동
   useEffect(() => {
     if (editResult?.ok) {
       console.log('업로드 완료');
       //상태 값 리셋
-      setLostPlace({ place: '' });
+      setPostPlace({ place: '' });
       [setImagePreview1, setImagePreview2, setImagePreview2].forEach((setImagePreview, INDEX) => {
         setImagePreview('');
       });
@@ -175,7 +175,7 @@ const Upload: NextPage = () => {
       router.push(`/losts/${router?.query?.id}`);
     }
   }, [editResult, router]);
-  console.log(prevLost);
+
   return (
     <>
       {!isPlaceFinderOpen ? (
@@ -220,8 +220,8 @@ const Upload: NextPage = () => {
               </div>
             </div>
             <div className="mt-2 space-x-2">
-              <label htmlFor="lostCategory">카테고리</label>
-              <select {...register('category')} className="rounded" id="lostCategory">
+              <label htmlFor="postCategory">카테고리</label>
+              <select {...register('category')} className="rounded" id="postCategory">
                 {CATEGORY.map((item, index) => (
                   <option key={index} value={item}>
                     {item}
@@ -232,7 +232,7 @@ const Upload: NextPage = () => {
             <div className="mt-2 space-y-2">
               <div className="flex space-x-2">
                 <span>잃어 버린 곳</span>
-                <span className="text-blue-400">{lostPlace.place}</span>
+                <span className="text-blue-400">{postPlace.place}</span>
               </div>
               <div
                 onClick={placeFinderOpen}
@@ -301,8 +301,8 @@ const Upload: NextPage = () => {
       ) : (
         <PlaceFinder
           setOpenFalse={() => setIsPlaceFinderOpen(false)}
-          setLostPlace={(place: ILostPlace) => setLostPlace(place)}
-          lostPlace={lostPlace}
+          setPostPlace={(place: IpostPlace) => setPostPlace(place)}
+          postPlace={postPlace}
         />
       )}
     </>

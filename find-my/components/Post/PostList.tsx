@@ -1,15 +1,15 @@
-import { ExtendedLost } from '../../typeDefs/lost';
-import LostItem from '@components/Lost/LostItem';
+import { ExtendedPost } from '../../typeDefs/post';
+import PostItem from '@components/Post/PostItem';
 import React from 'react';
 interface Props {
-  lostList: ExtendedLost[];
+  postList: ExtendedPost[];
 }
 
-function LostList({ lostList }: Props) {
+function PostList({ postList }: Props) {
   return (
     <div className="flex flex-col space-y-5  py-10">
-      {lostList?.map((lost) => {
-        return <LostItem key={lost.id} lost={lost} />;
+      {postList?.map((post) => {
+        return <PostItem key={post.id} post={post} />;
       })}
       <button className="fixed bottom-16 right-2 hover:bg-blue-500 transition-colors p-2 text-white bg-blue-400 rounded-full">
         <svg
@@ -27,4 +27,4 @@ function LostList({ lostList }: Props) {
   );
 }
 
-export default React.memo(LostList);
+export default React.memo(PostList);

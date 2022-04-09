@@ -5,7 +5,7 @@ import { withApiSession } from '@libs/back/session';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const {
-    query: { id, commentId },
+    query: { id },
     session: { user },
     body: { comment },
   } = req;
@@ -56,7 +56,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
             id: user?.id,
           },
         },
-        lost: {
+        post: {
           connect: {
             id: +id.toString(),
           },

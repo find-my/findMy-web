@@ -1,10 +1,10 @@
 import useUser from '@libs/front/hooks/useUser';
 import type { NextPage } from 'next';
 import useSWR from 'swr';
-import { Review, User } from '@prisma/client';
+import { Review, User, PostType } from '@prisma/client';
 import { useState } from 'react';
-import LostList from '@components/Lost/LostList';
-import { LostListResponse } from '../../typeDefs/lost';
+import PostList from '@components/Post/PostList';
+import { ExtendedPost, PostListResponse } from '../../typeDefs/post';
 import { useRouter } from 'next/router';
 
 interface ExtendedReview extends Review {
@@ -16,7 +16,7 @@ interface ReviewsResponse {
 }
 const Profile: NextPage = () => {
   const { user } = useUser();
-  const { data: userLostsData, error } = useSWR<LostListResponse>('/api/users/me/losts');
+  const { data: userPostsData, error } = useSWR<PostListResponse>('/api/users/me/posts');
   const { data: reviewsData } = useSWR<ReviewsResponse>('/api/users/me/reviews');
   const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
   console.log(user);
@@ -56,24 +56,30 @@ const Profile: NextPage = () => {
           <span>사용자 리뷰</span>
         </button>
       </div>
-      {viewFilter === 'Lost' ? <UserLosts userLostsData={userLostsData} /> : null}
-      {viewFilter === 'UserReview' ? <UserReviews reviewsData={reviewsData} /> : null}
+
+      {viewFilter === 'UserReview' ? (
+        <UserReviews reviewsData={reviewsData} />
+      ) : (
+        <UserPosts userPostsData={userPostsData} viewFilter={viewFilter} />
+      )}
     </div>
   );
 };
 export default Profile;
 
-interface UserLostsProps {
-  userLostsData: LostListResponse | undefined;
+interface UserPostsProps {
+  userPostsData: PostListResponse | undefined;
+  viewFilter: 'Lost' | 'Found';
 }
-function UserLosts({ userLostsData }: UserLostsProps) {
-  if (!userLostsData || !userLostsData.ok) return null;
+function UserPosts({ userPostsData, viewFilter }: UserPostsProps) {
+  let list: ExtendedPost[];
+  if (viewFilter === 'Lost') {
+    list = userPostsData?.postList?.filter((post) => post.type === PostType.LOST) || [];
+  } else {
+    list = userPostsData?.postList?.filter((post) => post.type === PostType.FOUND) || [];
+  }
   //GetLostResult 이 받는 interface를 userLostData.losts 만 받게 고치기
-  return (
-    <>
-      <LostList contents={userLostsData} />
-    </>
-  );
+  return <>{list ? <PostList postList={list} /> : null}</>;
 }
 interface ReviewsProps {
   reviewsData: ReviewsResponse | undefined;
@@ -145,6 +151,7 @@ function UserReviews({ reviewsData }: ReviewsProps) {
     </div>
   );
 }
+
 /*
 
  <div className="flex  space-x-1 items-start">

@@ -3,14 +3,14 @@ import useSWR from 'swr';
 import useMutation from '@libs/front/hooks/useMutation';
 import React from 'react';
 
-import { LostDetailResponse } from '../../typeDefs/lost';
+import { PostDetailResponse } from '../../typeDefs/post';
 
 interface Props {
   isScraped: boolean | undefined;
 }
 function ScrapButton({ isScraped }: Props) {
   const router = useRouter();
-  const { data, mutate } = useSWR<LostDetailResponse>(router.query.id ? `/api/losts/${router.query.id}` : null);
+  const { data, mutate } = useSWR<PostDetailResponse>(router.query.id ? `/api/posts/${router.query.id}` : null);
   const [toggleScrap] = useMutation(`/api/users/me/scraps/${router.query.id}`, 'POST');
 
   const onScrapClick = () => {
@@ -18,11 +18,11 @@ function ScrapButton({ isScraped }: Props) {
     mutate(
       {
         ...data,
-        lost: {
-          ...data.lost,
+        post: {
+          ...data.post,
           _count: {
-            ...data.lost._count,
-            scraps: data.isScraped ? data.lost?._count?.scraps - 1 : data?.lost?._count?.scraps + 1,
+            ...data.post._count,
+            scraps: data.isScraped ? data.post?._count?.scraps - 1 : data?.post?._count?.scraps + 1,
           },
         },
         isScraped: !data.isScraped,

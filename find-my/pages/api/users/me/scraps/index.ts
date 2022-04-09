@@ -13,7 +13,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         userId: user?.id,
       },
       include: {
-        lost: true,
+        post: true,
       },
     });
     res.json({

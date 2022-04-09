@@ -4,8 +4,8 @@ import useSWR from 'swr';
 import { Review, User } from '@prisma/client';
 import { classNames } from '@libs/front/utils';
 import { useEffect, useState } from 'react';
-import GetLostResult from '@components/Lost/LostList';
-import { LostListResponse } from '../../../typeDefs/lost';
+import PostList from '@components/Post/PostList';
+import { PostListResponse } from '../../../typeDefs/post';
 import { useRouter } from 'next/router';
 import useMutation from '@libs/front/hooks/useMutation';
 interface ExtendedReview extends Review {
@@ -20,9 +20,9 @@ const Profile: NextPage = () => {
   console.log();
   const { user: userLoggedIn } = useUser();
   const { data: user } = useSWR(router.query.id ? `/api/users/${router.query.id}` : null);
-  const { data: userLostsData, error } = useSWR<LostListResponse>(`/api/users/${router.query.id}/losts`);
+  const { data: userPostsData, error } = useSWR<PostListResponse>(`/api/users/${router.query.id}/posts`);
   const { data: reviewsData } = useSWR<ReviewsResponse>(`/api/users/${router.query.id}/reviews`);
-  const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
+  const [viewFilter, setViewFilter] = useState<'Post' | 'Found' | 'UserReview'>('UserReview');
   console.log(user);
   return (
     <div className="py-10 px-4">
@@ -44,7 +44,7 @@ const Profile: NextPage = () => {
       </div>
       <div className="grid grid-cols-3 gap-2 p-2 border-b ">
         <button
-          onClick={() => setViewFilter('Lost')}
+          onClick={() => setViewFilter('Post')}
           className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400"
         >
           <span>찾고 있는 물건</span>
@@ -63,22 +63,22 @@ const Profile: NextPage = () => {
         </button>
       </div>
 
-      {viewFilter === 'Lost' ? <UserLosts userLostsData={userLostsData} /> : null}
+      {viewFilter === 'Post' ? <Userposts userPostsData={userPostsData} /> : null}
       {viewFilter === 'UserReview' ? <UserReviews reviewsData={reviewsData} /> : null}
     </div>
   );
 };
 export default Profile;
 
-interface UserLostsProps {
-  userLostsData: LostListResponse | undefined;
+interface UserPostsProps {
+  userPostsData: PostListResponse | undefined;
 }
-function UserLosts({ userLostsData }: UserLostsProps) {
-  if (!userLostsData || !userLostsData.ok) return null;
-  //GetLostResult 이 받는 interface를 userLostData.losts 만 받게 고치기
+function Userposts({ userPostsData }: UserPostsProps) {
+  if (!userPostsData || !userPostsData.ok) return null;
+  //GetpostResult 이 받는 interface를 userpostData.posts 만 받게 고치기
   return (
     <>
-      <GetLostResult contents={userLostsData} />
+      <PostList postList={userPostsData.postList} />
     </>
   );
 }

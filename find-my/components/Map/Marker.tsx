@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps } from 'react-kakao-maps-sdk';
-import { ExtendedLost } from '../../typeDefs/lost';
+import { ExtendedPost } from '../../typeDefs/post';
 interface Props {
-  item: ExtendedLost;
+  item: ExtendedPost;
   itemType: 'lost' | 'found';
 }
 
@@ -37,7 +37,7 @@ function Marker({ item, itemType }: Props) {
 
 export default Marker;
 interface ContentProps {
-  item: ExtendedLost;
+  item: ExtendedPost;
   closeWindow: () => void;
 }
 function Content({ item, closeWindow }: ContentProps) {

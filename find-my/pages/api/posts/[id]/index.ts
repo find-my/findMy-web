@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import withHandler, { ResponseType } from '@libs/back/protectedHandler';
 import client from '@libs/back/client';
 import { withApiSession } from '@libs/back/session';
-import { LostPhoto } from '@prisma/client';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) {
   const {
@@ -11,7 +10,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   } = req;
   if (req.method === 'GET') {
     try {
-      const lost = await client.lost.findUnique({
+      const post = await client.post.findUnique({
         where: {
           id: +id.toString(),
         },
@@ -71,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       const isScraped = Boolean(
         await client.scrap.findFirst({
           where: {
-            lostId: lost?.id,
+            postId: post?.id,
             userId: user?.id,
           },
           select: {
@@ -79,8 +78,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
           },
         }),
       );
-      console.log(lost?.comments[0]?.reComments);
-      return res.json({ ok: true, lost, isScraped });
+      console.log(post?.comments[0]?.reComments);
+      return res.json({ ok: true, post, isScraped });
     } catch (error) {
       return res.json({ ok: false, message: '예상치 못한 오류가 발생했습니다.' });
     }
@@ -91,20 +90,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
     } = req;
 
     try {
-      const lost = await client.lost.update({
+      const post = await client.post.update({
         where: { id: +id.toString() },
         data: {
           title,
-          lostPlace: place,
+          place,
           latitude: +latitude || null,
           longitude: +longitude || null,
           description,
           category,
         },
       });
-      const prevPhotos = await client.lostPhoto.findMany({
+      const prevPhotos = await client.photo.findMany({
         where: {
-          lostId: +lost?.id?.toString(),
+          postId: +post?.id?.toString(),
         },
         select: {
           id: true,
@@ -117,19 +116,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
         else {
           //기존 사진 삭제
           if (prevPhotos[i]) {
-            await client.lostPhoto.delete({
+            await client.photo.delete({
               where: {
                 id: prevPhotos[i].id,
               },
             });
           } //사진 추가
           if (photos[i]) {
-            await client.lostPhoto.create({
+            await client.photo.create({
               data: {
                 file: photos[i],
-                lost: {
+                post: {
                   connect: {
-                    id: lost.id,
+                    id: post.id,
                   },
                 },
               },
@@ -146,7 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   }
   if (req.method === 'DELETE') {
     try {
-      await client.lost.delete({
+      await client.post.delete({
         where: {
           id: +id.toString(),
         },

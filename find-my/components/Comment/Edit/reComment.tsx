@@ -4,7 +4,7 @@ import useMutation from '@libs/front/hooks/useMutation';
 import React, { useEffect, useCallback, useRef } from 'react';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
-import { CommentDetailResponse } from '../../../typeDefs/lost';
+import { CommentDetailResponse } from '../../../typeDefs/post';
 
 interface Props {
   commentId: string;

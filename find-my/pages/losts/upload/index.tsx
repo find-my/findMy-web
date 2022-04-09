@@ -1,4 +1,4 @@
-//lost/upload
+//post/upload
 //분실물 게시물 업로드 페이지
 import { NextPage } from 'next';
 import { useForm, UseFormRegisterReturn } from 'react-hook-form';
@@ -7,11 +7,12 @@ import { useCallback, useState, useEffect } from 'react';
 import Router, { useRouter } from 'next/router';
 import PlaceFinder from 'components/Map/placeFinder';
 import useMutation from '@libs/front/hooks/useMutation';
-import { Lost } from '@prisma/client';
+import { Post, PostType } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
 import { uploadCFImage } from '@libs/front/cfImage';
-import UploadPhotoBlock from '@components/Lost/UploadPhotoBlock';
-interface LostForm {
+import UploadPhotoBlock from '@components/Post/UploadPhotoBlock';
+
+interface postForm {
   image1?: FileList;
   image2?: FileList;
   image3?: FileList;
@@ -21,10 +22,10 @@ interface LostForm {
 }
 
 //upload 결과 interface
-interface UploadLostState {
+interface UploadPostState {
   ok: boolean;
   message?: string;
-  lost?: Lost;
+  post?: Post;
 }
 
 //물품 category found 업로드와 겹치므로 분리 예정.
@@ -45,21 +46,21 @@ const CATEGORY = [
   '가방',
   '기타',
 ];
-interface ILostPlace {
+interface IpostPlace {
   place: string;
   latitude?: number;
   longitude?: number;
 }
 
 //분실물을 잃어 버린 위치를 모르겠을 때 설정 값. found 와 겹치므로 분리 예정
-const LOSTPLACE_NULL = '모르겠음';
+const POSTPLACE_NULL = '모르겠음';
 
 const Upload: NextPage = () => {
   const { user } = useUser();
-  const [uploadLost, { loading, data: uploadResult, error }] = useMutation<UploadLostState>('/api/losts', 'POST'); //lost 생성 mutation
+  const [uploadPost, { loading, data: uploadResult, error }] = useMutation<UploadPostState>('/api/posts', 'POST'); //post 생성 mutation
   const router = useRouter();
-  const [lostPlace, setLostPlace] = useState<ILostPlace>({ place: '' }); //lostPlace 상태 관리
-  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false); //lostPlace 설정을 위한 페이지 생성 여부
+  const [postPlace, setPostPlace] = useState<IpostPlace>({ place: '' }); //postPlace 상태 관리
+  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState<boolean>(false); //postPlace 설정을 위한 페이지 생성 여부
   const {
     register,
     handleSubmit,
@@ -67,14 +68,14 @@ const Upload: NextPage = () => {
     reset,
     watch,
     resetField,
-  } = useForm<LostForm>();
+  } = useForm<postForm>();
   const [imagePreview1, setImagePreview1] = useState<string>('');
   const [imagePreview2, setImagePreview2] = useState<string>('');
   const [imagePreview3, setImagePreview3] = useState<string>('');
   //upload Form 이 채워지면 POST
-  const onValid = async (data: LostForm) => {
+  const onValid = async (data: postForm) => {
     if (loading || !user) return;
-    if (!lostPlace.place || !lostPlace.place.trim()) return;
+    if (!postPlace.place || !postPlace.place.trim()) return;
     let imageIds: string[] = [];
     await Promise.all(
       [image1, image2, image3].map(async (image) => {
@@ -86,7 +87,7 @@ const Upload: NextPage = () => {
         }
       }),
     );
-    uploadLost({ ...data, ...lostPlace, photos: imageIds });
+    uploadPost({ ...data, ...postPlace, photos: imageIds, postType: PostType.LOST });
   };
   //
   const placeFinderOpen = () => {
@@ -95,7 +96,7 @@ const Upload: NextPage = () => {
 
   //모르겠음 버튼 클릭 이벤트
   const onUnKnownClick = () => {
-    setLostPlace({ place: LOSTPLACE_NULL });
+    setPostPlace({ place: POSTPLACE_NULL });
   };
 
   const image1 = watch('image1');
@@ -122,17 +123,17 @@ const Upload: NextPage = () => {
       setImagePreview3(URL.createObjectURL(file));
     }
   }, [image3]);
-  //업로드가 완료 되었으면 /lost/id로 이동
+  //업로드가 완료 되었으면 /post/id로 이동
   useEffect(() => {
     if (uploadResult?.ok) {
       console.log('업로드 완료');
       //상태 값 리셋
-      setLostPlace({ place: '' });
+      setPostPlace({ place: '' });
       setImagePreview1('');
       setImagePreview2('');
       setImagePreview3('');
       reset();
-      router.push(`/losts/${uploadResult.lost?.id}`);
+      router.push(`/losts/${uploadResult.post?.id}`);
     }
   }, [uploadResult, router]);
 
@@ -180,8 +181,8 @@ const Upload: NextPage = () => {
               </div>
             </div>
             <div className="mt-2 space-x-2">
-              <label htmlFor="lostCategory">카테고리</label>
-              <select {...register('category')} className="rounded" id="lostCategory">
+              <label htmlFor="postCategory">카테고리</label>
+              <select {...register('category')} className="rounded" id="postCategory">
                 {CATEGORY.map((item, index) => (
                   <option key={index} value={item}>
                     {item}
@@ -192,7 +193,7 @@ const Upload: NextPage = () => {
             <div className="mt-2 space-y-2">
               <div className="flex space-x-2">
                 <span>잃어 버린 곳</span>
-                <span className="text-blue-400">{lostPlace.place}</span>
+                <span className="text-blue-400">{postPlace.place}</span>
               </div>
               <div
                 onClick={placeFinderOpen}
@@ -260,8 +261,8 @@ const Upload: NextPage = () => {
       ) : (
         <PlaceFinder
           setOpenFalse={() => setIsPlaceFinderOpen(false)}
-          setLostPlace={(place: ILostPlace) => setLostPlace(place)}
-          lostPlace={lostPlace}
+          setPostPlace={(place: IpostPlace) => setPostPlace(place)}
+          postPlace={postPlace}
         />
       )}
     </>

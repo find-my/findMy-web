@@ -1,7 +1,8 @@
-import { Lost, User, Comment, ReComment, LostPhoto } from '@prisma/client';
+import { Post, User, Comment, ReComment, Photo } from '@prisma/client';
 export interface ExtendedReComment extends ReComment {
   user: User;
 }
+
 export interface ExtendedComment extends Comment {
   user: User;
   reComments: ExtendedReComment[];
@@ -9,18 +10,18 @@ export interface ExtendedComment extends Comment {
     reComments: number;
   };
 }
-export interface ExtendedLost extends Lost {
+export interface ExtendedPost extends Post {
   user: User;
-  photos: LostPhoto[];
+  photos: Photo[];
   _count: {
     scraps: number;
     comments: number;
   };
   comments: ExtendedComment[];
 }
-export interface LostDetailResponse {
+export interface PostDetailResponse {
   ok: boolean;
-  lost: ExtendedLost;
+  post: ExtendedPost;
   isScraped: boolean;
 }
 export interface CommentsResponse {
@@ -32,7 +33,7 @@ export interface CommentDetailResponse {
   comment: ExtendedComment;
 }
 
-export interface LostListResponse {
+export interface PostListResponse {
   ok: boolean;
-  lostList: ExtendedLost[];
+  postList: ExtendedPost[];
 }
