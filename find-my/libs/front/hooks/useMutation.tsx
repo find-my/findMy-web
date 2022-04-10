@@ -13,7 +13,7 @@ export default function usePost<T = any>(url: string, method: 'POST' | 'PUT' | '
     data: undefined,
     error: undefined,
   });
-  const postFunc = (data: any) => {
+  const mutateFunc = (data: any) => {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method,
@@ -26,5 +26,5 @@ export default function usePost<T = any>(url: string, method: 'POST' | 'PUT' | '
       .then((data) => setState((prev) => ({ ...prev, data, loading: false })))
       .catch((error) => setState((prev) => ({ ...prev, error, loading: false })));
   };
-  return [postFunc, { ...state }];
+  return [mutateFunc, { ...state }];
 }

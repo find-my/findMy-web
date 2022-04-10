@@ -13,6 +13,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   } = req;
   if (req.method === 'GET') {
     const postList = await client.post.findMany({
+      orderBy: [{ createdAt: 'desc' }],
       include: {
         user: {
           select: {

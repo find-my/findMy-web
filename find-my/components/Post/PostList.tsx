@@ -1,16 +1,26 @@
+import React, { useEffect, useRef } from 'react';
 import { ExtendedPost } from '../../typeDefs/post';
 import PostItem from '@components/Post/PostItem';
-import React from 'react';
+
 interface Props {
   postList: ExtendedPost[];
+  inViewRef: (node?: Element | null | undefined) => void;
 }
 
-function PostList({ postList }: Props) {
+function PostList({ postList, inViewRef }: Props) {
   return (
     <div className="flex flex-col space-y-5  py-10">
-      {postList?.map((post) => {
-        return <PostItem key={post.id} post={post} />;
-      })}
+      {postList?.map((post, i) => (
+        <React.Fragment key={post.id}>
+          {i === postList.length - 1 ? (
+            <div ref={inViewRef}>
+              <PostItem key={post.id} post={post} />
+            </div>
+          ) : (
+            <PostItem key={post.id} post={post} />
+          )}
+        </React.Fragment>
+      ))}
       <button className="fixed bottom-16 right-2 hover:bg-blue-500 transition-colors p-2 text-white bg-blue-400 rounded-full">
         <svg
           className="h-8 w-8"

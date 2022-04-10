@@ -9,12 +9,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
   //views 기능 추가 필요
   const {
     session: { user },
+    query: { page },
   } = req;
   if (req.method === 'GET') {
     const lostList = await client.post.findMany({
+      skip: (+page - 1) * 10,
+      take: 10,
       where: {
         type: PostType.LOST,
       },
+      orderBy: [{ createdAt: 'desc' }],
       include: {
         user: {
           select: {
