@@ -172,7 +172,7 @@ const Upload: NextPage = () => {
         setImagePreview('');
       });
       reset();
-      router.push(`/losts/${router?.query?.id}`);
+      router.push(`/founds/${router?.query?.id}`);
     }
   }, [editResult, router]);
 

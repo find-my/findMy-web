@@ -96,15 +96,33 @@ function MapContainer() {
             averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
             minLevel={10} // 클러스터 할 최소 지도 레벨
           >
-            {filter === 'lost' ? (
+            {filter === 'all' ? (
               <>
-                {postListData?.postList
-                  ?.filter((post) => post.type === PostType.LOST)
-                  .map((post) => (
-                    <Marker key={post.id} item={post} itemType="lost" />
-                  ))}
+                {postListData?.postList?.map((post) => (
+                  <Marker key={post.id} item={post} />
+                ))}
               </>
-            ) : null}
+            ) : (
+              <>
+                {filter === 'lost' ? (
+                  <>
+                    {postListData?.postList
+                      ?.filter((post) => post.type === PostType.LOST)
+                      ?.map((post) => (
+                        <Marker key={post.id} item={post} />
+                      ))}
+                  </>
+                ) : (
+                  <>
+                    {postListData?.postList
+                      ?.filter((post) => post.type === PostType.FOUND)
+                      ?.map((post) => (
+                        <Marker key={post.id} item={post} />
+                      ))}
+                  </>
+                )}
+              </>
+            )}
           </MarkerClusterer>
         </Map>
         {/* 지도타입 컨트롤 div 입니다 */}

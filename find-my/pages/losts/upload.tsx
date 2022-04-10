@@ -133,7 +133,7 @@ const Upload: NextPage = () => {
       setImagePreview2('');
       setImagePreview3('');
       reset();
-      router.push(`/founds/${uploadResult.post?.id}`);
+      router.push(`/losts/${uploadResult.post?.id}`);
     }
   }, [uploadResult, router]);
 

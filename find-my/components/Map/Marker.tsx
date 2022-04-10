@@ -1,12 +1,12 @@
+import { PostType } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps } from 'react-kakao-maps-sdk';
 import { ExtendedPost } from '../../typeDefs/post';
 interface Props {
   item: ExtendedPost;
-  itemType: 'lost' | 'found';
 }
 
-function Marker({ item, itemType }: Props) {
+function Marker({ item }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
@@ -14,7 +14,7 @@ function Marker({ item, itemType }: Props) {
         <MapMarker
           position={{ lat: item.latitude, lng: item.longitude }}
           image={{
-            src: `/images/marker_${itemType === 'lost' ? 'red' : 'blue'}.svg`, // 마커이미지의 주소입니다
+            src: `/images/marker_${item.type === PostType.LOST ? 'red' : 'blue'}.svg`, // 마커이미지의 주소입니다
             size: {
               width: 60,
               height: 29,
