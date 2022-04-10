@@ -34,6 +34,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseType>) 
       _count: {
         select: {
           scraps: true,
+          comments: true,
+        },
+      },
+      comments: {
+        select: {
+          _count: {
+            select: {
+              reComments: true,
+            },
+          },
+        },
+      },
+      photos: {
+        select: {
+          file: true,
         },
       },
     },

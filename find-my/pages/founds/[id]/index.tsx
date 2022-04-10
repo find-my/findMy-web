@@ -38,7 +38,7 @@ const FoundDetail: NextPage = () => {
   console.log(process.env.IMAGE_DELIVERY);
   useEffect(() => {
     if (!data || (data && !data?.ok)) return;
-    if (data.post.type !== PostType.FOUND) {
+    if (data?.post?.type === PostType.LOST) {
       router.push(`/losts/${router.query.id}`);
     }
   }, [data]);

@@ -11,12 +11,12 @@ const PostSearch = ({ router }: WithRouterProps) => {
   const {
     query: { searchTerm },
   } = router;
-  const { data: searchResult, isLoading } = useSearch<PostListResponse>(searchTerm?.toString() || '', PostType.FOUND);
+  const { data: searchResult } = useSearch<PostListResponse>(searchTerm?.toString() || '', PostType.FOUND);
 
   return (
     <>
       <SearchInput urlType="founds" />
-      {isLoading ? null : <PostList postList={searchResult.postList} />}
+      {searchResult && searchResult.ok ? <PostList postList={searchResult.postList} /> : null}
     </>
   );
 };

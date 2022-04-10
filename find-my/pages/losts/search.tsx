@@ -17,7 +17,7 @@ const PostSearch = ({ router }: WithRouterProps) => {
   return (
     <>
       <SearchInput urlType="losts" />
-      {isLoading ? null : <PostList postList={searchResult.postList} />}
+      {searchResult && searchResult.ok ? <PostList postList={searchResult.postList} /> : null}
     </>
   );
 };
