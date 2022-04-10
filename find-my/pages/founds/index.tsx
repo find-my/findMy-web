@@ -5,10 +5,10 @@ import PostList from '@components/Post/PostList';
 import { PostListResponse } from '../../typeDefs/post';
 
 const Losts: NextPage = () => {
-  const { data } = useSWR<PostListResponse>('/api/losts');
+  const { data } = useSWR<PostListResponse>('/api/founds');
   return (
     <>
-      <SearchInput urlType="losts" />
+      <SearchInput urlType="founds" />
       {data ? <PostList postList={data.postList} /> : null}
     </>
   );

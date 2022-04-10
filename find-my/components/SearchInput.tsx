@@ -3,7 +3,10 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 
-const SearchInput = () => {
+interface Props {
+  urlType: 'losts' | 'founds';
+}
+const SearchInput = ({ urlType }: Props) => {
   const router = useRouter();
 
   const [searchTerm, setSearhTerm] = useState<string>('');
@@ -17,9 +20,9 @@ const SearchInput = () => {
     setSearhTerm(data.searchTerm);
   };
   useEffect(() => {
-    if (!searchTerm.trim()) return;
-    router.push({ pathname: `/lost/lostList/search`, query: { searchTerm } });
-  }, [searchTerm]);
+    if (!searchTerm.trim() || !urlType) return;
+    router.push({ pathname: `/${urlType}/search`, query: { searchTerm } });
+  }, [searchTerm, urlType]);
   return (
     <>
       <form onSubmit={handleSubmit(onValid)} className="border border-2">

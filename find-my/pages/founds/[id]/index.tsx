@@ -18,7 +18,7 @@ function countRecomments(comments: ExtendedComment[]): number {
   comments?.forEach((comment) => (recommentCount += comment?._count?.reComments));
   return recommentCount;
 }
-const LostDetail: NextPage = () => {
+const FoundDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
   const { data } = useSWR<PostDetailResponse>(router.query.id ? `/api/posts/${router.query.id}` : null);
@@ -38,8 +38,8 @@ const LostDetail: NextPage = () => {
   console.log(process.env.IMAGE_DELIVERY);
   useEffect(() => {
     if (!data || (data && !data?.ok)) return;
-    if (data.post.type !== PostType.LOST) {
-      router.push(`/founds/${router.query.id}`);
+    if (data.post.type !== PostType.FOUND) {
+      router.push(`/losts/${router.query.id}`);
     }
   }, [data]);
   return (
@@ -175,4 +175,4 @@ const LostDetail: NextPage = () => {
   );
 };
 
-export default LostDetail;
+export default FoundDetail;
