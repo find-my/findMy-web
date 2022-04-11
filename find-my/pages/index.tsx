@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import useUser from '@libs/front/hooks/useUser';
 import { withSsrSession } from '@libs/back/session';
 import client from '@libs/back/client';
-
+import Layout from '@components/layout';
 export const getServerSideProps = withSsrSession(async function ({ req, res }: NextPageContext) {
   const user = req?.session?.user;
 
@@ -26,7 +26,11 @@ export const getServerSideProps = withSsrSession(async function ({ req, res }: N
 });
 const Home: NextPage = ({ user }: any) => {
   console.log(JSON.parse(JSON.stringify(user)));
-  return <Map />;
+  return (
+    <Layout logoDisplay={true}>
+      <Map />
+    </Layout>
+  );
 };
 
 export default Home;
