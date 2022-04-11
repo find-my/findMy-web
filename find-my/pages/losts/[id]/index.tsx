@@ -12,6 +12,7 @@ import { displayTimeForDetail } from '@libs/front/displayTime';
 import ScrapButton from '@components/Post/ScrapButton';
 import { CFImageUrl } from '@libs/front/cfImage';
 import { PostType } from '@prisma/client';
+import Layout from '@components/layout';
 function countRecomments(comments: ExtendedComment[]): number {
   if (!comments || comments === []) return 0;
   let recommentCount = 0;
@@ -43,7 +44,7 @@ const LostDetail: NextPage = () => {
     }
   }, [data]);
   return (
-    <>
+    <Layout canGoBack={true} pageTitle="분실물">
       <div>
         {data?.post?.photos[0]?.file ? (
           <img src={CFImageUrl(data?.post?.photos[0]?.file)} className="w-full h-96 bg-slate-500" />
@@ -171,7 +172,7 @@ const LostDetail: NextPage = () => {
 
         <CommentList />
       </div>
-    </>
+    </Layout>
   );
 };
 

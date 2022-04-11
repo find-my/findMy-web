@@ -31,6 +31,7 @@ const SearchInput = ({ urlType }: Props) => {
           placeholder="검색어를 입력해 주세요."
           className="border border-2 w-full"
         />
+        <input value="검색" type="submit" />
       </form>
     </>
   );

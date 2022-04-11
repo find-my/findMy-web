@@ -2,6 +2,7 @@ import { PostType } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { Map, MapMarker, ZoomControl, MapTypeControl, MapProps } from 'react-kakao-maps-sdk';
 import { ExtendedPost } from '../../typeDefs/post';
+import Link from 'next/link';
 interface Props {
   item: ExtendedPost;
 }
@@ -71,7 +72,9 @@ function Content({ item, closeWindow }: ContentProps) {
         )}
       </div>
       <div className="flex flex-col w-full overflow-x-clip space-y-2 ">
-        <span className="text-sm text-blue-400 mt-2 text-center font-semibold">자세히 보기&rarr;</span>
+        <Link href={item.type === PostType.LOST ? `/losts/${item.id}` : `/founds/${item.id}`}>
+          <a className="text-sm text-blue-400 mt-2 text-center font-semibold">자세히 보기&rarr;</a>
+        </Link>
         <span className="text-base font-semibold ">{item.title}</span>
         <span className="text-base">카테고리: {item.category}</span>
         <span className="text-sm">{item.createdAt}</span>
