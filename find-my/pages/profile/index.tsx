@@ -7,6 +7,7 @@ import PostList from '@components/Post/PostList';
 import { ExtendedPost, PostListResponse } from '../../typeDefs/post';
 import { useRouter } from 'next/router';
 import { CFImageUrl } from '@libs/front/cfImage';
+import Layout from '@components/layout';
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -21,7 +22,7 @@ const Profile: NextPage = () => {
   const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
   console.log(user);
   return (
-    <div className="py-10 px-4">
+    <Layout pageTitle="내 프로필" canGoBack={true}>
       <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
         {user?.avatar ? (
           <img src={CFImageUrl(user?.avatar)} className="w-14 h-14 rounded-full bg-slate-500" />
@@ -59,7 +60,7 @@ const Profile: NextPage = () => {
       ) : (
         <UserPosts userPostsData={userPostsData} viewFilter={viewFilter} />
       )}
-    </div>
+    </Layout>
   );
 };
 export default Profile;

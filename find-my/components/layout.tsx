@@ -4,6 +4,7 @@ import { classNames } from '../libs/front/utils';
 import Link from 'next/link';
 import useUser from '@libs/front/hooks/useUser';
 import { CFImageUrl } from '@libs/front/cfImage';
+import { useRouter } from 'next/router';
 interface LayoutProps {
   logoDisplay?: boolean;
   pageTitle?: string;
@@ -12,16 +13,33 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export default function Layout({ pageTitle, logoDisplay = false, canGoBack, hasTabBar, children }: LayoutProps) {
+export default function Layout({ pageTitle = '', logoDisplay = false, canGoBack, hasTabBar, children }: LayoutProps) {
   const { user, isLoading } = useUser();
+  const router = useRouter();
+  const onGoBack = () => {
+    router.back();
+  };
   return (
     <div>
       <div className="bg-white w-full text-lg font-medium py-2 px-3 fixed text-gray-800 border-b top-0 justify-between flex items-center">
-        {logoDisplay ? <ServiceLogo textSize="text-4xl" /> : null}
-        {true ? (
-          <button>
+        {canGoBack ? (
+          <button onClick={onGoBack}>
             <svg
-              className="w-7 h-7 text-gray-500"
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+          </button>
+        ) : null}
+        {logoDisplay ? <ServiceLogo textSize="text-4xl" /> : <span>{pageTitle}</span>}
+        {true ? (
+          <Link href="/profile">
+            <svg
+              className="w-7 h-7 text-gray-500 cursor-pointer"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -34,7 +52,7 @@ export default function Layout({ pageTitle, logoDisplay = false, canGoBack, hasT
                 d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               ></path>
             </svg>
-          </button>
+          </Link>
         ) : (
           <div className="text-sm font-semibold space-x-2 flex items-center">
             <div>
@@ -50,7 +68,9 @@ export default function Layout({ pageTitle, logoDisplay = false, canGoBack, hasT
           </div>
         )}
       </div>
-      <div className={classNames('pt-14', hasTabBar ? 'pb-16' : '')}>{children}</div>
+      <div className={classNames('pt-14', hasTabBar ? 'pb-16' : '', router?.pathname === '/' ? '' : 'px-4')}>
+        {children}
+      </div>
       {true ? (
         <nav className="bg-white text-gray-700 border-t fixed bottom-0 w-full px-10 py-2 flex z-50 justify-between text-xs">
           <Link href="/">
@@ -127,26 +147,6 @@ export default function Layout({ pageTitle, logoDisplay = false, canGoBack, hasT
                 ></path>
               </svg>
               <span>채팅</span>
-            </a>
-          </Link>
-
-          <Link href="/profile">
-            <a className="flex flex-col items-center space-y-1">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                ></path>
-              </svg>
-              <span>내 프로필</span>
             </a>
           </Link>
         </nav>

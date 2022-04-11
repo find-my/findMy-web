@@ -1,8 +1,8 @@
 import type { NextPage } from 'next';
-
+import Layout from '@components/layout';
 const Chats: NextPage = () => {
   return (
-    <div className="py-10 divide-y-[1px] ">
+    <Layout canGoBack={true} pageTitle="채팅 목록">
       {[1, 1, 1, 1, 1, 1, 1].map((_, i) => (
         <div key={i} className="flex items-end px-5 cursor-pointer py-3 justify-between">
           <div className="flex space-x-2 ">
@@ -18,7 +18,7 @@ const Chats: NextPage = () => {
           </div>
         </div>
       ))}
-    </div>
+    </Layout>
   );
 };
 

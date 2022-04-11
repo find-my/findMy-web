@@ -6,7 +6,7 @@ interface Props {
 
 //textSize ex)text-4xl
 function ServiceLogo({ textSize }: Props) {
-  return <h3 className={classNames(textSize, 'font-nanum-pen-script text-blue-400 text-center')}>어딨지?</h3>;
+  return <span className={classNames(textSize, 'font-nanum-pen-script text-blue-400 text-center')}>어딨지?</span>;
 }
 
 export default React.memo(ServiceLogo);

@@ -5,7 +5,7 @@ import PostList from '@components/Post/PostList';
 import { ExtendedPost, PostListResponse } from '../../typeDefs/post';
 import { useState, useEffect, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
-
+import Layout from '@components/layout';
 const Losts: NextPage = () => {
   const [posts, setPosts] = useState<ExtendedPost[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -45,10 +45,10 @@ const Losts: NextPage = () => {
     console.log(inView);
   }, [inView, loading]);
   return (
-    <>
+    <Layout canGoBack={true} pageTitle="습득물 목록">
       <SearchInput urlType="losts" />
       {posts ? <PostList postList={posts} inViewRef={ref} /> : null}
-    </>
+    </Layout>
   );
 };
 
