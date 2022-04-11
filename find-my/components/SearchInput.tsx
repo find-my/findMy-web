@@ -24,16 +24,15 @@ const SearchInput = ({ urlType }: Props) => {
     router.push({ pathname: `/${urlType}/search`, query: { searchTerm } });
   }, [searchTerm, urlType]);
   return (
-    <>
-      <form onSubmit={handleSubmit(onValid)} className="border border-2">
-        <input
-          {...register('searchTerm', { required: true })}
-          placeholder="검색어를 입력해 주세요."
-          className="border border-2 w-full"
-        />
-        <input value="검색" type="submit" />
-      </form>
-    </>
+    <form onSubmit={handleSubmit(onValid)} className="fixed w-full bg-inherit flex justify-center">
+      <input
+        {...register('searchTerm', { required: true })}
+        placeholder="검색어를 입력해 주세요."
+        type="text"
+        className="border-2 border-blue-400 w-3/4 py-1 rounded-l pl-2  focus:border-blue-500 "
+      />
+      <input value="검색" type="submit" className="bg-blue-400 text-white p-1 rounded-r" />
+    </form>
   );
 };
 
