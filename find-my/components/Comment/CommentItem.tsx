@@ -10,6 +10,7 @@ import { CommentDetailResponse, PostDetailResponse } from '../../typeDefs/post';
 import CreateRecomment from '@components/Comment/create/reComment';
 import EditComment from '@components/Comment/Edit/comment';
 import { CFImageUrl } from '@libs/front/cfImage';
+import Link from 'next/link';
 interface Props {
   commentId: number;
   postUserId: number;
@@ -82,17 +83,24 @@ function CommentItem({ commentId, postUserId }: Props) {
 
   return (
     <div className="flex w-full justify-between space-x-2 items-start">
-      {commentData?.comment?.user?.avatar ? (
-        <img src={CFImageUrl(commentData?.comment?.user?.avatar)} className="w-5 h-5 bg-purple-500 rounded-full" />
-      ) : (
-        <div className="w-5 h-5 bg-purple-500 rounded-full" />
-      )}
+      <Link href={commentData?.comment?.user?.id ? `/users/${commentData?.comment?.user?.id}` : router.pathname}>
+        {commentData?.comment?.user?.avatar ? (
+          <img
+            src={CFImageUrl(commentData?.comment?.user?.avatar)}
+            className="w-5 h-5 bg-purple-500 rounded-full cursor-pointer"
+          />
+        ) : (
+          <div className="w-5 h-5 bg-purple-500 rounded-full cursor-pointer" />
+        )}
+      </Link>
       <div className="w-full ">
         <div className="text-sm flex items-start justify-between">
-          <div className="cursor-pointer flex items-center space-x-1">
-            <span>{commentData?.comment?.user?.name || null}</span>
-            <span>{commentData?.comment?.user?.id === postUserId ? <>(글쓴이)</> : null}</span>
-          </div>
+          <Link href={commentData?.comment?.user?.id ? `/users/${commentData?.comment?.user?.id}` : router.pathname}>
+            <div className="cursor-pointer flex items-center space-x-1">
+              <span>{commentData?.comment?.user?.name || null}</span>
+              <span>{commentData?.comment?.user?.id === postUserId ? <>(글쓴이)</> : null}</span>
+            </div>
+          </Link>
           <div className="relative">
             <button onClick={() => setShowMenu(true)}>
               <svg

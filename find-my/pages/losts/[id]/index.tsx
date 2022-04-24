@@ -44,7 +44,7 @@ const LostDetail: NextPage = () => {
     }
   }, [data]);
   return (
-    <Layout canGoBack={true} pageTitle="분실물">
+    <Layout canGoBack={true} pageTitle="분실물" hasNav={false}>
       <div>
         {data?.post?.photos[0]?.file ? (
           <img src={CFImageUrl(data?.post?.photos[0]?.file)} className="w-full h-96 bg-slate-500" />
@@ -56,7 +56,7 @@ const LostDetail: NextPage = () => {
         <div className="border-b pb-3">
           <div className="flex justify-between items-center space-x-2 border-b pb-3 border-slate-300">
             <div className="flex items-center space-x-2">
-              <Link href={`/users/profiles/${data?.post?.user?.id}`}>
+              <Link href={data?.post?.user?.id ? `/users/${data?.post?.user?.id}` : router.pathname}>
                 <a>
                   {data?.post?.user?.avatar ? (
                     <img src={CFImageUrl(data?.post?.user?.avatar)} className="w-12 h-12 rounded-full bg-green-500" />
@@ -66,7 +66,7 @@ const LostDetail: NextPage = () => {
                 </a>
               </Link>
               <div>
-                <Link href={`/users/profiles/${data?.post?.user?.id}`}>
+                <Link href={data?.post?.user?.id ? `/users/${data?.post?.user?.id}` : router.pathname}>
                   <a>
                     <p className="font-bold text-lg">{data?.post?.user?.name || null}</p>
                   </a>

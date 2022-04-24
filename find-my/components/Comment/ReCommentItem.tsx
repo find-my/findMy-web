@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { ExtendedReComment, CommentDetailResponse, PostDetailResponse } from '../../typeDefs/post';
 import EditRecomment from '@components/Comment/Edit/reComment';
 import { CFImageUrl } from '@libs/front/cfImage';
+import Link from 'next/link';
 interface Props {
   commentId: string;
   reComment: ExtendedReComment;
@@ -78,17 +79,24 @@ function ReCommentItem({ commentId, postUserId, reComment }: Props) {
   return (
     <div>
       <div className="flex w-full justify-between space-x-2 items-start">
-        {reComment?.user?.avatar ? (
-          <img src={CFImageUrl(reComment?.user?.avatar)} className="w-5 h-5 bg-purple-500 rounded-full" />
-        ) : (
-          <div className="w-5 h-5 bg-purple-500 rounded-full" />
-        )}
+        <Link href={reComment?.user?.id ? `/users/${reComment?.user?.id}` : router.pathname}>
+          {reComment?.user?.avatar ? (
+            <img
+              src={CFImageUrl(reComment?.user?.avatar)}
+              className="w-5 h-5 bg-purple-500 rounded-full cursor-pointer"
+            />
+          ) : (
+            <div className="w-5 h-5 bg-purple-500 rounded-full cursor-pointer" />
+          )}
+        </Link>
         <div className="w-full ">
           <div className="text-sm flex items-start justify-between">
-            <div className="cursor-pointer flex items-center space-x-1">
-              <span>{reComment?.user?.name || null}</span>
-              <span>{+reComment?.user?.id === postUserId ? <>(글쓴이)</> : null}</span>
-            </div>
+            <Link href={reComment?.user?.id ? `/users/${reComment?.user?.id}` : router.pathname}>
+              <div className="cursor-pointer flex items-center space-x-1">
+                <span>{reComment?.user?.name || null}</span>
+                <span>{+reComment?.user?.id === postUserId ? <>(글쓴이)</> : null}</span>
+              </div>
+            </Link>
             <div className="relative">
               <button onClick={() => setShowMenu(true)}>
                 <svg
