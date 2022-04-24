@@ -9,6 +9,8 @@ import { PostListResponse, ExtendedPost } from '../../../typeDefs/post';
 import { useRouter } from 'next/router';
 import useMutation from '@libs/front/hooks/useMutation';
 import { CFImageUrl } from '@libs/front/cfImage';
+import Layout from '@components/layout';
+import Link from 'next/link';
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -26,47 +28,55 @@ const Profile: NextPage = () => {
   const [viewFilter, setViewFilter] = useState<'Lost' | 'Found' | 'UserReview'>('UserReview');
   console.log(user);
   return (
-    <div className="py-10 px-4">
-      <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
-        {user?.userData?.avatar ? (
-          <img src={CFImageUrl(user?.userData?.avatar)} className="w-14 h-14 rounded-full bg-slate-500" />
-        ) : (
-          <div className="w-14 h-14 rounded-full bg-slate-500" />
-        )}
-        <div className="flex flex-col">
-          <span className="font-semibold">{user?.userData?.name || null}</span>
-          <button className="border border-slate-500 text-xs p-1 rounded">
-            {userLoggedIn?.id === +(router.query.id || -1) ? <>프로필 수정</> : <>리뷰 작성</>}
+    <Layout pageTitle={`${user?.userData?.name || ''}의 프로필`} canGoBack={true}>
+      <div className=" px-4">
+        <div className="flex space-x-4 items-center border-b border-slate-300 pb-4">
+          {user?.userData?.avatar ? (
+            <img src={CFImageUrl(user?.userData?.avatar)} className="w-14 h-14 rounded-full bg-slate-500" />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-slate-500" />
+          )}
+          <div className="flex flex-col">
+            <span className="font-semibold">{user?.userData?.name || null}</span>
+            <button className="border border-slate-500 text-xs p-1 rounded">
+              {userLoggedIn?.id === +(router.query.id || -1) ? (
+                <>프로필 수정</>
+              ) : (
+                <Link href={user?.userData?.id ? `/users/${user?.userData?.id}/reviews/write` : router.pathname}>
+                  리뷰 작성
+                </Link>
+              )}
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 p-2 border-b ">
+          <button
+            onClick={() => setViewFilter('Lost')}
+            className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400"
+          >
+            <span>찾고 있는 물건</span>
+          </button>
+          <button
+            onClick={() => setViewFilter('Found')}
+            className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400 "
+          >
+            <span>주인을 찾아요</span>
+          </button>
+          <button
+            onClick={() => setViewFilter('UserReview')}
+            className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400"
+          >
+            <span>사용자 리뷰</span>
           </button>
         </div>
-      </div>
-      <div className="grid grid-cols-3 gap-2 p-2 border-b ">
-        <button
-          onClick={() => setViewFilter('Lost')}
-          className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400"
-        >
-          <span>찾고 있는 물건</span>
-        </button>
-        <button
-          onClick={() => setViewFilter('Found')}
-          className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400 "
-        >
-          <span>주인을 찾아요</span>
-        </button>
-        <button
-          onClick={() => setViewFilter('UserReview')}
-          className="text-center text-white bg-gray-400 p-2 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:bg-blue-400"
-        >
-          <span>사용자 리뷰</span>
-        </button>
-      </div>
 
-      {viewFilter === 'UserReview' ? (
-        <UserReviews reviewsData={reviewsData} />
-      ) : (
-        <UserPosts userPostsData={userPostsData} viewFilter={viewFilter} />
-      )}
-    </div>
+        {viewFilter === 'UserReview' ? (
+          <UserReviews reviewsData={reviewsData} />
+        ) : (
+          <UserPosts userPostsData={userPostsData} viewFilter={viewFilter} />
+        )}
+      </div>
+    </Layout>
   );
 };
 export default Profile;
