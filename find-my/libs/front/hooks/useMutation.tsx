@@ -7,7 +7,7 @@ interface PostState<T> {
 }
 
 type UsePostResult<T> = [(data: any) => void, PostState<T>];
-export default function usePost<T = any>(url: string, method: 'POST' | 'PUT' | 'DELETE'): UsePostResult<T> {
+export default function useMutation<T = any>(url: string, method: 'POST' | 'PUT' | 'DELETE'): UsePostResult<T> {
   const [state, setState] = useState<PostState<T>>({
     loading: false,
     data: undefined,

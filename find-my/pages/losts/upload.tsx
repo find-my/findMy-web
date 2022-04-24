@@ -11,7 +11,7 @@ import { Post, PostType } from '@prisma/client';
 import useUser from '@libs/front/hooks/useUser';
 import { uploadCFImage } from '@libs/front/cfImage';
 import UploadPhotoBlock from '@components/Post/UploadPhotoBlock';
-
+import Layout from '@components/layout';
 interface postForm {
   image1?: FileList;
   image2?: FileList;
@@ -138,10 +138,10 @@ const Upload: NextPage = () => {
   }, [uploadResult, router]);
 
   return (
-    <>
+    <Layout canGoBack={true} pageTitle="분실물 목록">
       {!isPlaceFinderOpen ? (
         <div>
-          <form onSubmit={handleSubmit(onValid)} className="px-4 py-16">
+          <form onSubmit={handleSubmit(onValid)} className="px-4">
             <div className="flex space-x-4 border-b pb-4">
               <UploadPhotoBlock
                 register={register('image1')}
@@ -265,7 +265,7 @@ const Upload: NextPage = () => {
           postPlace={postPlace}
         />
       )}
-    </>
+    </Layout>
   );
 };
 

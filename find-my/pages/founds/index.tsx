@@ -21,7 +21,7 @@ const Losts: NextPage = () => {
   const getPosts = useCallback(() => {
     setLoading(true);
 
-    fetch(`/api/losts?page=${page}`)
+    fetch(`/api/founds?page=${page}`)
       .then((response) => response.json().catch(() => {}))
       .then((data: PostListResponse) => {
         if (!data.ok) return;

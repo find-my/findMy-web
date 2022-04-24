@@ -21,7 +21,7 @@ export default function Layout({ pageTitle = '', logoDisplay = false, canGoBack,
   };
   return (
     <div>
-      <div className="bg-white w-full text-lg font-medium py-2 px-3 fixed text-gray-800 border-b top-0 justify-between flex items-center">
+      <div className="bg-white z-50 w-full text-lg  font-medium py-2 px-3 fixed text-gray-800  top-0 justify-between flex items-center">
         {canGoBack ? (
           <button onClick={onGoBack}>
             <svg
