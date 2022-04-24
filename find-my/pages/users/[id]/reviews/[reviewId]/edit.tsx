@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 import { Review } from '@prisma/client';
 import useSWR from 'swr';
+import Layout from '@components/layout';
 interface ReviewResponse {
   ok: boolean;
   review: Review;
@@ -55,35 +56,32 @@ const editReview: NextPage = () => {
     }
   }, [editResult]);
   return (
-    <>
-      {' '}
-      <div>
-        <form onSubmit={handleSubmit(onValid)} className="px-4 py-16">
-          <div className="mt-3">
-            <label htmlFor="description">리뷰 수정</label>
-            <div className="mt-1">
-              <textarea
-                {...register('review', { required: true })}
-                id="description"
-                className="w-full rounded"
-                rows={10}
-              />
-            </div>
-          </div>
-          <div className="mt-3 flex flex-col space-y-1">
-            <span>별점 수정</span>
-            <Rating
-              onChange={(value) => setScore(value)}
-              initialRating={score}
-              emptySymbol={<FontAwesomeIcon icon={faStar} className="text-gray-300 mr-1 text-xl" />}
-              fullSymbol={<FontAwesomeIcon icon={faStar} className="text-yellow-400 text-xl" />}
+    <Layout pageTitle="사용자 리뷰 수정" canGoBack={true} hasNav={false}>
+      <form onSubmit={handleSubmit(onValid)} className="px-4 ">
+        <div className="mt-3">
+          <label htmlFor="description">리뷰 수정</label>
+          <div className="mt-1">
+            <textarea
+              {...register('review', { required: true })}
+              id="description"
+              className="w-full rounded"
+              rows={10}
             />
           </div>
+        </div>
+        <div className="mt-3 flex flex-col space-y-1">
+          <span>별점 수정</span>
+          <Rating
+            onChange={(value) => setScore(value)}
+            initialRating={score}
+            emptySymbol={<FontAwesomeIcon icon={faStar} className="text-gray-300 mr-1 text-xl" />}
+            fullSymbol={<FontAwesomeIcon icon={faStar} className="text-yellow-400 text-xl" />}
+          />
+        </div>
 
-          <UploadButton isCompleted={errors !== null} />
-        </form>
-      </div>
-    </>
+        <UploadButton isCompleted={errors !== null} />
+      </form>
+    </Layout>
   );
 };
 
