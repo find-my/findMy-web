@@ -46,7 +46,7 @@ const Losts: NextPage = () => {
   }, [inView, loading]);
   return (
     <Layout canGoBack={true} pageTitle="습득물 목록">
-      <SearchInput urlType="losts" />
+      <SearchInput urlType="founds" />
       {posts ? <PostList postList={posts} inViewRef={ref} /> : null}
     </Layout>
   );

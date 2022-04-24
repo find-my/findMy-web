@@ -8,6 +8,7 @@ import { ExtendedPost, PostListResponse } from '../../typeDefs/post';
 import { useRouter } from 'next/router';
 import { CFImageUrl } from '@libs/front/cfImage';
 import Layout from '@components/layout';
+import Link from 'next/link';
 interface ExtendedReview extends Review {
   createdBy: User;
 }
@@ -31,7 +32,9 @@ const Profile: NextPage = () => {
         )}
         <div className="flex flex-col">
           <span className="font-semibold">{user?.name || null}</span>
-          <button className="border border-slate-500 text-xs p-1 rounded">프로필 수정</button>
+          <Link href={'/profile/edit'}>
+            <button className="border border-slate-500 text-xs p-1 rounded">프로필 수정</button>
+          </Link>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-2 p-2 border-b ">

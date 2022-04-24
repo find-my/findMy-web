@@ -5,7 +5,7 @@ import PostUploadButton from '@components/Post/PostUploadButton';
 
 interface Props {
   postList: ExtendedPost[];
-  inViewRef: (node?: Element | null | undefined) => void;
+  inViewRef?: (node?: Element | null | undefined) => void;
 }
 
 function PostList({ postList, inViewRef }: Props) {

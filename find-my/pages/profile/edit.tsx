@@ -7,6 +7,7 @@ import { useForm, UseFormRegisterReturn } from 'react-hook-form';
 import useMutation from '@libs/front/hooks/useMutation';
 import { classNames } from '@libs/front/utils';
 import { uploadCFImage, deleteCFImage, CFImageUrl } from '@libs/front/cfImage';
+import Layout from '@components/layout';
 interface EditProfileForm {
   avatar: FileList;
   email?: string;
@@ -101,65 +102,67 @@ const ProfileEdit: NextPage = () => {
     }
   }, [editProfileResult, user]);
   return (
-    <form onSubmit={handleSubmit(onValid)} className="py-10 px-4 space-y-4">
-      <UploadPhoto register={register('avatar')} previewImage={avatarPreview} />
-      <div className="space-y-1">
-        <label htmlFor="name" className="text-sm font-medium text-gray-700">
-          이름
-        </label>
-        <input
-          {...register('name')}
-          id="name"
-          type="text"
-          className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder={user?.name}
-        />
-      </div>
-      <div className="space-y-1">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
-          이메일
-        </label>
-        <input
-          {...register('email')}
-          placeholder={user?.email}
-          id="email"
-          type="email"
-          className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-      <div className="space-y-1">
-        <label htmlFor="password" className="text-sm font-medium text-gray-700">
-          비밀번호
-        </label>
-        <input
-          {...register('password')}
-          type="password"
-          className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-      <div className="space-y-1">
-        <label htmlFor="phone" className="text-sm font-medium text-gray-700">
-          휴대폰 번호
-        </label>
-        <input
-          {...register('phone')}
-          id="phone"
-          type="text"
-          placeholder={user?.phone || ''}
-          className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-      <button
-        className={classNames(
-          'mt-5 w-full   text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium ',
-          errors?.formErrors?.type === 'emptyForm'
-            ? 'bg-blue-300 cursor-not-allowed'
-            : 'bg-blue-400 hover:bg-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:outline-none',
-        )}
-      >
-        프로필 변경
-      </button>
-    </form>
+    <Layout pageTitle="프로필 수정" canGoBack={true}>
+      <form onSubmit={handleSubmit(onValid)} className="mt-4 px-4 space-y-4">
+        <UploadPhoto register={register('avatar')} previewImage={avatarPreview} />
+        <div className="space-y-1">
+          <label htmlFor="name" className="text-sm font-medium text-gray-700">
+            이름
+          </label>
+          <input
+            {...register('name')}
+            id="name"
+            type="text"
+            className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder={user?.name}
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="email" className="text-sm font-medium text-gray-700">
+            이메일
+          </label>
+          <input
+            {...register('email')}
+            placeholder={user?.email}
+            id="email"
+            type="email"
+            className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="password" className="text-sm font-medium text-gray-700">
+            비밀번호
+          </label>
+          <input
+            {...register('password')}
+            type="password"
+            className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+            휴대폰 번호
+          </label>
+          <input
+            {...register('phone')}
+            id="phone"
+            type="text"
+            placeholder={user?.phone || ''}
+            className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <button
+          className={classNames(
+            'mt-5 w-full   text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium ',
+            errors?.formErrors?.type === 'emptyForm'
+              ? 'bg-blue-300 cursor-not-allowed'
+              : 'bg-blue-400 hover:bg-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:outline-none',
+          )}
+        >
+          프로필 변경
+        </button>
+      </form>
+    </Layout>
   );
 };
 
