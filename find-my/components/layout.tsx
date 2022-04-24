@@ -11,9 +11,17 @@ interface LayoutProps {
   canGoBack?: boolean;
   hasTabBar?: boolean;
   children: React.ReactNode;
+  hasNav?: boolean;
 }
 
-export default function Layout({ pageTitle = '', logoDisplay = false, canGoBack, hasTabBar, children }: LayoutProps) {
+export default function Layout({
+  pageTitle = '',
+  logoDisplay = false,
+  canGoBack,
+  hasTabBar,
+  children,
+  hasNav = true,
+}: LayoutProps) {
   const { user, isLoading } = useUser();
   const router = useRouter();
   const onGoBack = () => {
@@ -71,7 +79,7 @@ export default function Layout({ pageTitle = '', logoDisplay = false, canGoBack,
       <div className={classNames('pt-14', hasTabBar ? 'pb-16' : '', router?.pathname === '/' ? '' : 'px-4')}>
         {children}
       </div>
-      {true ? (
+      {hasNav ? (
         <nav className="bg-white text-gray-700 border-t fixed bottom-0 w-full px-10 py-2 flex z-50 justify-between text-xs">
           <Link href="/">
             <a className="flex flex-col items-center space-y-1">

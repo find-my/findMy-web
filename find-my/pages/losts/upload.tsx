@@ -138,10 +138,10 @@ const Upload: NextPage = () => {
   }, [uploadResult, router]);
 
   return (
-    <Layout canGoBack={true} pageTitle="분실물 목록">
+    <Layout canGoBack={true} pageTitle="분실물 업로드" hasNav={false}>
       {!isPlaceFinderOpen ? (
         <div>
-          <form onSubmit={handleSubmit(onValid)} className="px-4">
+          <form onSubmit={handleSubmit(onValid)} className="px-4 mb-3">
             <div className="flex space-x-4 border-b pb-4">
               <UploadPhotoBlock
                 register={register('image1')}
