@@ -68,7 +68,8 @@ model Scrap {
   postId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@index([userId,postId])
+  @@index([userId])
+   @@index([postId])
 }
 
 
@@ -93,7 +94,8 @@ model Comment {
   reComments ReComment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-    @@index([userId,postId])
+    @@index([userId])
+     @@index([postId])
 }
 
 model ReComment{
@@ -105,7 +107,8 @@ model ReComment{
   content String    @db.MediumText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-    @@index([userId,commentId])
+    @@index([userId])
+     @@index([commentId])
 }
 
 model Review {
@@ -118,6 +121,8 @@ model Review {
   createdFor   User     @relation(name: "receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
   createdForId Int
   score        Int   @default(1)
-    @@index([createdById,createdForId])
+    @@index([createdById])
+      @@index([ createdForId])
+   
 }
 
