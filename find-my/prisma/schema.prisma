@@ -53,7 +53,7 @@ model Post{
   category String
   views Int
   scraps Scrap[]
-  
+  @@index([userId])
 }
 
 
@@ -68,6 +68,7 @@ model Scrap {
   postId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([userId,postId])
 }
 
 
@@ -79,6 +80,7 @@ model Photo {
   file      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+    @@index([postId])
 }
 
 model Comment {
@@ -91,6 +93,7 @@ model Comment {
   reComments ReComment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+    @@index([userId,postId])
 }
 
 model ReComment{
@@ -102,6 +105,7 @@ model ReComment{
   content String    @db.MediumText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+    @@index([userId,commentId])
 }
 
 model Review {
@@ -114,5 +118,6 @@ model Review {
   createdFor   User     @relation(name: "receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
   createdForId Int
   score        Int   @default(1)
+    @@index([createdById,createdForId])
 }
 
