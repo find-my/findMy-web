@@ -136,7 +136,7 @@ function Search({ latitude, longitude, placeInfo, placeKeyword, setPostPlace }: 
             </span>
           </div>
           <button onClick={panTo} className="absolute top-40 right-4 z-10 bg-white rounded p-2">
-            <FontAwesomeIcon icon={faLocationCrosshairs} size="lg" />
+            <FontAwesomeIcon icon="location-crosshairs" size="lg" />
           </button>
         </div>
       </div>
