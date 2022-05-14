@@ -1,5 +1,5 @@
 import React from 'react';
-import { classNames } from '../libs/front/utils';
+import { classNames } from '@libs/front/utils';
 interface Props {
   textSize: string;
 }

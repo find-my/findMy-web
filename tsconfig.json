@@ -19,7 +19,8 @@
     "paths": {
       "@libs/*": ["libs/*"],
       "@components/*": ["components/*"],
-      "@typeDefs/": ["typeDefs/*"]
+      "@typeDefs/*": ["typeDefs/*"],
+      "@pages/*": ["pages/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "libs/posts.js", "libs/posts.jsx"],
