@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { NextPage, NextPageContext } from 'next';
 import Map from '@components/Map';
-import useSWRR, { SWRConfig } from 'swr';
+import useSWR, { SWRConfig } from 'swr';
 import { useRouter } from 'next/router';
 import useUser from '@libs/front/hooks/useUser';
 import { withSsrSession } from '@libs/back/session';

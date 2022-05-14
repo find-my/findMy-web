@@ -48,14 +48,14 @@ const Login: NextPage = () => {
           {errors?.email?.message}
           <Input
             register={register('email', { required: '이메일을 입력해 주세요' })}
-            icon={<FontAwesomeIcon icon={faUser} />}
+            icon={<FontAwesomeIcon icon="user" />}
             type="email"
             placeholder="이메일"
           />
           {errors?.password?.message}
           <Input
             register={register('password', { required: '이메일을 입력해 주세요' })}
-            icon={<FontAwesomeIcon icon={faLock} />}
+            icon={<FontAwesomeIcon icon="lock" />}
             type="password"
             placeholder="비밀번호"
           />
@@ -80,7 +80,7 @@ const Login: NextPage = () => {
           <li className="bg-yellow-400 text-black py-1.5 rounded mt-2">
             <button className="w-full relative">
               <div className="absolute left-3">
-                <FontAwesomeIcon icon={faComment} size="lg" />
+                <FontAwesomeIcon icon="comment" size="lg" />
               </div>
               <span className="text-center font-semibold">카카오 로그인</span>
             </button>
@@ -88,7 +88,7 @@ const Login: NextPage = () => {
           <li className="bg-green-500 text-white py-1.5 rounded  mt-2">
             <button className="w-full relative">
               <div className="absolute left-3">
-                <FontAwesomeIcon icon={faN} size="lg" />
+                <FontAwesomeIcon icon="n" size="lg" />
               </div>
               <span className="text-center font-semibold">네이버 로그인</span>
             </button>
