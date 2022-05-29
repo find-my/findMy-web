@@ -1,6 +1,6 @@
 # 어딨지? 프로젝트
 
-### 구현 결과(구현 내용 중 일부 자세한 영상 업로드 예정)
+### 구현 결과(구현 내용 중 일부 자세한 영상 업로드 예정).
 
 Click [here]()
 <img src="https://user-images.githubusercontent.com/74299317/165021765-075f0a3e-fc34-43b8-a0c2-93c2f9b83bba.PNG" width="300" height="400"/>
