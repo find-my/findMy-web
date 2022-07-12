@@ -9,10 +9,11 @@ COPY package-lock.json /app
 
 RUN npm install
 
+COPY / /app
 
 RUN npm run build
 
-CMD ["npx", "serve", "-s", "build"]
+CMD ["npm", "run", "start"]
 
 EXPOSE 3000
 
