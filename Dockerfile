@@ -1,5 +1,5 @@
 # Install dependencies only when needed
-FROM node:latest-alpine AS deps
+FROM node:16.15.0-alpine 
 
 WORKDIR /app
 COPY package.json package-lock.json /app 
