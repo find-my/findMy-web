@@ -1,16 +1,18 @@
 # Install dependencies only when needed
-FROM node:16.15.0-alpine AS deps
+FROM node-alpine AS deps
 
 WORKDIR /app
-COPY package.json package-lock.json ./ 
+COPY package.json package-lock.json /app 
 
 RUN npm install
 
 
-COPY . .
+COPY . /app
 
 
 RUN npm run build
+
+CMD ["npx", "serve", "-s", "build"]
 
 EXPOSE 3000
 
